@@ -11,10 +11,6 @@ import (
 	"os"
 	"strings"
 	"path/filepath"
-	"github.com/markbates/pkger"
-	"io/ioutil"
-	"os/exec"
-	"runtime"
 	"io/fs"
 	"github.com/alecthomas/kong"
 	"github.com/yuin/goldmark/text"
@@ -72,18 +68,31 @@ func main() {
 		cnt[file.Name()] += len(strings.TrimSpace(S))
 	}
 
-	entries, _ := os.ReadDir(".")
-
 	m := token.NewFileSet()
 	files := make([]*ast.File, 0)
-	for _, f := range entries {
-		inf, _ := f.Info()
-		m.AddFile("./" + f.Name(), m.Base(), int(inf.Size()))
+	paths := make(map[string]bool)
+	fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() { paths[path] = true; return nil }
+		if !strings.HasSuffix(d.Name(), ".go") { return nil }
+		//fullpath := filepath.Join(path, d.Name())
+		inf, _ := d.Info()
+		m.AddFile(path, m.Base(), int(inf.Size()))
+		return nil
+	})
+
+	var myPkgs = make(map[string]*ast.Package)
+	for path, _ := range paths {
+		pkgMap, _ := parser.ParseDir(m, path, nil, parser.ParseComments)
+		for n, pkg := range pkgMap {
+			myPkgs[n] = pkg
+		}
 	}
-	myPkg, _ := parser.ParseDir(m, ".", nil, parser.ParseComments)
-	fmt.Println(myPkg)
-	for _, f := range myPkg["cfgo"].Files {
-		files = append(files, f)
+
+	for name, pkg := range myPkgs {
+		fmt.Println(name)
+		for _, f := range pkg.Files {
+			files = append(files, f)
+		}
 	}
 
 	pkg, _ := doc.NewFromFiles(m, files, "github.com/fikisipi/cloudflare-workers-go/cfgo", doc.AllMethods)
@@ -192,36 +201,14 @@ func main() {
 		}
 		mdFile.Close()
 	}
-	win, _ := pkger.Open("/pkger/mdbook.exe")
-	linux, _ := pkger.Open("/pkger/mdbook.bin")
-	plat := win
-	fmt.Println("Detected GOOS =", runtime.GOOS, "\n")
-	if runtime.GOOS == "windows" {
-		plat = win
-	} else {
-		plat = linux
-	}
-	platFile := filepath.Base(plat.Name())
-	fileBytes, _ := ioutil.ReadAll(plat)
-	ioutil.WriteFile(platFile, fileBytes, 0777)
-	//extra := make([]string, 0)
-	cmd := []string{"build", "-d", "src"}
-	if Cli.Open {
-		cmd = append(cmd, "-o")
-	}
-	err := exec.Command("./" + platFile, cmd...).Run()
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Wrote docs to \"src/\".")
-		fmt.Println("Directory contents:")
-		filepath.WalkDir("./src", func(path string, d fs.DirEntry, err error) error {
-			if strings.HasSuffix(path, "html") {
-				fmt.Print(path, " ")
-			}
-			return nil
-		})
-		fmt.Println("")
-	}
-	os.Remove(platFile)
+
+	fmt.Println("Wrote docs to \"src/\".")
+	fmt.Println("Directory contents:")
+	filepath.WalkDir("./src", func(path string, d fs.DirEntry, err error) error {
+		if strings.HasSuffix(path, "html") {
+			fmt.Print(path, " ")
+		}
+		return nil
+	})
+	fmt.Println("")
 }

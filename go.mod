@@ -1,4 +1,4 @@
-module mdbook-go
+module superchargeDoc
 
 go 1.16
 
