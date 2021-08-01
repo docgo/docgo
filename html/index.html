@@ -22,12 +22,12 @@
       header a, header a:visited { text-decoration: none; padding: 0.3em 1em; }
       main { flex-grow: 1; margin: 0 auto; width: 100%;}
 
-      .left-right-parent { width: 100%; display: grid; grid-template-areas: 'left right'; grid-template-columns: 300px 1fr; }
-      .part-left { width: 300px; grid-area: left; justify-self: left; }
-      .part-right { grid-area: right; min-width: 300px; box-sizing: border-box; }
+      .left-right-parent { width: 100%; }
+      .part-left { width: 300px; position: fixed; top: 0; bottom: 0; left: 0; }
+      .part-right { margin-left: 300px; }
       @media(max-device-width: 500px) {
         .part-left { display: none; }
-        .left-right-parent { grid-template-columns: 0px 1fr; }
+        .part-right { margin-left: 0; }
       }
       .part-right-wrap { max-width: 860px; margin: 0 auto; padding-left: 2em; }
       article .part-right-wrap { padding: 2em 0; }
@@ -59,16 +59,20 @@
     </style>
 </head>
 <body>
-<div style="height: 100vh; " class="left-right-parent">
+<div class="left-right-parent">
   <nav class="part-left navleft">
     <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.3em;">
       <h2>Documentation</h2>
       <ul>
         <li class="pkg">
-          <h3>Package <code>/code-pkg</code></h3>
+          {{ range $p, $ast := .Packages }}
+          <h3>{{ $p }}</h3>
           <ul>
-            <li><span class="hlt">Some module</span></li>
+            {{ range $name := PackageFiles $ast }}
+            <li><span class="hlt"> {{ $name }} </span></li>
+            {{ end }}
           </ul>
+          {{ end }}
         </li>
       </ul>
     </div>
@@ -95,7 +99,7 @@
     <div>
     <small>bread > crumb</small>
     <h1>Your docs</h1><br/>
-      <!--content-block-->
+      {{.Content}}
     some content<br>
     <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() { paths[path] = true; return nil }
@@ -105,7 +109,6 @@
 		m.AddFile(path, m.Base(), int(inf.Size()))
 		return nil
 	})</code></pre>
-      <!--content-block-->
     </div>
   </article>
 </main>

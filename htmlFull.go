@@ -1,16 +1,24 @@
 package main
 
 import (
-	"strings"
 	"os"
 	"github.com/markbates/pkger"
 	"io"
 	"fmt"
 	"path/filepath"
 	"errors"
+	"html/template"
+	"bytes"
+	"go/ast"
 )
 
-func GenerateHTML(html string) (path string) {
+type Meta struct {
+	Packages map[string]*ast.Package
+	PackageNames []string
+	Content template.HTML
+}
+func GenerateHTML(html string, metadata Meta) (path string) {
+	t := template.New("main")
 	raw, err := pkger.Open("/html/index.html")
 	if err != nil {
 		fmt.Println("pkger error: ", err)
@@ -18,9 +26,25 @@ func GenerateHTML(html string) (path string) {
 	}
 	data, _ := io.ReadAll(raw)
 	htmlRaw := string(data)
+	t.Funcs(template.FuncMap{
+		"PackageFiles": func(p *ast.Package) []string {
+			out := make([]string, 0)
+			for f, _ := range p.Files {
+				out = append(out, filepath.Base(f))
+			}
+			return out
+		},
+	})
+	t, _ = t.Parse(htmlRaw)
 
-	parts := strings.Split(htmlRaw, "<!--content-block-->")
-	newRaw := parts[0] + html + parts[2]
+	byteBuffer := bytes.Buffer{}
+	metadata.Content = template.HTML(html)
+	err = t.Execute(&byteBuffer, metadata)
+	if err != nil {
+		fmt.Println("template err", err)
+		os.Exit(1)
+	}
+
 	ferr := os.Mkdir("out", 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
@@ -29,7 +53,7 @@ func GenerateHTML(html string) (path string) {
 		}
 	}
 	f, _ := os.Create("out/index.html")
-	f.WriteString(newRaw)
+	f.Write(byteBuffer.Bytes())
 	outAbs, _ := filepath.Abs("./out/index.html")
 	return outAbs
 }

@@ -186,7 +186,15 @@ func Generate() (distPath string) {
 
 	bufOut, _ := io.ReadAll(&w)
 
-	distPath = GenerateHTML(string(bufOut))
+	pkgNameList := make([]string, 0)
+	for pkgName, _ := range myPkgs {
+		pkgNameList = append(pkgNameList, pkgName)
+	}
+	metadata := Meta{
+		Packages: myPkgs,
+		PackageNames: pkgNameList,
+	}
+	distPath = GenerateHTML(string(bufOut), metadata)
 	return
 }
 
