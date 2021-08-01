@@ -1,4 +1,4 @@
-module superchargeDoc
+module goSuperDoc
 
 go 1.16
 

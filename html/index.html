@@ -6,23 +6,33 @@
     <title>Title</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
   <link rel="stylesheet" href="http://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
 
     <style>
       body{ font-family: Lato,-apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;  height: 100vh; margin: 0; background: #202229; color: #DFE1E3; }
-      .container { width: 80%; max-width: 1200px; margin: 0 auto; }
       a, a:visited { color: #D29BFF; }
 
       h1, h2, h3 { margin: 0; font-weight: 500;}
-      header { width: 100%; border-bottom: 1px solid #36393F; background: #2d313c;}
+      h1 { font-weight: 300; font-size: 2em; }
+      header { width: 100%; border-bottom: 1px solid #36393F; background: #2d313c; }
       header h1, header h2 { font-weight: 400; }
       header a, header a:visited { text-decoration: none; padding: 0.3em 1em; }
-      main { flex-grow: 1; margin: 0 auto; width: 100%; display: flex; flex-direction: row; }
-      nav {  min-width: 350px; height: 100%; box-sizing: border-box; overflow-y: scroll; background: #1B1D23; }
+      main { flex-grow: 1; margin: 0 auto; width: 100%;}
+
+      .left-right-parent { width: 100%; display: grid; grid-template-areas: 'left right'; grid-template-columns: 300px auto;}
+      .part-left { min-width: 300px; grid-area: left; justify-self: left; }
+      .part-right { grid-area: right; min-width: 300px; box-sizing: border-box; padding: 0em 4em; }
+      .part-right-wrap { max-width: 860px; margin: 0 auto; }
+      article .part-right-wrap { padding: 2em 0; }
+
+      nav { height: 100%; box-sizing: border-box; overflow-y: scroll; background: #1B1D23; }
       nav ul { list-style: none; padding: 0 8px;}
       nav>ul { padding: 0 0; }
       li:not(.pkg) { padding: 10px 0; }
-      article { flex-grow: 1; box-sizing: border-box; padding: 2em 4em; }
+
+      article { padding: 2em 0; }
       .hwrap {
         padding: 2px 0;
         display: flex;
@@ -30,16 +40,22 @@
         vertical-align: middle;
       }
       .hwrap h1, h2 { font-size: 1.3em; line-height: 2.6em; }
-      article>aside{ padding: 5px 0px 25px; font-size: 0.8em; text-transform: uppercase;}
+      article small{ display: block; padding: 5px 0px 25px; letter-spacing: 0.1em; text-transform: uppercase;}
       code[class*="language-"], pre[class*="language-"]{font-size: 1em !important; }
-      pre[class*="language-go"] { border: 1px solid #393E4A; background: #1F1F21; }
+      pre[class*="language-go"] { border: 1px solid #393E4A; background: #1F1F21;
+        overflow: auto !important;
+        min-width: 300px;
+        max-width: 100%;
+      }
       .hlt { background: #7800DB40; padding: 0.5em 1em; border-radius: 20px; }
     </style>
 </head>
 <body>
-<div style="height: 100vh; display: flex; flex-direction: column; overflow-y: scroll;">
-<header>
-  <div class="container">
+<div style="height: 100vh; display: flex; flex-direction: column;">
+<header class="left-right-parent">
+  <div class="part-left">&nbsp;</div>
+  <div class="part-right">
+    <div class="part-right-wrap">
     <div class="hwrap">
     <h1 class="logo" style="font-weight: 300">Project name</h1>
       <h2>
@@ -50,23 +66,26 @@
       </h2>
     </div>
   </div>
-</header>
-<main>
-<nav>
-  <div style="min-height: 105%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.3em;">
-  <h2>Documentation</h2>
-  <ul>
-    <li class="pkg">
-      <h3>Package <code>/code-pkg</code></h3>
-      <ul>
-        <li><span class="hlt">Some module</span></li>
-      </ul>
-    </li>
-  </ul>
   </div>
-</nav>
-  <article>
-    <aside>bread > crumb</aside>
+</header>
+
+<main class="left-right-parent">
+  <nav class="part-left navleft">
+    <div style="min-height: 105%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.3em;">
+    <h2>Documentation</h2>
+    <ul>
+      <li class="pkg">
+        <h3>Package <code>/code-pkg</code></h3>
+        <ul>
+          <li><span class="hlt">Some module</span></li>
+        </ul>
+      </li>
+    </ul>
+    </div>
+  </nav>
+  <article class="part-right">
+    <div class="part-right-wrap">
+    <small>bread > crumb</small>
     <h1>Your docs</h1><br/>
     some content<br>
     <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
@@ -77,6 +96,7 @@
 		m.AddFile(path, m.Base(), int(inf.Size()))
 		return nil
 	})</code></pre>
+    </div>
   </article>
 </main>
 </div>

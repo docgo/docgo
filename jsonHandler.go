@@ -3,7 +3,27 @@ package main
 import (
 	mdAst "github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
+	"os"
+	"fmt"
+	"github.com/yuin/goldmark"
+	"path/filepath"
 )
+
+type PkgList map[string]map[string]MarkdownFile
+func ParsePackages(dirPath string) (list PkgList) {
+	mdFile := filepath.Join(dirPath, "DOCS.md")
+	mdData, err := os.ReadFile(mdFile)
+	if err != nil {
+		fmt.Println("[note] no DOCS.md found, will use default.")
+		return
+	}
+	mdReader := text.NewReader(mdData)
+	md := goldmark.DefaultParser().Parse(mdReader)
+	list = parseJson(func(segment text.Segment) string {
+		return string(mdData[segment.Start : segment.Stop])
+	}, md)
+	return list
+}
 
 type MarkdownFile struct {
 	pkg string
