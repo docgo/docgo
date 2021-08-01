@@ -17,6 +17,7 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"io"
 	"bytes"
+	"net/http"
 )
 
 var Cli struct {
@@ -26,16 +27,16 @@ var Cli struct {
 
 func cliParse() {
 	kong.Parse(&Cli)
-	mInfo, err := os.Stat(Cli.ModulePath)
+	absModPath, err := filepath.Abs(Cli.ModulePath)
+	mInfo, err := os.Stat(absModPath)
 	if err != nil {
 		fmt.Println("Error loading '", mInfo, "': ", err)
 		os.Exit(1)
 	}
-	mDirPath := ""
+	mDirPath := absModPath
 	if !mInfo.IsDir() {
 		mDirPath = filepath.Dir(Cli.ModulePath)
 	}
-	mDirPath, _ = filepath.Abs(mDirPath)
 
 	ModulePath = mDirPath
 	MdPackages = ParsePackages(mDirPath)
@@ -44,19 +45,18 @@ func cliParse() {
 var ModulePath string
 var MdPackages map[string]map[string]MarkdownFile
 
-func main() {
-	cliParse()
-
-	//sf := fmt.Sprintf
-
+func Generate() (distPath string) {
+	fmt.Println("ModulePath =", ModulePath)
 	m := token.NewFileSet()
 	files := make([]*ast.File, 0)
 	paths := make(map[string]bool)
-	fs.WalkDir(os.DirFS(ModulePath), ".", func(path string, d fs.DirEntry, err error) error {
+	filepath.WalkDir(ModulePath, func(path string, d fs.DirEntry, err error) error {
+		if d.Name() == ".git" { return filepath.SkipDir }
 		if d.IsDir() { paths[path] = true; return nil }
 		if !strings.HasSuffix(d.Name(), ".go") { return nil }
 		//fullpath := filepath.Join(path, d.Name())
 		inf, _ := d.Info()
+		fmt.Println("Adding file:", path)
 		m.AddFile(path, m.Base(), int(inf.Size()))
 		return nil
 	})
@@ -70,7 +70,7 @@ func main() {
 	}
 
 	for name, pkg := range myPkgs {
-		fmt.Println(name)
+		fmt.Println("Parsed pkg:", name)
 		for _, f := range pkg.Files {
 			files = append(files, f)
 		}
@@ -185,5 +185,21 @@ func main() {
 	goldmark.New(goldmark.WithRendererOptions(html.WithXHTML())).Convert([]byte(buffer), &w)
 
 	bufOut, _ := io.ReadAll(&w)
-	GenerateHTML(string(bufOut))
+
+	distPath = GenerateHTML(string(bufOut))
+	return
+}
+
+func main() {
+	cliParse()
+
+	//sf := fmt.Sprintf
+	distPath := Generate()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		distPath = Generate()
+		http.FileServer(http.Dir(filepath.Dir(distPath))).ServeHTTP(writer, request)
+	})
+	http.ListenAndServe(":8080", mux)
 }

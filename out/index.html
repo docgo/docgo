@@ -95,17 +95,31 @@
     <div>
     <small>bread > crumb</small>
     <h1>Your docs</h1><br/>
-      <!--content-block-->
-    some content<br>
-    <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() { paths[path] = true; return nil }
-		if !strings.HasSuffix(d.Name(), ".go") { return nil }
-		//fullpath := filepath.Join(path, d.Name())
-		inf, _ := d.Info()
-		m.AddFile(path, m.Base(), int(inf.Size()))
-		return nil
-	})</code></pre>
-      <!--content-block-->
+      <h1>main</h1>
+<h1>file1</h1>
+<h3>PublicFunction</h3>
+<pre><code class="language-go">func PublicFunction(t MyType) (x int, err error)
+</code></pre>
+<p>Does something</p>
+<h3>interface Dumper</h3>
+<pre><code class="language-go">type Dumper interface {
+  Load(...interface{})
+  Dump() string
+}
+</code></pre>
+<h3>struct IntDumper</h3>
+<pre><code class="language-go">type IntDumper struct {
+}
+</code></pre>
+<pre><code class="language-go">func (i IntDumper) Dump() string
+</code></pre>
+<pre><code class="language-go">func (i IntDumper) Load(data ...interface{})
+</code></pre>
+<h3>struct MyType</h3>
+<pre><code class="language-go">type MyType struct {
+}
+</code></pre>
+
     </div>
   </article>
 </main>
