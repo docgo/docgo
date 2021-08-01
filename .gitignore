@@ -2,3 +2,4 @@
 *.bin
 /src
 pkged.go
+/out
