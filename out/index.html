@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="http://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
 
     <style>
-      body{ font-size: 16px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;  height: 100vh; margin: 0; background: #202229; color: #DFE1E3; }
+      body{ font-size: 16px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;  margin: 0; background: #202229; color: #DFE1E3; }
       a, a:visited { color: #D29BFF; }
 
       .material-icons { vertical-align: middle; }
@@ -29,21 +29,27 @@
       nav.menu-left .project-name-box { display: flex; }
       nav.menu-left .project-name { flex-grow: 1; }
       nav.menu-left .project-name-box > .toggle-menu-labels { width: 20px; }
-      .menu-left { width: 300px; position: fixed; top: 0; bottom: 0; left: 0; }
+      nav.menu-left {
+        position: fixed;
+        box-sizing: border-box;
+        overflow-y: hidden;
+        background: #1B1D23;
+        width: 300px; top: 0; bottom: 0; left: 0;
+        z-index: 100;
+        transition: all 0.3s;
+      }
       .part-right { margin-left: 300px; }
-      .menu-left { z-index: 100; transition: all 0.3s; }
       .toggle-menu-labels { display: none; }
       @media(max-width: 600px) {
         .toggle-menu-labels { display: inline-block; cursor: pointer; user-select: none; }
-        .menu-left { visibility: hidden; width: 100%; left: -100%;}
+        nav.menu-left { visibility: hidden; width: 100%; left: -100%;}
         .part-right { margin-left: 0; }
-        input[name="header-check"]:checked + .menu-left { visibility: visible; left: 0;}
+        input[name="header-check"]:checked + nav.menu-left { visibility: visible; left: 0;}
         input[name="header-check"]:checked ~ .part-right { display: none; }
       }
       .center-container { max-width: 860px; margin: 0 auto; padding-left: 2em; }
       article .center-container { padding: 2em 0; }
 
-      nav.menu-left { height: 100vh; position: fixed; box-sizing: border-box; overflow-y: none; background: #1B1D23; }
       nav.menu-left ul { padding: 0; }
       nav.menu-left .pkg ul { padding-left: 10px; }
       .pkg li { list-style: none; box-sizing: border-box; padding: 5px 10px 10px; margin: 10px 0; position: relative; left: 0.4em;}
