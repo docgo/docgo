@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"go/ast"
+	"go/token"
+	"os"
+	"path/filepath"
 )
 
 type ModuleDoc struct {
@@ -25,9 +29,24 @@ type Snippet struct {
 	SnippetText string
 }
 
-type Function struct {
-	Snippet
+func CreateSnippet(node ast.Node, pkg *Package) Snippet {
+	snipFile := pkg.FileSet.File(node.Pos())
+	q, _ := os.ReadFile(filepath.Join(pkg.Path, snipFile.Name()))
+	snipStr := string(q)[snipFile.Offset(node.Pos())  : snipFile.Offset(node.End()) ]
+	return Snippet{snipStr}
 }
+
+type FunctionDef struct {
+	Snippet
+	Name string
+	Doc string
+}
+
+type StructDef struct {
+	Snippet
+	Name string
+}
+
 type Method struct {
 	Snippet
 }
@@ -36,7 +55,7 @@ type Typedef struct{
 }
 
 type CodeDefinition struct {
-	Functions []Function
+	Functions []FunctionDef
 	Methods []Method
 	Typedefs []Typedef
 }
@@ -51,4 +70,5 @@ type Package struct {
 	Path string
 	ExportedCode CodeDefinition
 	Files []PackageFile
+	FileSet *token.FileSet
 }
