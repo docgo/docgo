@@ -11,7 +11,7 @@ import (
 type ModuleDoc struct {
 	AbsolutePath  string
 	ImportPath    string
-	Packages      []Package
+	Packages      []PackageDoc
 	SimpleExports SimpleExportsByType
 }
 
@@ -29,7 +29,7 @@ type Snippet struct {
 	SnippetText string
 }
 
-func CreateSnippet(node ast.Node, pkg *Package) Snippet {
+func CreateSnippet(node ast.Node, pkg *PackageDoc) Snippet {
 	snipFile := pkg.FileSet.File(node.Pos())
 	q, _ := os.ReadFile(filepath.Join(pkg.Path, snipFile.Name()))
 	snipStr := string(q)[snipFile.Offset(node.Pos())  : snipFile.Offset(node.End()) ]
@@ -45,34 +45,34 @@ type FunctionDef struct {
 type StructDef struct {
 	Snippet
 	Name string
+	Type *ast.StructType
 }
 
 type InterfaceDef struct {
 	Snippet
-	
+	Name string
+	Type *ast.InterfaceType
 }
-typepe Method struct {
+
+type Method struct {
 	Snippet
 }
 type Typedef struct{
 	Snippet
 }
 
-type CodeDefinition struct {
+type CodeDef struct {
 	Functions []FunctionDef
 	Methods []Method
 	Typedefs []Typedef
 }
 
-type PackageFile struct {
-	Pkg *Package
-	Code CodeDefinition
-}
+type PackageFile struct {}
 
-type Package struct {
-	Name string
-	Path string
-	ExportedCode CodeDefinition
-	Files []PackageFile
-	FileSet *token.FileSet
+type PackageDoc struct {
+	Name            string
+	Path            string
+	CodeDefinitions CodeDef
+	Files           []PackageFile
+	FileSet         *token.FileSet
 }

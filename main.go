@@ -53,7 +53,7 @@ func cliParse() {
 
 func ModuleParse(modFilePath string) {
 	var ModDocs ModuleDoc
-	ModDocs.Packages = []Package{}
+	ModDocs.Packages = []PackageDoc{}
 	ModDocs.SimpleExports = SimpleExportsByType{}
 
 	fmt.Println("modFilePath", modFilePath)
@@ -95,7 +95,7 @@ func ModuleParse(modFilePath string) {
 
 	docPresent := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {
-		docPackage := new(Package)
+		docPackage := new(PackageDoc)
 		info := docPresent.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
 		if info == nil { continue }
 
@@ -121,8 +121,7 @@ func ModuleParse(modFilePath string) {
 	}
 }
 
-func ParseTypeDecl(s ast.Spec, docPackage *Package) {
-	write := fmt.Printf
+func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 	t := s.(*ast.TypeSpec)
 	declName := t.Name.Name
 	st, ok := t.Type.(*ast.StructType)
@@ -130,6 +129,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *Package) {
 		sDef := StructDef{}
 		sDef.Snippet = CreateSnippet(st, docPackage)
 		sDef.Name = declName
+		sDef.Type = st
 
 		for _, field := range st.Fields.List {
 			_ = field
@@ -137,12 +137,14 @@ func ParseTypeDecl(s ast.Spec, docPackage *Package) {
 	} else {
 		it, ok := t.Type.(*ast.InterfaceType)
 		if !ok { return }
-		write("### interface %s\n```go\ntype %s interface {\n", declName, declName)
+		interDef := InterfaceDef{}
+		interDef.Name = declName
+		interDef.Type = it
+		interDef.Snippet = CreateSnippet(it, docPackage)
+
 		for _, meth := range it.Methods.List {
-			snip := (snippet(meth))
-			write("  %s\n", snip)
+			_ = meth
 		}
-		write("}\n```\n")
 	}
 }
 
