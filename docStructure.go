@@ -49,9 +49,9 @@ type StructDef struct {
 
 type InterfaceDef struct {
 	Snippet
-
-	ty
-}pe Method struct {
+	
+}
+typepe Method struct {
 	Snippet
 }
 type Typedef struct{
