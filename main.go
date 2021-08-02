@@ -51,9 +51,13 @@ func cliParse() {
 	MdPackages = ParsePackages(mDirPath)
 }
 
-func ModuleParse(mPath string) {
-	fmt.Println("mPath", mPath)
-	c := godoc.NewCorpus(vfs.OS(mPath))
+func ModuleParse(modFilePath string) {
+	var ModDocs ModuleDoc
+	ModDocs.Packages = []Package{}
+	ModDocs.SimpleExports = SimpleExportsByType{}
+
+	fmt.Println("modFilePath", modFilePath)
+	c := godoc.NewCorpus(vfs.OS(modFilePath))
 
 	err := c.Init()
 	if err != nil {
@@ -63,25 +67,32 @@ func ModuleParse(mPath string) {
 		c.RunIndexer()
 	}()
 	<- time.NewTicker(time.Millisecond * 200).C
-	idx, _ := c.CurrentIndex()
-	goModBuffer, err := os.ReadFile(filepath.Join(mPath, "go.mod"))
 
-	modPath := modfile.ModulePath(goModBuffer)
-	fmt.Println("modPath", modPath)
+	idx, _ := c.CurrentIndex()
+
+	goModBuffer, err := os.ReadFile(filepath.Join(modFilePath, "go.mod"))
+	modImportPath := modfile.ModulePath(goModBuffer)
+
+	ModDocs.AbsolutePath = modFilePath
+	ModDocs.ImportPath = modImportPath
 
 	pkgList := map[string]string{}
 	for kind, symbols := range idx.Idents() {
-		fmt.Println(kind.Name())
 		if kind.Name() == "Packages" {
 			for _, sym := range symbols {
 				pkgList[sym[0].Path] = sym[0].Name
 			}
 		} else {
 			for name, sym := range symbols {
-				fmt.Println(" -", name, sym[0].Package)
+				if len(sym) != 0 {
+					exportType := ExportType(kind.Name())
+					ModDocs.SimpleExports[exportType] = append(ModDocs.SimpleExports[exportType], fmt.Sprintf("%s [%s]", name, sym[0].Path))
+				}
 			}
 		}
 	}
+	ModDocs.Print()
+
 	docPresent := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {
 		info := docPresent.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
@@ -89,7 +100,7 @@ func ModuleParse(mPath string) {
 		fmt.Println(info.PDoc.Doc)
 		snippet := func (n ast.Node) string {
 			snipFile := info.FSet.File(n.Pos())
-			q, _ := os.ReadFile(filepath.Join(mPath, snipFile.Name()))
+			q, _ := os.ReadFile(filepath.Join(modFilePath, snipFile.Name()))
 			return string(q)[snipFile.Offset(n.Pos()) : snipFile.Offset(n.End()) ]
 
 		}

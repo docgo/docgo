@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="http://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
 
     <style>
-      body{ font-size: 16px; font-family: Lato,-apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;  height: 100vh; margin: 0; background: #202229; color: #DFE1E3; }
+      body{ font-size: 16px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;  height: 100vh; margin: 0; background: #202229; color: #DFE1E3; }
       a, a:visited { color: #D29BFF; }
 
       .material-icons { vertical-align: middle; }
@@ -67,8 +67,12 @@
         max-width: 100%;
       }
       .header-split-sides { align-items: center; }
-      .search-form { height: 30px; margin: 0; padding: 0; width: 40%; min-width: 100px; }
-      .search-form input { height: 100%; width: 100%; margin: 0; padding: 5px; padding-left: 25px; box-sizing: border-box;}
+      .search-form { height: 35px; margin: 0; padding: 0; flex-grow: 1; min-width: 160px; }
+      .search-form input { height: 100%; width: 100%; margin: 0; padding: 5px; padding-left: 25px;
+        box-sizing: border-box; background: #202225; color: #eee; border: 1px solid #3D404B; border-radius: 10px;
+      }
+      .search-form input:focus, .search-form input:active { outline: 0; border: 1px solid #7800DB; }
+      .search-form input::placeholder { color: #aaa; }
     </style>
 </head>
 <body>
@@ -91,24 +95,29 @@
             <li class="active">Home</li>
           </ul>
           
+          <h3>cfgo</h3>
+          <ul>
+            
+            <li> response.go </li>
+            
+            <li> cfgo.go </li>
+            
+            <li> cfgo_test.go </li>
+            
+            <li> jsFunctions.go </li>
+            
+            <li> jsMap.go </li>
+            
+            <li> kv.go </li>
+            
+            <li> request.go </li>
+            
+          </ul>
+          
           <h3>main</h3>
           <ul>
             
             <li> main.go </li>
-            
-          </ul>
-          
-          <h3>pkg1</h3>
-          <ul>
-            
-            <li> file1.go </li>
-            
-          </ul>
-          
-          <h3>pkg2</h3>
-          <ul>
-            
-            <li> pkg2.go </li>
             
           </ul>
           
@@ -121,7 +130,7 @@
     <div class="center-container">
     <div class="header-split-sides">
       <form class="search-form" style="position: relative">
-        <span class="material-icons" style="position:absolute; left: 2px; top: 3px; color: #333333">search</span>
+        <span class="material-icons" style="position:absolute; left: 4px; top: 6px; color: #7800DB; font-size: 20px">search</span>
         <input type="text" placeholder="Search" />
       </form>
       <section class="header-right">
@@ -138,44 +147,141 @@
     <div>
     <small>bread > crumb</small>
     <h1>Your docs</h1><br/>
-      <p>Package two documentation contains blah.</p>
+      <p>This is some cfgo documentation
+that I wrote.</p>
 <h1>main</h1>
-<h1>file1</h1>
-<h3>PublicFunction</h3>
-<pre><code class="language-go">func PublicFunction(t MyType) (x int, err error)
+<pre><code class="language-go">var KV = cfgo.KV(&quot;PROBA&quot;)
 </code></pre>
-<p>Does something</p>
-<h3>interface Dumper</h3>
-<pre><code class="language-go">type Dumper interface {
-  Load(...interface{})
-  Dump() string
+<pre><code class="language-go">var KeyValueDemo = func(req *cfgo.Request) {
+ if v, has := req.QueryParams[&quot;value&quot;]; has {
+  KV.PutKey(req.QueryParams[&quot;key&quot;], v)
+ }
+ currentVals := printMap(KV.ListKeyValues(&quot;&quot;), &quot; - proba[%s] = %s\n&quot;)
+ resp := `
+  &lt;pre&gt;` + currentVals + `
+  ---
+  &lt;/pre&gt;
+  &lt;form&gt;
+  &lt;input name=&quot;key&quot; placeholder=&quot;Key&quot; /&gt; 
+  &lt;input name=&quot;value&quot; placeholder=&quot;Value&quot; /&gt; &lt;br/&gt;
+  &lt;input type=&quot;submit&quot; value=&quot;Set&quot; /&gt;
+  &lt;/form&gt;
+  `
+
+ req.Respond(resp, cfgo.SetHeader(&quot;content-type&quot;, &quot;text/html&quot;))
 }
 </code></pre>
-<h3>struct IntDumper</h3>
-<pre><code class="language-go">type IntDumper struct {
+<h3>FetchDemo</h3>
+<pre><code class="language-go">func FetchDemo(req *cfgo.Request)
+</code></pre>
+<h3>HomeDemo</h3>
+<pre><code class="language-go">func HomeDemo(req *cfgo.Request)
+</code></pre>
+<h1>jsFunctions</h1>
+<h1>jsMap</h1>
+<h1>kv</h1>
+<h3>struct KVNamespace</h3>
+<pre><code class="language-go">type KVNamespace struct {
+  Name string
 }
 </code></pre>
-<pre><code class="language-go">func (i IntDumper) Dump() string
+<p>blah blagh</p>
+<h3>KV</h3>
+<pre><code class="language-go">func KV(namespace string) KVNamespace
 </code></pre>
-<pre><code class="language-go">func (i IntDumper) Load(data ...interface{})
+<pre><code class="language-go">func (namespace KVNamespace) GetKey(key string) string
 </code></pre>
-<h3>struct MyType</h3>
-<pre><code class="language-go">type MyType struct {
+<p>Return the KV value based on the key</p>
+<pre><code class="language-go">func (namespace KVNamespace) ListKeyValues(prefix string) map[string]string
+</code></pre>
+<pre><code class="language-go">func (namespace KVNamespace) PutKey(key string, value string)
+</code></pre>
+<pre><code class="language-go">func (namespace KVNamespace) PutKeyExpiring(key string, value string, seconds int)
+</code></pre>
+<h1>request</h1>
+<h3>struct Request</h3>
+<pre><code class="language-go">type Request struct {
+  Body           string
+  Headers        map[string]string
+  QueryParams    map[string]string
+  URL            string
+  Hostname       string
+  Pathname       string
+  Method         string
+  Cf             RequestCFInfo
 }
 </code></pre>
-<h1>pkg2</h1>
-<h3>MulTwo</h3>
-<pre><code class="language-go">func MulTwo(x Num) int
+<pre><code class="language-go">func (r *Request) Respond(body string, options ...ResponseOption)
 </code></pre>
-<p>Multiply a number by two</p>
-<h3>struct Num</h3>
-<pre><code class="language-go">type Num struct {
+<p>Example:</p>
+<pre><code class="language-go">{
+	var m *Request
+	// blah
+	m.Respond(&quot;My body&quot;, SetStatus(403), SetHeader(&quot;x-a&quot;, &quot;val&quot;))
 }
 </code></pre>
-<h3>CreateNum</h3>
-<pre><code class="language-go">func CreateNum(x int) Num
+<h3>struct RequestCFInfo</h3>
+<pre><code class="language-go">type RequestCFInfo struct {
+  Asn             string
+  Colo            string
+  Country         string
+  HttpProtocol    string
+  RequestPriority string
+  TLSCipher       string
+  TLSClientAuth   string
+  TLSVersion      string
+  City            string
+  Continent       string
+  Latitude        string
+  Longitude       string
+  PostalCode      string
+  MetroCode       string
+  Region          string
+  RegionCode      string
+  Timezone        string
+}
 </code></pre>
-<p>Creates a Num from an integer</p>
+<h1>response</h1>
+<h3>interface ResponseOption</h3>
+<pre><code class="language-go">type ResponseOption interface {
+  Apply(responseStruct *responseStruct)
+}
+</code></pre>
+<h3>SetHeader</h3>
+<pre><code class="language-go">func SetHeader(key string, value string) ResponseOption
+</code></pre>
+<p>Red roses too.</p>
+<h3>SetStatus</h3>
+<pre><code class="language-go">func SetStatus(code int) ResponseOption
+</code></pre>
+<h1>cfgo</h1>
+<p>Router Blah blah</p>
+<pre><code class="language-go">var Router = routeHandler{}
+</code></pre>
+<h3>Fetch</h3>
+<pre><code class="language-go">func Fetch(url string, method string, headers map[string]string,
+	requestBody FetchBody) string
+</code></pre>
+<p>Fetches any URL using the fetch() Web API. Unlike browsers,
+CloudFlare workers miss some features like credentials.</p>
+<p>If you don't need headers or a request body, set them to nil:
+Fetch(myUrl, &quot;GET&quot;, nil, nil)</p>
+<p>To create a POST/PUT body, use cfgo.BodyForm() or cfgo.BodyString():
+Fetch(myURL, &quot;PUT&quot;, nil, cfgo.BodyForm(myDict))</p>
+<h3>interface FetchBody</h3>
+<pre><code class="language-go">type FetchBody interface {
+  Get() js.Value
+}
+</code></pre>
+<h3>BodyForm</h3>
+<pre><code class="language-go">func BodyForm(body map[string]string) FetchBody
+</code></pre>
+<h3>struct FormStruct</h3>
+<pre><code class="language-go">type FormStruct struct {
+}
+</code></pre>
+<pre><code class="language-go">func (s FormStruct) Get() js.Value
+</code></pre>
 
     some content<br>
     <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
