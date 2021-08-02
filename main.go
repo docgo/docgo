@@ -28,7 +28,7 @@ import (
 )
 
 var Cli struct {
-	ModulePath string `arg help:"Path to module"`
+	ModulePath string `arg help:"RelativePath to module"`
 	Open bool
 }
 
@@ -93,19 +93,18 @@ func ModuleParse(modFilePath string) {
 	}
 	ModDocs.Print()
 
-	docPresent := godoc.NewPresentation(c)
+	godocPresentation := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {
 		docPackage := new(PackageDoc)
-		info := docPresent.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
+		info := godocPresentation.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
 		if info == nil { continue }
 
 		docPackage.FileSet = info.FSet
-		docPackage.Path = path
+		docPackage.RelativePath = path
 		docPackage.Name = pkgName
+		docPackage.Doc = info.PDoc.Doc
 
-		fmt.Println(info.PDoc.Doc)
 		for _, tp := range info.PDoc.Types {
-			fmt.Println("found type", tp.Name)
 			for _, spec := range tp.Decl.Specs {
 				ParseTypeDecl(spec, docPackage)
 			}
@@ -117,6 +116,15 @@ func ModuleParse(modFilePath string) {
 			docFn.Name = fn.Name
 			docFn.Doc = fn.Doc
 		}
+
+		for _, varVal := range info.PDoc.Vars {
+			_ = varVal
+		}
+
+		for _, constVal := range info.PDoc.Consts {
+			_ = constVal
+		}
+
 		//fmt.Println(info.CallGraphIndex)
 	}
 }
