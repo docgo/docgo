@@ -1,8 +1,18 @@
 # package
-## Step one `file: a.go`
-Do stuff two.
-## Step two `file: b.go`
-Do stuff.
-## Step three `file: c.go`
 
+## Intro
+This is some example documentation.
+
+(( .Description ))
+(( include: file1.go ))
+
+Do stuff two.
+
+## Step two
+
+Do stuff.
+
+((include: file2.go))
+
+## Step three
 This is your documentation

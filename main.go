@@ -1,6 +1,9 @@
 //go:generate wget https://github.com/fikisipi/cloudflare-workers-go/releases/download/0.0.1/pkged.go -O pkged.go
 
+// This comment is above package main
 package main
+
+// This comment is under.
 
 import (
 	"go/doc"
@@ -18,6 +21,10 @@ import (
 	"io"
 	"bytes"
 	"net/http"
+	"golang.org/x/tools/godoc"
+	"golang.org/x/mod/modfile"
+	"golang.org/x/tools/godoc/vfs"
+	"time"
 )
 
 var Cli struct {
@@ -38,8 +45,60 @@ func cliParse() {
 		mDirPath = filepath.Dir(Cli.ModulePath)
 	}
 
+	ModuleParse(mDirPath)
+
 	ModulePath = mDirPath
 	MdPackages = ParsePackages(mDirPath)
+}
+
+func ModuleParse(mPath string) {
+	fmt.Println("mPath", mPath)
+	c := godoc.NewCorpus(vfs.OS(mPath))
+
+	err := c.Init()
+	if err != nil {
+		fmt.Println(err)
+	}
+	go func() {
+		c.RunIndexer()
+	}()
+	<- time.NewTicker(time.Millisecond * 200).C
+	idx, _ := c.CurrentIndex()
+	goModBuffer, err := os.ReadFile(filepath.Join(mPath, "go.mod"))
+
+	modPath := modfile.ModulePath(goModBuffer)
+	fmt.Println("modPath", modPath)
+
+	pkgList := map[string]string{}
+	for kind, symbols := range idx.Idents() {
+		fmt.Println(kind.Name())
+		if kind.Name() == "Packages" {
+			for _, sym := range symbols {
+				pkgList[sym[0].Path] = sym[0].Name
+			}
+		} else {
+			for name, sym := range symbols {
+				fmt.Println(" -", name, sym[0].Package)
+			}
+		}
+	}
+	docPresent := godoc.NewPresentation(c)
+	for path, pkgName := range pkgList {
+		info := docPresent.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
+		if info == nil { continue }
+		fmt.Println(info.PDoc.Doc)
+		snippet := func (n ast.Node) string {
+			snipFile := info.FSet.File(n.Pos())
+			q, _ := os.ReadFile(filepath.Join(mPath, snipFile.Name()))
+			return string(q)[snipFile.Offset(n.Pos()) : snipFile.Offset(n.End()) ]
+
+		}
+		for _, fn := range info.PDoc.Funcs {
+			fmt.Println(snippet(fn.Decl))
+			fmt.Println("fn", fn.Name, " doc =", fn.Doc)
+		}
+		//fmt.Println(info.CallGraphIndex)
+	}
 }
 
 var ModulePath string
@@ -62,17 +121,21 @@ func Generate() (distPath string) {
 	})
 
 	var myPkgs = make(map[string]*ast.Package)
+	pkgPaths := make(map[string]string)
 	for path, _ := range paths {
 		pkgMap, _ := parser.ParseDir(m, path, nil, parser.ParseComments)
-		for n, pkg := range pkgMap {
-			myPkgs[n] = pkg
+		for pkgName, pkg := range pkgMap {
+			pkgPaths[pkgName] = path
+			myPkgs[pkgName] = pkg
 		}
 	}
 
 	for name, pkg := range myPkgs {
-		fmt.Println("Parsed pkg:", name)
+		pkgFiles := make([]*ast.File, 0)
+		fmt.Println("Parsed pkg:", name, "\nFiles:", pkg.Files)
 		for _, f := range pkg.Files {
 			files = append(files, f)
+			pkgFiles = append(pkgFiles, f)
 		}
 	}
 

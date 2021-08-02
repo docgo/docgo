@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<link href="https://fonts.googleapis.com/css2?family=Georama:wght@200;300;400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <head>
     <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
@@ -15,8 +14,10 @@
       body{ font-size: 16px; font-family: Lato,-apple-system,BlinkMacSystemFont,"Segoe UI","Liberation Sans",sans-serif;  height: 100vh; margin: 0; background: #202229; color: #DFE1E3; }
       a, a:visited { color: #D29BFF; }
 
-      h1, h2, h3 { margin: 0; font-weight: 500;}
+      h1, h2, h3 { margin: 0; }
+      .project-name { font-weight: 500; }
       h1 { font-weight: 300; font-size: 2em; }
+      h1, h2 { font-weight: 300; } h3 { font-weight: 500; }
       header { width: 100%; border-bottom: 1px solid #333744; background: #333640; }
       header h1, header h2 { font-weight: 400; }
       header a, header a:visited { text-decoration: none; padding: 0.3em 1em; }
@@ -32,11 +33,11 @@
       .part-right-wrap { max-width: 860px; margin: 0 auto; padding-left: 2em; }
       article .part-right-wrap { padding: 2em 0; }
 
-      nav { height: 100vh; position: fixed; box-sizing: border-box; overflow-y: scroll; background: #1B1D23; }
-      nav ul { list-style: none; padding: 0 8px;}
-      nav>ul { padding: 0 0; }
-      li:not(.pkg) { padding: 10px 0; }
-
+      nav { height: 100vh; position: fixed; box-sizing: border-box; overflow-y: none; background: #1B1D23; }
+      nav ul { padding: 0; }
+      .pkg ul { padding-left: 10px; }
+      .pkg li { list-style: none; box-sizing: border-box; padding: 5px 10px 10px; margin: 10px 0; position: relative; left: 0.4em;}
+      .pkg li.active { background: rgba(255 255 255 / 0.1); border-left: 5px solid #7800DB; }
       article { padding: 2em 0; }
       .hwrap {
         padding: 2px 0;
@@ -52,7 +53,6 @@
         min-width: 300px;
         max-width: 100%;
       }
-      .hlt { background: #7800DB40; padding: 0.5em 1em; border-radius: 20px; }
       .hwrap { align-items: center; }
       .search-form { height: 30px; margin: 0; padding: 0; width: 40%; min-width: 100px; }
       .search-form input { height: 100%; width: 100%; margin: 0; padding: 5px; box-sizing: border-box;}
@@ -61,94 +61,38 @@
 <body>
 <div class="left-right-parent">
   <nav class="part-left navleft">
-    <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.3em;">
-      <h2>Documentation</h2>
+    <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.5em;">
+      
+      <h2 class="project-name">
+        <span class="material-icons" style="font-size: 2em; vertical-align: middle;">view_in_ar</span>
+        Project Name
+      </h2>
+
       <ul>
         <li class="pkg">
-          
-          <h3>embed</h3>
+          <h3> Intro </h3>
           <ul>
-            
-            <li><span class="hlt"> embed.go </span></li>
-            
-            <li><span class="hlt"> file.go </span></li>
-            
-          </ul>
-          
-          <h3>here</h3>
-          <ul>
-            
-            <li><span class="hlt"> here.go </span></li>
-            
+            <li class="active">Home</li>
           </ul>
           
           <h3>main</h3>
           <ul>
             
-            <li><span class="hlt"> main.go </span></li>
-            
-            <li><span class="hlt"> pkged.go </span></li>
+            <li> main.go </li>
             
           </ul>
           
-          <h3>maps</h3>
+          <h3>pkg1</h3>
           <ul>
             
-            <li><span class="hlt"> files.go </span></li>
-            
-            <li><span class="hlt"> infos.go </span></li>
+            <li> file1.go </li>
             
           </ul>
           
-          <h3>mem</h3>
+          <h3>pkg2</h3>
           <ul>
             
-            <li><span class="hlt"> add.go </span></li>
-            
-            <li><span class="hlt"> embed.go </span></li>
-            
-            <li><span class="hlt"> file.go </span></li>
-            
-            <li><span class="hlt"> mem.go </span></li>
-            
-          </ul>
-          
-          <h3>pkger</h3>
-          <ul>
-            
-            <li><span class="hlt"> apply.go </span></li>
-            
-            <li><span class="hlt"> pkger.go </span></li>
-            
-            <li><span class="hlt"> version.go </span></li>
-            
-          </ul>
-          
-          <h3>pkging</h3>
-          <ul>
-            
-            <li><span class="hlt"> file.go </span></li>
-            
-            <li><span class="hlt"> file_info.go </span></li>
-            
-            <li><span class="hlt"> mod_time.go </span></li>
-            
-            <li><span class="hlt"> pkger.go </span></li>
-            
-            <li><span class="hlt"> wrap.go </span></li>
-            
-            <li><span class="hlt"> faces.go </span></li>
-            
-          </ul>
-          
-          <h3>stdos</h3>
-          <ul>
-            
-            <li><span class="hlt"> file.go </span></li>
-            
-            <li><span class="hlt"> json.go </span></li>
-            
-            <li><span class="hlt"> stdos.go </span></li>
+            <li> pkg2.go </li>
             
           </ul>
           
@@ -178,306 +122,44 @@
     <div>
     <small>bread > crumb</small>
     <h1>Your docs</h1><br/>
-      <h1>embed</h1>
-<h3>Decode</h3>
-<pre><code class="language-go">func Decode(src []byte) ([]byte, error)
-</code></pre>
-<h3>Encode</h3>
-<pre><code class="language-go">func Encode(b []byte) ([]byte, error)
-</code></pre>
-<h3>struct Data</h3>
-<pre><code class="language-go">type Data struct {
-  Infos map[string]here.Info `json:&quot;infos&quot;`
-  Files map[string]File      `json:&quot;files&quot;`
-  Here  here.Info            `json:&quot;here&quot;`
-}
-</code></pre>
-<h1>file</h1>
-<h1>add</h1>
-<h1>embed</h1>
-<h1>file</h1>
-<h1>mem</h1>
-<h1>file</h1>
-<h3>struct File</h3>
-<pre><code class="language-go">type File struct {
-  *os.File
-}
-</code></pre>
-<pre><code class="language-go">func (f *File) Close() error
-</code></pre>
-<p>Close closes the File, rendering it unusable for I/O.</p>
-<pre><code class="language-go">func (f *File) Info() here.Info
-</code></pre>
-<p>Info returns the here.Info of the file</p>
-<pre><code class="language-go">func (f File) Name() string
-</code></pre>
-<p>Name retuns the name of the file in pkger format</p>
-<pre><code class="language-go">func (f *File) Open(name string) (http.File, error)
-</code></pre>
-<p>Open implements the http.FileSystem interface. A FileSystem implements access to a collection of named files. The elements in a file path are separated by slash ('/', U+002F) characters, regardless of host operating system convention.</p>
-<pre><code class="language-go">func (f *File) Path() here.Path
-</code></pre>
-<p>Path returns the here.Path of the file</p>
-<pre><code class="language-go">func (f *File) Read(p []byte) (int, error)
-</code></pre>
-<p>Read reads up to len(b) bytes from the File. It returns the number of bytes read and any error encountered. At end of file, Read returns 0, io.EOF.</p>
-<pre><code class="language-go">func (f *File) Readdir(count int) ([]os.FileInfo, error)
-</code></pre>
-<p>Readdir reads the contents of the directory associated with file and returns a slice of up to n FileInfo values, as would be returned by Lstat, in directory order. Subsequent calls on the same file will yield further FileInfos.</p>
-<p>If n &gt; 0, Readdir returns at most n FileInfo structures. In this case, if Readdir returns an empty slice, it will return a non-nil error explaining why. At the end of a directory, the error is io.EOF.</p>
-<p>If n &lt;= 0, Readdir returns all the FileInfo from the directory in a single slice. In this case, if Readdir succeeds (reads all the way to the end of the directory), it returns the slice and a nil error. If it encounters an error before the end of the directory, Readdir returns the FileInfo read until that point and a non-nil error.</p>
-<pre><code class="language-go">func (f *File) Seek(ofpkginget int64, whence int) (int64, error)
-</code></pre>
-<p>Seek sets the offset for the next Read or Write on file to offset, interpreted according to whence: 0 means relative to the origin of the file, 1 means relative to the current offset, and 2 means relative to the end. It returns the new offset and an error, if any.</p>
-<pre><code class="language-go">func (f *File) Stat() (os.FileInfo, error)
-</code></pre>
-<p>Stat returns the FileInfo structure describing file. If there is an error, it will be of type *PathError.</p>
-<pre><code class="language-go">func (f File) String() string
-</code></pre>
-<pre><code class="language-go">func (f *File) Write(b []byte) (int, error)
-</code></pre>
-<p>Write writes len(b) bytes to the File. It returns the number of bytes written and an error, if any. Write returns a non-nil error when n != len(b).</p>
-<h1>json</h1>
-<h1>stdos</h1>
-<h3>struct Pkger</h3>
-<pre><code class="language-go">type Pkger struct {
-  Here  here.Info
-}
-</code></pre>
-<h3>New</h3>
-<pre><code class="language-go">func New(her here.Info) (*Pkger, error)
-</code></pre>
-<p>New returns *Pkger for the provided here.Info</p>
-<h3>UnmarshalEmbed</h3>
-<pre><code class="language-go">func UnmarshalEmbed(in []byte) (*Pkger, error)
-</code></pre>
-<h3>Wrap</h3>
-<pre><code class="language-go">func Wrap(parent, with Pkger) Pkger
-</code></pre>
-<pre><code class="language-go">func (fx *Pkger) Add(files ...*os.File) error
-</code></pre>
-<p>Add copies the pkging.File into the *Pkger</p>
-<pre><code class="language-go">func (fx *Pkger) Create(name string) (pkging.File, error)
-</code></pre>
-<p>Create creates the named file with mode 0666 (before umask) - It's actually 0644, truncating it if it already exists. If successful, methods on the returned File can be used for I/O; the associated file descriptor has mode O_RDWR.</p>
-<pre><code class="language-go">func (f *Pkger) Current() (here.Info, error)
-</code></pre>
-<p>Current returns the here.Info representing the current Pkger implementation.</p>
-<pre><code class="language-go">func (f *Pkger) Info(p string) (here.Info, error)
-</code></pre>
-<p>Info returns the here.Info of the here.Path</p>
-<pre><code class="language-go">func (p *Pkger) MarshalJSON() ([]byte, error)
-</code></pre>
-<p>MarshalJSON creates a fully re-hydratable JSON representation of *Pkger</p>
-<pre><code class="language-go">func (f *Pkger) MkdirAll(p string, perm os.FileMode) error
-</code></pre>
-<p>MkdirAll creates a directory named path, along with any necessary parents, and returns nil, or else returns an error. The permission bits perm (before umask) are used for all directories that MkdirAll creates. If path is already a directory, MkdirAll does nothing and returns nil.</p>
-<pre><code class="language-go">func (fx *Pkger) Open(name string) (pkging.File, error)
-</code></pre>
-<p>Open opens the named file for reading. If successful, methods on the returned file can be used for reading; the associated file descriptor has mode O_RDONLY.</p>
-<pre><code class="language-go">func (f *Pkger) Parse(p string) (here.Path, error)
-</code></pre>
-<p>Parse the string in here.Path format.</p>
-<pre><code class="language-go">func (fx *Pkger) Remove(name string) error
-</code></pre>
-<p>Remove removes the named file or (empty) directory.</p>
-<pre><code class="language-go">func (fx *Pkger) RemoveAll(name string) error
-</code></pre>
-<p>RemoveAll removes path and any children it contains. It removes everything it can but returns the first error it encounters. If the path does not exist, RemoveAll returns nil (no error).</p>
-<pre><code class="language-go">func (fx *Pkger) Stat(name string) (os.FileInfo, error)
-</code></pre>
-<p>Stat returns a FileInfo describing the named file.</p>
-<pre><code class="language-go">func (p *Pkger) UnmarshalJSON(b []byte) error
-</code></pre>
-<p>UnmarshalJSON re-hydrates the *Pkger</p>
-<pre><code class="language-go">func (f *Pkger) Walk(p string, wf filepath.WalkFunc) error
-</code></pre>
-<p>Walk walks the file tree rooted at root, calling walkFn for each file or directory in the tree, including root. All errors that arise visiting files and directories are filtered by walkFn. The files are walked in lexical order, which makes the output deterministic but means that for very large directories Walk can be inefficient. Walk does not follow symbolic links. - That is from the standard library. I know. Their grammar teachers can not be happy with them right now.</p>
-<h1>file_info</h1>
-<h3>struct Details</h3>
-<pre><code class="language-go">type Details struct {
-  Name    string      `json:&quot;name&quot;`
-  Size    int64       `json:&quot;size&quot;`
-  Mode    os.FileMode `json:&quot;mode&quot;`
-  ModTime ModTime     `json:&quot;mod_time&quot;`
-  IsDir   bool        `json:&quot;is_dir&quot;`
-  Sys     interface{} `json:&quot;sys&quot;`
-}
-</code></pre>
-<h3>struct FileInfo</h3>
-<pre><code class="language-go">type FileInfo struct {
-  Details `json:&quot;details&quot;`
-}
-</code></pre>
-<h3>NewFileInfo</h3>
-<pre><code class="language-go">func NewFileInfo(info os.FileInfo) *FileInfo
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) IsDir() bool
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) ModTime() time.Time
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) Mode() os.FileMode
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) Name() string
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) Size() int64
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) String() string
-</code></pre>
-<pre><code class="language-go">func (f *FileInfo) Sys() interface{}
-</code></pre>
-<h1>mod_time</h1>
-<pre><code class="language-go">func (m ModTime) MarshalJSON() ([]byte, error)
-</code></pre>
-<pre><code class="language-go">func (m *ModTime) UnmarshalJSON(b []byte) error
-</code></pre>
-<h1>pkger</h1>
-<h1>wrap</h1>
-<h1>faces</h1>
-<h3>interface Adder</h3>
-<pre><code class="language-go">type Adder interface {
-  Add(files ...*os.File) error
-}
-</code></pre>
-<h1>file</h1>
-<h1>version</h1>
-<p>Version of pkger</p>
-<pre><code class="language-go">var Version = &quot;development&quot;
-</code></pre>
-<h1>apply</h1>
-<h3>Apply</h3>
-<pre><code class="language-go">func Apply(pkg pkging.Pkger, err error) error
-</code></pre>
-<p>Apply will wrap the current implementation
-of pkger.Pkger with the new pkg. This allows
-for layering of pkging.Pkger implementations.</p>
-<h1>pkger</h1>
-<h3>Create</h3>
-<pre><code class="language-go">func Create(p string) (pkging.File, error)
-</code></pre>
-<p>Create creates the named file with mode 0666 (before umask) - It's actually 0644, truncating it if it already exists. If successful, methods on the returned File can be used for I/O; the associated file descriptor has mode O_RDWR.</p>
-<h3>Current</h3>
-<pre><code class="language-go">func Current() (here.Info, error)
-</code></pre>
-<p>Current returns the here.Info representing the current Pkger implementation.</p>
-<h3>Include</h3>
-<pre><code class="language-go">func Include(name string) string
-</code></pre>
-<p>Include is a no-op that directs the pkger tool to include the desired file or folder.</p>
-<h3>Info</h3>
-<pre><code class="language-go">func Info(p string) (here.Info, error)
-</code></pre>
-<p>Info returns the here.Info of the here.Path</p>
-<h3>MkdirAll</h3>
-<pre><code class="language-go">func MkdirAll(p string, perm os.FileMode) error
-</code></pre>
-<p>MkdirAll creates a directory named path, along with any necessary parents, and returns nil, or else returns an error. The permission bits perm (before umask) are used for all directories that MkdirAll creates. If path is already a directory, MkdirAll does nothing and returns nil.</p>
-<h3>Open</h3>
-<pre><code class="language-go">func Open(p string) (pkging.File, error)
-</code></pre>
-<p>Open opens the named file for reading. If successful, methods on the returned file can be used for reading; the associated file descriptor has mode O_RDONLY.</p>
-<h3>Parse</h3>
-<pre><code class="language-go">func Parse(p string) (here.Path, error)
-</code></pre>
-<p>Parse the string in here.Path format.</p>
-<h3>Remove</h3>
-<pre><code class="language-go">func Remove(name string) error
-</code></pre>
-<p>Remove removes the named file or (empty) directory.</p>
-<h3>RemoveAll</h3>
-<pre><code class="language-go">func RemoveAll(name string) error
-</code></pre>
-<p>RemoveAll removes path and any children it contains. It removes everything it can but returns the first error it encounters. If the path does not exist, RemoveAll returns nil (no error).</p>
-<h3>Stat</h3>
-<pre><code class="language-go">func Stat(name string) (os.FileInfo, error)
-</code></pre>
-<p>Stat returns a FileInfo describing the named file.</p>
-<h3>Walk</h3>
-<pre><code class="language-go">func Walk(p string, wf filepath.WalkFunc) error
-</code></pre>
-<p>Walk walks the file tree rooted at root, calling walkFn for each file or directory in the tree, including root. All errors that arise visiting files and directories are filtered by walkFn. The files are walked in lexical order, which makes the output deterministic but means that for very large directories Walk can be inefficient. Walk does not follow symbolic links. - That is from the standard library. I know. Their grammar teachers can not be happy with them right now.</p>
-<pre><code class="language-go">func (d Dir) Open(name string) (http.File, error)
-</code></pre>
-<h1>files</h1>
-<h3>struct Files</h3>
-<pre><code class="language-go">type Files struct {
-}
-</code></pre>
-<p>Files wraps sync.Map and uses the following types:
-key:   here.Path
-value: pkging.File</p>
-<pre><code class="language-go">func (m *Files) Data() *sync.Map
-</code></pre>
-<pre><code class="language-go">func (m *Files) Delete(key here.Path)
-</code></pre>
-<p>Delete the key from the map</p>
-<pre><code class="language-go">func (m *Files) Keys() []here.Path
-</code></pre>
-<p>Keys returns a list of keys in the map</p>
-<pre><code class="language-go">func (m *Files) Load(key here.Path) (pkging.File, bool)
-</code></pre>
-<p>Load the key from the map.
-Returns pkging.File or bool.
-A false return indicates either the key was not found
-or the value is not of type pkging.File</p>
-<pre><code class="language-go">func (m *Files) MarshalJSON() ([]byte, error)
-</code></pre>
-<pre><code class="language-go">func (m *Files) Range(f func(key here.Path, value pkging.File) bool)
-</code></pre>
-<p>Range over the pkging.File values in the map</p>
-<pre><code class="language-go">func (m *Files) Store(key here.Path, value pkging.File)
-</code></pre>
-<p>Store a pkging.File in the map</p>
-<pre><code class="language-go">func (m *Files) String() string
-</code></pre>
-<pre><code class="language-go">func (m *Files) UnmarshalJSON(b []byte) error
-</code></pre>
-<h1>infos</h1>
-<h3>struct Infos</h3>
-<pre><code class="language-go">type Infos struct {
-}
-</code></pre>
-<p>Infos wraps sync.Map and uses the following types:
-key:   string
-value: here.Info</p>
-<pre><code class="language-go">func (m *Infos) Data() *sync.Map
-</code></pre>
-<pre><code class="language-go">func (m *Infos) Delete(key string)
-</code></pre>
-<p>Delete the key from the map</p>
-<pre><code class="language-go">func (m *Infos) Keys() []string
-</code></pre>
-<p>Keys returns a list of keys in the map</p>
-<pre><code class="language-go">func (m *Infos) Load(key string) (here.Info, bool)
-</code></pre>
-<p>Load the key from the map.
-Returns here.Info or bool.
-A false return indicates either the key was not found
-or the value is not of type here.Info</p>
-<pre><code class="language-go">func (m *Infos) MarshalJSON() ([]byte, error)
-</code></pre>
-<pre><code class="language-go">func (m *Infos) Range(f func(key string, value here.Info) bool)
-</code></pre>
-<p>Range over the here.Info values in the map</p>
-<pre><code class="language-go">func (m *Infos) Store(key string, value here.Info)
-</code></pre>
-<p>Store a here.Info in the map</p>
-<pre><code class="language-go">func (m *Infos) UnmarshalJSON(b []byte) error
-</code></pre>
+      <p>Package two documentation contains blah.</p>
 <h1>main</h1>
-<h3>InlineTempl</h3>
-<pre><code class="language-go">func InlineTempl(f pkging.File) (*template.Template, string)
+<h1>file1</h1>
+<h3>PublicFunction</h3>
+<pre><code class="language-go">func PublicFunction(t MyType) (x int, err error)
 </code></pre>
-<h1>pkged</h1>
-<h1>here</h1>
-<pre><code class="language-go">var Current = Here.Current
+<p>Does something</p>
+<h3>interface Dumper</h3>
+<pre><code class="language-go">type Dumper interface {
+  Load(...interface{})
+  Dump() string
+}
 </code></pre>
-<pre><code class="language-go">var Dir = Here.Dir
+<h3>struct IntDumper</h3>
+<pre><code class="language-go">type IntDumper struct {
+}
 </code></pre>
-<pre><code class="language-go">var Here = here.New()
+<pre><code class="language-go">func (i IntDumper) Dump() string
 </code></pre>
-<pre><code class="language-go">var Package = Here.Package
+<pre><code class="language-go">func (i IntDumper) Load(data ...interface{})
 </code></pre>
+<h3>struct MyType</h3>
+<pre><code class="language-go">type MyType struct {
+}
+</code></pre>
+<h1>pkg2</h1>
+<h3>MulTwo</h3>
+<pre><code class="language-go">func MulTwo(x Num) int
+</code></pre>
+<p>Multiply a number by two</p>
+<h3>struct Num</h3>
+<pre><code class="language-go">type Num struct {
+}
+</code></pre>
+<h3>CreateNum</h3>
+<pre><code class="language-go">func CreateNum(x int) Num
+</code></pre>
+<p>Creates a Num from an integer</p>
 
     some content<br>
     <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {

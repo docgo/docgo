@@ -1,6 +1,9 @@
 package pkg1
 
-import "fmt"
+import (
+	"fmt"
+	"example.com/demomod/pkg1/pkg2"
+)
 
 type MyType struct {
 	num float64
@@ -29,6 +32,7 @@ func (i IntDumper) Load(data ...interface{}) {
 func (i IntDumper) Dump() string {
 	out := ""
 	for _, number := range i.mem {
+		number = pkg2.MulTwo(pkg2.CreateNum(number))
 		out += fmt.Sprintf("%d ", number)
 	}
 	return out

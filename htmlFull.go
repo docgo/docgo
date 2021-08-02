@@ -36,8 +36,11 @@ func GenerateHTML(html string, metadata Meta) (path string) {
 		},
 	})
 	t, _ = t.Parse(htmlRaw)
-
 	byteBuffer := bytes.Buffer{}
+
+	//t.Lookup("q").Execute(&byteBuffer, metadata)
+	//fmt.Println(byteBuffer.String())
+	byteBuffer = bytes.Buffer{}
 	metadata.Content = template.HTML(html)
 	err = t.Execute(&byteBuffer, metadata)
 	if err != nil {
