@@ -99,6 +99,7 @@ func ModuleParse(modFilePath string) {
 		info := godocPresentation.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
 		if info == nil { continue }
 
+		docPackage.AbsolutePath = filepath.Join(modFilePath, strings.TrimPrefix(path, "/"))
 		docPackage.FileSet = info.FSet
 		docPackage.RelativePath = path
 		docPackage.Name = pkgName

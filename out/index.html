@@ -143,6 +143,17 @@
     <small>bread > crumb</small>
     <h1>Your docs</h1><br/>
       <p>Package two documentation contains blah.</p>
+<h1>main</h1>
+<h3>interface BType</h3>
+<pre><code class="language-go">type BType interface {
+  CInterface
+  SomeFunction(func() int) int
+}
+</code></pre>
+<h3>interface CInterface</h3>
+<pre><code class="language-go">type CInterface interface {
+}
+</code></pre>
 <h1>file1</h1>
 <h3>PublicFunction</h3>
 <pre><code class="language-go">func PublicFunction(t MyType) (x int, err error)
@@ -179,17 +190,6 @@
 <pre><code class="language-go">func CreateNum(x int) Num
 </code></pre>
 <p>Creates a Num from an integer</p>
-<h1>main</h1>
-<h3>interface BType</h3>
-<pre><code class="language-go">type BType interface {
-  CInterface
-  SomeFunction(func() int) int
-}
-</code></pre>
-<h3>interface CInterface</h3>
-<pre><code class="language-go">type CInterface interface {
-}
-</code></pre>
 
     some content<br>
     <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {

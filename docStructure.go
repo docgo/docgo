@@ -31,7 +31,12 @@ type Snippet struct {
 
 func CreateSnippet(node ast.Node, pkg *PackageDoc) Snippet {
 	snipFile := pkg.FileSet.File(node.Pos())
-	q, _ := os.ReadFile(filepath.Join(pkg.RelativePath, snipFile.Name()))
+	baseName := filepath.Base(snipFile.Name())
+	q, _ := os.ReadFile(filepath.Join(pkg.AbsolutePath, baseName))
+	if len(q) == 0 {
+		fmt.Println(pkg.AbsolutePath, baseName)
+		os.Exit(1)
+	}
 	snipStr := string(q)[snipFile.Offset(node.Pos())  : snipFile.Offset(node.End()) ]
 	return Snippet{snipStr}
 }
@@ -72,6 +77,7 @@ type PackageFile struct {}
 type PackageDoc struct {
 	Name            string
 	Doc             string
+	AbsolutePath    string
 	RelativePath    string
 	CodeDefinitions CodeDef
 	Files           []PackageFile
