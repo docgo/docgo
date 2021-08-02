@@ -101,14 +101,42 @@ func ModuleParse(modFilePath string) {
 		snippet := func (n ast.Node) string {
 			snipFile := info.FSet.File(n.Pos())
 			q, _ := os.ReadFile(filepath.Join(modFilePath, snipFile.Name()))
-			return string(q)[snipFile.Offset(n.Pos()) : snipFile.Offset(n.End()) ]
+			return string(q)[snipFile.Offset(n.Pos())  : snipFile.Offset(n.End()) ]
+		}
+		for _, tp := range info.PDoc.Types {
+			fmt.Println("found type", tp.Name)
+			ParseTypeDecl(tp, snippet)
 
 		}
 		for _, fn := range info.PDoc.Funcs {
+			fmt.Println("found fn", fn.Name, " doc =", fn.Doc)
 			fmt.Println(snippet(fn.Decl))
-			fmt.Println("fn", fn.Name, " doc =", fn.Doc)
 		}
 		//fmt.Println(info.CallGraphIndex)
+	}
+}
+
+func ParseTypeDecl(declType *doc.Type, snippet func(node ast.Node) string) {
+	s := declType.Decl.Specs[0]
+	write := fmt.Printf
+	t := s.(*ast.TypeSpec)
+	declName := t.Name.Name
+	st, ok := t.Type.(*ast.StructType)
+	if ok {
+		write("### struct " + declName + "\n\n```go\ntype %s struct {\n", declName)
+		for _, field := range st.Fields.List {
+			write("  %s\n", snippet(field))
+		}
+		write("}\n```\n")
+	} else {
+		it, ok := t.Type.(*ast.InterfaceType)
+		if !ok { return }
+		write("### interface %s\n```go\ntype %s interface {\n", declName, declName)
+		for _, meth := range it.Methods.List {
+			snip := (snippet(meth))
+			write("  %s\n", snip)
+		}
+		write("}\n```\n")
 	}
 }
 

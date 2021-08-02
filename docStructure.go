@@ -21,13 +21,19 @@ func (m ModuleDoc) Print() {
 	}
 }
 
-type Snippet interface {
-	Snip() string
+type Snippet struct {
+	SnippetText string
 }
 
-type Function struct {}
-type Method struct {}
-type Typedef struct{}
+type Function struct {
+	Snippet
+}
+type Method struct {
+	Snippet
+}
+type Typedef struct{
+	Snippet
+}
 
 type CodeDefinition struct {
 	Functions []Function
