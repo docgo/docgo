@@ -47,7 +47,11 @@ type StructDef struct {
 	Name string
 }
 
-type Method struct {
+type InterfaceDef struct {
+	Snippet
+
+	ty
+}pe Method struct {
 	Snippet
 }
 type Typedef struct{
