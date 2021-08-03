@@ -12,3 +12,7 @@
 * [ ] Autolink identifiers & better snippet support
 * [ ] Per-file docgen
 * [ ] Testing & support for doc generation with GitHub Actions
+
+**LICENSE**
+
+goNewDoc is licensed under the GPLv3 License.
