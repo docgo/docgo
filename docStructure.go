@@ -15,8 +15,16 @@ type ModuleDoc struct {
 	SimpleExports SimpleExportsByType
 }
 
+type ScopedIdentifier struct {
+	PackagePath string
+	Name string
+	IsFunction bool
+	IsMethod bool
+	isType bool
+}
+
 type ExportType string
-type SimpleExportsByType map[ExportType][]string
+type SimpleExportsByType map[string][]ScopedIdentifier
 
 func (m ModuleDoc) Print() {
 	fmt.Println("ModuleDoc{ ", "AbsolutePath =", m.AbsolutePath, " ImportPath =", m.ImportPath)
@@ -70,17 +78,20 @@ type CodeDef struct {
 	Functions []FunctionDef
 	Methods []Method
 	Typedefs []Typedef
+	Structs []StructDef
+	Interfaces []InterfaceDef
 }
 
 type PackageFile struct {}
 
 type PackageDoc struct {
+	CodeDef
 	Name            string
 	Doc             string
 	AbsolutePath    string
 	RelativePath    string
-	CodeDefinitions CodeDef
 	Files           []PackageFile
 	FileSet         *token.FileSet
 	ParentModule    *ModuleDoc
 }
+

@@ -14,3 +14,5 @@ func CreateNum(x int) Num {
 func MulTwo(x Num) int {
 	return x.int * 2
 }
+
+type Dumper float64

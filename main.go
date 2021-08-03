@@ -53,7 +53,7 @@ func cliParse() {
 
 func ModuleParse(modFilePath string) {
 	var parsedModuleDoc = new(ModuleDoc)
-	parsedModuleDoc.Packages = []PackageDoc{}
+	parsedModuleDoc.Packages = []*PackageDoc{}
 	parsedModuleDoc.SimpleExports = SimpleExportsByType{}
 
 	fmt.Println("modFilePath", modFilePath)
@@ -83,10 +83,16 @@ func ModuleParse(modFilePath string) {
 				pkgList[sym[0].Path] = sym[0].Name
 			}
 		} else {
-			for name, sym := range symbols {
-				if len(sym) != 0 {
-					exportType := ExportType(kind.Name())
-					parsedModuleDoc.SimpleExports[exportType] = append(parsedModuleDoc.SimpleExports[exportType], fmt.Sprintf("%s [%s]", name, sym[0].Path))
+			for name, symTable := range symbols {
+				for _, symbol := range symTable {
+					scopedId := ScopedIdentifier{
+						PackagePath: symbol.Path,
+						Name:        name,
+						IsFunction:  kind == godoc.FuncDecl,
+						IsMethod:    kind == godoc.MethodDecl,
+						isType:      kind == godoc.TypeDecl,
+					}
+					parsedModuleDoc.SimpleExports[name] = append(parsedModuleDoc.SimpleExports[name], scopedId)
 				}
 			}
 		}
@@ -115,10 +121,11 @@ func ModuleParse(modFilePath string) {
 		}
 
 		for _, fn := range info.PDoc.Funcs {
-			docFn := FunctionDef{}
-			docFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
-			docFn.Name = fn.Name
-			docFn.Doc = fn.Doc
+			parsedFn := FunctionDef{}
+			parsedFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
+			parsedFn.Name = fn.Name
+			parsedFn.Doc = fn.Doc
+			parsedPackage.Functions = append(parsedPackage.Functions, parsedFn)
 		}
 
 		for _, varVal := range info.PDoc.Vars {
@@ -146,6 +153,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		for _, field := range st.Fields.List {
 			_ = field
 		}
+		docPackage.Structs = append(docPackage.Structs, sDef)
 	} else {
 		it, ok := t.Type.(*ast.InterfaceType)
 		if !ok { return }
@@ -153,6 +161,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		interDef.Name = declName
 		interDef.Type = it
 		interDef.Snippet = CreateSnippet(it, docPackage)
+		docPackage.Interfaces = append(docPackage.Interfaces, interDef)
 
 		for _, meth := range it.Methods.List {
 			_ = meth
