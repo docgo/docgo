@@ -176,12 +176,13 @@ func GenerateHTML(doc *ModuleDoc) {
 				CurrentPage: realIndex,
 				ModuleDoc:   doc,
 			}
-			templates.Lookup("baseHTML").Execute(distFile, thisPage)
+			err := templates.Lookup("baseHTML").Execute(distFile, thisPage)
+			if err != nil {
+				myfmt.Red(err)
+				return
+			}
 		}(realIndex, s)
 		realIndex += 1
 	}
-
-	searchJson, err := json.Marshal(pageNameToSearchableContent)
-	CreateDist("godoc_search.html").WriteString(`<script>const content = ` + string(searchJson) + `; </script>`)
-
+	GenerateSearch(pageNameToSearchableContent)
 }
