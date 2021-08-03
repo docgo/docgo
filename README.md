@@ -1,5 +1,5 @@
 <h3 align="center">goNewDoc <br><small>a different static docs generator for Go</small></h1>
-<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png" width="100%">
+<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png?1" width="100%">
 <hr />
 
 **TODO:**
@@ -12,3 +12,7 @@
 * [ ] Autolink identifiers & better snippet support
 * [ ] Per-file docgen
 * [ ] Testing & support for doc generation with GitHub Actions
+
+**LICENSE**
+
+goNewDoc is licensed under the GPLv3 License.
