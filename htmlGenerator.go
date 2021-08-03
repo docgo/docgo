@@ -15,6 +15,7 @@ import (
 	"strings"
 	"path/filepath"
 	"math/rand"
+	"encoding/json"
 )
 
 func CreateDist(file string) *os.File {
@@ -144,23 +145,28 @@ func GenerateHTML(doc *ModuleDoc) {
 
 	var pageLinks = map[int]string{}
 	var pageLinksInverted = map[string]int{}
+	var pageNameToSearchableContent = map[string]string {}
 
 	realIndex := 0
 	for counter, s := range strings.Split(htmlBuffer.String(), "<h1></h1>") {
 		if counter == 0 {
 			continue
 		}
+		pageName := ""
 		if realIndex == 0 {
+			pageName = "index"
 			pageLinks[0] = "index.html"
-			pageLinksInverted["index"] = 0
+			pageLinksInverted[pageName] = 0
 		} else {
 			dumbLink := strings.Join(strings.Fields(headingTitles[realIndex]), "-")
 			if _, exists := pageLinksInverted[dumbLink]; exists {
 				dumbLink += fmt.Sprintf("%d", rand.Uint32())
 			}
+			pageName = dumbLink
 			pageLinks[realIndex] = dumbLink + ".html"
 			pageLinksInverted[dumbLink] = realIndex
 		}
+		pageNameToSearchableContent[pageName] = s
 		defer func(realIndex int, s string) {
 			distFile := CreateDist(pageLinks[realIndex])
 			thisPage := Page{
@@ -174,5 +180,8 @@ func GenerateHTML(doc *ModuleDoc) {
 		}(realIndex, s)
 		realIndex += 1
 	}
+
+	searchJson, err := json.Marshal(pageNameToSearchableContent)
+	CreateDist("godoc_search.html").WriteString(`<script>const content = ` + string(searchJson) + `; </script>`)
 
 }
