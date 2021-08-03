@@ -2,4 +2,4 @@
 *.bin
 /src
 pkged.go
-/out
+/dist
