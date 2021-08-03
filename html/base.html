@@ -153,11 +153,18 @@
             margin: 10px 0;
             position: relative;
             left: 0.4em;
+            background: rgba(255 255 255 / 0.1);
+        }
+
+        .pkg li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 400;
         }
 
         .pkg li.active {
-            background: rgba(255 255 255 / 0.1);
             border-left: 5px solid #7800DB;
+            font-weight: 500;
         }
 
         article {
@@ -253,8 +260,11 @@
             <li class="pkg">
                 <h3> Intro </h3>
                 <ul>
-                    {{ range $i, $p := .Menu }}
-                    <li><a href="{{$i}}.html">{{ $p }}</a></li>
+                    {{ $currentIdx := .CurrentPage }}
+                    {{ range $i, $p := .PageLinks }}
+                    <li
+                    {{ if eq $i $currentIdx }} class="active" {{ end }}
+                    ><a href="{{ $p }}">{{ GetPageTitle $i }}</a></li>
                     {{ end }}
                 </ul>
 

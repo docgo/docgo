@@ -15,6 +15,7 @@ import (
 	"github.com/yuin/goldmark/text"
 	"strings"
 	"path/filepath"
+	"math/rand"
 )
 
 type Meta struct {
@@ -62,24 +63,33 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template{
 
 func GenerateHTML2(doc *ModuleDoc)  {
 	os.RemoveAll("./out")
+
+	var headingTitles []string
+	var subHeadingTitles []string
+
 	markdownOutputBuffer := bytes.Buffer{}
 
-	templates := ReadTemplates(template.FuncMap{
+	templateFunctions := template.FuncMap{
+		"GetPageTitle": func(idx int) string {
+			return headingTitles[idx]
+		},
+	}
+	templates := ReadTemplates(templateFunctions)
 
-	})
-
-	templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
+	err := templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
+	if err != nil {
+		fmt.Println("Error parsing markdown", err)
+		os.Exit(1)
+	}
 
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
 
 	type Page struct {
 		Title string
 		Body template.HTML
-		Menu []string
+		PageLinks map[int]string
+		CurrentPage int
 	}
-
-	var headingTitles []string
-	var h2s []string
 
 	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
 
@@ -94,28 +104,48 @@ func GenerateHTML2(doc *ModuleDoc)  {
 					n.RemoveChildren(n)
 				}
 				if nHeading.Level == 2 {
-					h2s = append(h2s, t)
+					subHeadingTitles = append(subHeadingTitles, t)
 				}
 			}
 		}
 		return mdAst.WalkContinue, nil
 	})
 	htmlBuffer := bytes.Buffer{}
-	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
+	err = goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
+	if err != nil {
+		fmt.Println("Error rendering markdown to HTML", err)
+		os.Exit(1)
+	}
+
+	var pageLinks = map[int]string{}
+	var pageLinksInverted = map[string]int{}
 
 	realIndex := 0
 	for counter, s := range strings.Split(htmlBuffer.String(), "<h1></h1>") {
 		if counter == 0 {
 			continue
 		}
-
-		distFile := CreateDist(fmt.Sprintf("%d", realIndex) + ".html")
-		thisPage := Page{
-			Title: headingTitles[realIndex],
-			Body:  template.HTML(s),
-			Menu:  headingTitles,
+		if realIndex == 0 {
+			pageLinks[0] = "index.html"
+			pageLinksInverted["index"] = 0
+		} else {
+			dumbLink := strings.Join(strings.Fields(headingTitles[realIndex]), "-")
+			if _, exists := pageLinksInverted[dumbLink]; exists {
+				dumbLink += fmt.Sprintf("%d", rand.Uint32())
+			}
+			pageLinks[realIndex] = dumbLink + ".html"
+			pageLinksInverted[dumbLink] = realIndex
 		}
-		templates.Lookup("baseHTML").Execute(distFile, thisPage)
+		defer func(realIndex int, s string) {
+			distFile := CreateDist(pageLinks[realIndex])
+			thisPage := Page{
+				Title:     headingTitles[realIndex],
+				Body:      template.HTML(s),
+				PageLinks: pageLinks,
+				CurrentPage: realIndex,
+			}
+			templates.Lookup("baseHTML").Execute(distFile, thisPage)
+		}(realIndex, s)
 		realIndex += 1
 	}
 
