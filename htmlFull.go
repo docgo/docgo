@@ -28,12 +28,15 @@ func CreateDist() *os.File{
 	f, _ := os.Create("out/index.html")
 	return f
 }
-func ReadTempl(name string) *template.Template{
+func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 	t := template.New("main")
 	raw, err := pkger.Open("/html/" + name)
 	if err != nil {
 		fmt.Println("pkger error: ", err)
 		os.Exit(1)
+	}
+	if funcMap != nil {
+		t.Funcs(funcMap)
 	}
 	data, _ := io.ReadAll(raw)
 	templ, err := t.Parse(string(data))
@@ -43,8 +46,13 @@ func ReadTempl(name string) *template.Template{
 	}
 	return templ
 }
-func GenerateHTML2(doc *ModuleDoc) {
-	
+func GenerateHTML2(doc *ModuleDoc) string {
+	distFile := CreateDist()
+	ReadTempl("base.html", nil).Execute(distFile, doc)
+	if y, err := filepath.Abs("./out/index.html"); err == nil {
+		return y
+	}
+	return ""
 }
 
 func GenerateHTML(html string, metadata Meta) (path string) {
