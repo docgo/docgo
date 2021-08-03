@@ -1,5 +1,6 @@
-<h3 align="center">goNewDoc <br><small>a different static docs generator for Go</small></h1>
-<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png?1" width="100%">
+<h3 align="center">goNewDoc <br><small>a <i>different</i> static docs generator for Go</small><br>
+<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png?1" width="60%">
+</h3>
 <hr />
 
 **TODO:**
@@ -15,4 +16,4 @@
 
 **LICENSE**
 
-goNewDoc is licensed under the GPLv3 License.
+`goNewDoc is licensed under the GPLv3 License.`
