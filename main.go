@@ -1,6 +1,3 @@
-//go:generate wget https://github.com/fikisipi/cloudflare-workers-go/releases/download/0.0.1/pkged.go -O pkged.go
-
-// This comment is above package main
 package main
 
 // This comment is under.
@@ -22,7 +19,7 @@ import (
 )
 
 var Cli struct {
-	Out    string `short:"o" help"Where to put documentation/assets."`
+	Out    string `default:"dist" short:"o" help"Where to put documentation/assets."`
 	Module string `arg help:"Path to module/package for documentation generation."`
 	Open   bool
 }
@@ -54,6 +51,8 @@ func cliParse() {
 			return
 		}
 	}
+
+	myfmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
 
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)

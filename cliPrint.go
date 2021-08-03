@@ -15,7 +15,8 @@ func _mWrapColor(c color.Attribute) _mPrintlnType {
 var myfmt = struct {
 	Red   _mPrintlnType
 	Green _mPrintlnType
+	Yellow _mPrintlnType
 	Debug _mPrintlnType
 }{
-	_mWrapColor(color.FgRed), _mWrapColor(color.FgGreen), log.New(os.Stdout, "DBG ", log.Flags()).Println,
+	_mWrapColor(color.FgRed), _mWrapColor(color.FgGreen), _mWrapColor(color.FgHiYellow), log.New(os.Stdout, "DBG ", log.Flags()).Println,
 }

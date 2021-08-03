@@ -15,6 +15,7 @@ import (
 	"strings"
 	"path/filepath"
 	"math/rand"
+	"github.com/fatih/color"
 )
 
 func CreateDist(file string) *os.File {
@@ -184,4 +185,5 @@ func GenerateHTML(doc *ModuleDoc) {
 		realIndex += 1
 	}
 	GenerateSearch(pageNameToSearchableContent)
+	color.Green("Generated docs ✔")
 }
