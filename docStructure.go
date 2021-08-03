@@ -11,7 +11,7 @@ import (
 type ModuleDoc struct {
 	AbsolutePath  string
 	ImportPath    string
-	Packages      []PackageDoc
+	Packages      []*PackageDoc
 	SimpleExports SimpleExportsByType
 }
 
@@ -82,4 +82,5 @@ type PackageDoc struct {
 	CodeDefinitions CodeDef
 	Files           []PackageFile
 	FileSet         *token.FileSet
+	ParentModule    *ModuleDoc
 }

@@ -52,9 +52,9 @@ func cliParse() {
 }
 
 func ModuleParse(modFilePath string) {
-	var ModDocs ModuleDoc
-	ModDocs.Packages = []PackageDoc{}
-	ModDocs.SimpleExports = SimpleExportsByType{}
+	var parsedModuleDoc = new(ModuleDoc)
+	parsedModuleDoc.Packages = []PackageDoc{}
+	parsedModuleDoc.SimpleExports = SimpleExportsByType{}
 
 	fmt.Println("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
@@ -73,8 +73,8 @@ func ModuleParse(modFilePath string) {
 	goModBuffer, err := os.ReadFile(filepath.Join(modFilePath, "go.mod"))
 	modImportPath := modfile.ModulePath(goModBuffer)
 
-	ModDocs.AbsolutePath = modFilePath
-	ModDocs.ImportPath = modImportPath
+	parsedModuleDoc.AbsolutePath = modFilePath
+	parsedModuleDoc.ImportPath = modImportPath
 
 	pkgList := map[string]string{}
 	for kind, symbols := range idx.Idents() {
@@ -86,34 +86,37 @@ func ModuleParse(modFilePath string) {
 			for name, sym := range symbols {
 				if len(sym) != 0 {
 					exportType := ExportType(kind.Name())
-					ModDocs.SimpleExports[exportType] = append(ModDocs.SimpleExports[exportType], fmt.Sprintf("%s [%s]", name, sym[0].Path))
+					parsedModuleDoc.SimpleExports[exportType] = append(parsedModuleDoc.SimpleExports[exportType], fmt.Sprintf("%s [%s]", name, sym[0].Path))
 				}
 			}
 		}
 	}
-	ModDocs.Print()
+	parsedModuleDoc.Print()
 
 	godocPresentation := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {
-		docPackage := new(PackageDoc)
+		parsedPackage := new(PackageDoc)
 		info := godocPresentation.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
 		if info == nil { continue }
 
-		docPackage.AbsolutePath = filepath.Join(modFilePath, strings.TrimPrefix(path, "/"))
-		docPackage.FileSet = info.FSet
-		docPackage.RelativePath = path
-		docPackage.Name = pkgName
-		docPackage.Doc = info.PDoc.Doc
+		parsedPackage.ParentModule = parsedModuleDoc
+		parsedPackage.AbsolutePath = filepath.Join(modFilePath, strings.TrimPrefix(path, "/"))
+		parsedPackage.FileSet = info.FSet
+		parsedPackage.RelativePath = path
+		parsedPackage.Name = pkgName
+		parsedPackage.Doc = info.PDoc.Doc
+
+		parsedModuleDoc.Packages = append(parsedModuleDoc.Packages, parsedPackage)
 
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
-				ParseTypeDecl(spec, docPackage)
+				ParseTypeDecl(spec, parsedPackage)
 			}
 		}
 
 		for _, fn := range info.PDoc.Funcs {
 			docFn := FunctionDef{}
-			docFn.Snippet = CreateSnippet(fn.Decl, docPackage)
+			docFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
 			docFn.Name = fn.Name
 			docFn.Doc = fn.Doc
 		}
