@@ -33,32 +33,30 @@ func CreateDist(file string) *os.File{
 	f, _ := os.Create(filepath.Join(".", "out", file))
 	return f
 }
-func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
+func ReadTemplates(funcMap template.FuncMap) *template.Template{
 	t := template.New("main")
-	t.New("snip").Parse(`
-{{ range $idx, $p := . }}
-### {{ .Name }} [{{.FoundInFile}}]
-{{ .Doc }}
-` + "```" + `go
-{{ .Snippet }}
-` + "```" + `
-{{ end }}
-`)
-	raw, err := pkger.Open(name)
-	if err != nil {
-		fmt.Println("pkger error: ", err)
-		os.Exit(1)
-	}
 	if funcMap != nil {
 		t.Funcs(funcMap)
 	}
-	data, _ := io.ReadAll(raw)
-	templ, err := t.Parse(string(data))
-	if err != nil {
-		fmt.Println("template loading error", err)
-		os.Exit(1)
+	var TEMPLATES = map[string]string{"baseHTML": "/html/base.html", "baseMarkdown": "/html/base.md", "snippet": "/html/snippet.md"}
+	for templateName, templatePath := range TEMPLATES {
+		file, err := pkger.Open(templatePath)
+		if err != nil {
+			fmt.Println("Error opening", templatePath, err)
+			os.Exit(1)
+		}
+		templateRawBytes, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println("Error reading", templatePath, err)
+			os.Exit(1)
+		}
+
+		_, err = t.New(templateName).Parse(string(templateRawBytes))
+		if err != nil {
+			fmt.Println("Error in template", templateName, err)
+		}
 	}
-	return templ
+	return t
 }
 
 
@@ -66,24 +64,21 @@ func GenerateHTML2(doc *ModuleDoc)  {
 	os.RemoveAll("./out")
 	markdownOutputBuffer := bytes.Buffer{}
 
-	ReadTempl("/html/DOCS.tmpl", template.FuncMap{
-		"A": func(x int) int{ return 5},
-	}).Execute(&markdownOutputBuffer, doc)
+	templates := ReadTemplates(template.FuncMap{
 
-	//htmlBytes := append([]byte{}, htmlBuf.Bytes()...)
+	})
+
+	templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
+
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
-	//fmt.Printf("%s\n", markdownOutputBytes)
-
-	//htmlString := htmlBuf.String()
 
 	type Page struct {
 		Title string
 		Body template.HTML
 		Menu []string
 	}
-	//entries := []Entry{}
 
-	var h1s []string
+	var headingTitles []string
 	var h2s []string
 
 	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
@@ -95,36 +90,32 @@ func GenerateHTML2(doc *ModuleDoc)  {
 				t := fmt.Sprintf("%s", n.Text(markdownOutputBytes))
 
 				if nHeading.Level == 1 {
-					h1s = append(h1s, t)
-					//head := mdAst.NewString([]byte("[godoc:heading]"))
-					//n.InsertBefore(n.Parent(), n, head)
+					headingTitles = append(headingTitles, t)
 					n.RemoveChildren(n)
-					//n.InsertAfter(n.Parent(), n, mdAst.NewString([]byte("[godoc:heading]")))
 				}
 				if nHeading.Level == 2 {
 					h2s = append(h2s, t)
-					//eentries = append(entries, currentEntry)
 				}
 			}
 		}
 		return mdAst.WalkContinue, nil
 	})
-	step2 := bytes.Buffer{}
-	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&step2, markdownOutputBytes, markdownAST)
+	htmlBuffer := bytes.Buffer{}
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
 
 	realIndex := 0
-	for counter, s := range strings.Split(step2.String(), "<h1></h1>") {
+	for counter, s := range strings.Split(htmlBuffer.String(), "<h1></h1>") {
 		if counter == 0 {
 			continue
 		}
 
 		distFile := CreateDist(fmt.Sprintf("%d", realIndex) + ".html")
 		thisPage := Page{
-			Title: h1s[realIndex],
+			Title: headingTitles[realIndex],
 			Body:  template.HTML(s),
-			Menu:  h1s,
+			Menu:  headingTitles,
 		}
-		ReadTempl("/html/base.html", nil).Execute(distFile, thisPage)
+		templates.Lookup("baseHTML").Execute(distFile, thisPage)
 		realIndex += 1
 	}
 

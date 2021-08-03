@@ -9,8 +9,8 @@ Welcome to the documentation.
 
 {{ .Doc }}
 
-{{ template "snip" .Functions }}
-{{ template "snip" .Structs }}
-{{ template "snip" .Interfaces }}
+{{ template "snippet" .Functions }}
+{{ template "snippet" .Structs }}
+{{ template "snippet" .Interfaces }}
 
 {{ end }}
