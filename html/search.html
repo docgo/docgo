@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
-    <script src="https://cdn.jsdelivr.net/npm/elasticlunr@0.9.5/elasticlunr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.7.2/flexsearch.bundle.min.js" integrity="sha512-nFmzFs0vxLvw95r3kpEArM496n1udEDP2OJ+uoyv00RaP4B6NOHbciX0Gr2V9/DxeaHi3fKXLYty8YTLgVkquw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         body {
             background: #202229;
@@ -14,7 +14,7 @@
         }
         ul { list-style: none; }
         ul li { border-bottom: 1px dashed #999; margin: 20px 0; padding: 1em 0; }
-        li > small { display: block; color: #999; margin-bottom: 10px; }
+        li > small { display: block; color: #999; margin-bottom: 10px; font-size: 1em; }
         .back, .back:visited { color: #fff; display: block; text-align: center; }
     </style>
 </head>
@@ -35,21 +35,18 @@
     for(var key in godoc) {
         godoc[key] = stripHtml(godoc[key])
     }
-    var index = elasticlunr();
-    index.addField('body');
-    index.setRef('page');
+    var index = new FlexSearch.Index();
 
-    [...Object.entries(godoc)].map((x, idx) => index.addDoc({page: x[0], body: x[1]}));
+    [...Object.entries(godoc)].map((x, idx) => index.add(x[0], x[1]));
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
 
-    const searchResults = index.search(params.q, {fields: {body: {boost: 10}}});
-    console.log(searchResults)
+    const searchResults = index.search(params.q);
     searchResults.map(x => {
-        let contents = godoc[x.ref];
+        let contents = godoc[x];
         const listItem = document.createElement('li');
         params.q.split(/\s/g).map(x => contents = contents.replaceAll(x, `<b>${stripHtml(x)}</b>`))
-        listItem.innerHTML = `<small>${stripHtml(x.ref)}</small>`;
+        listItem.innerHTML = `<small>${stripHtml(x)}</small>`;
         listItem.innerHTML += contents;
         searchList.append(listItem);
     })
