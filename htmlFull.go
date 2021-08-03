@@ -5,14 +5,16 @@ import (
 	"github.com/markbates/pkger"
 	"io"
 	"fmt"
-	"path/filepath"
 	"errors"
 	"html/template"
 	"bytes"
 	"go/ast"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/renderer/html"
+	ast2 "github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/text"
+	"strings"
+	"path/filepath"
 )
 
 type Meta struct {
@@ -20,7 +22,7 @@ type Meta struct {
 	PackageNames []string
 	Content template.HTML
 }
-func CreateDist() *os.File{
+func CreateDist(file string) *os.File{
 	ferr := os.Mkdir("out", 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
@@ -28,7 +30,7 @@ func CreateDist() *os.File{
 			os.Exit(1)
 		}
 	}
-	f, _ := os.Create("out/index.html")
+	f, _ := os.Create(filepath.Join(".", "out", file))
 	return f
 }
 func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
@@ -49,69 +51,60 @@ func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 	}
 	return templ
 }
-func GenerateHTML2(doc *ModuleDoc) string {
-	distFile := CreateDist()
-	buf := bytes.Buffer{}
-	md := goldmark.New(goldmark.WithExtensions(extension.GFM), goldmark.WithRendererOptions(html.WithHardWraps()))
 
-	errT := ReadTempl("/html/DOCS.tmpl", template.FuncMap{
+
+func GenerateHTML2(doc *ModuleDoc)  {
+	buf := bytes.Buffer{}
+
+	md := goldmark.New(goldmark.WithExtensions(extension.GFM))
+
+	ReadTempl("/html/DOCS.tmpl", template.FuncMap{
 		"A": func(x int) int{ return 5},
 	}).Execute(&buf, doc)
-	buf2 := bytes.Buffer{}
-	md.Convert(buf.Bytes(), &buf2)
+	htmlBuf := bytes.Buffer{}
+	markdownBytes := append([]byte{}, buf.Bytes()...)
+	md.Convert(markdownBytes, &htmlBuf)
+	//htmlString := htmlBuf.String()
 
-	markdownHTML := buf2.String()
-	ReadTempl("/html/base.html", nil).Execute(distFile, template.HTML(markdownHTML))
+	type Entry struct {
+		h1 string
+		h2 string
+		markdownRest string
+	}
+	//entries := []Entry{}
 
-	if errT != nil {
-		fmt.Println(errT)
-	}
-	if y, err := filepath.Abs("./out/index.html"); err == nil {
-		return y
-	}
-	return ""
-}
+	var h1s []string
+	var h2s []string
+	parsedMarkdown := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownBytes))
 
-func GenerateHTML(html string, metadata Meta) (path string) {
-	t := template.New("main")
-	raw, err := pkger.Open("/html/index.html")
-	if err != nil {
-		fmt.Println("pkger error: ", err)
-		os.Exit(1)
-	}
-	data, _ := io.ReadAll(raw)
-	htmlRaw := string(data)
-	t.Funcs(template.FuncMap{
-		"PackageFiles": func(p *ast.Package) []string {
-			out := make([]string, 0)
-			for f, _ := range p.Files {
-				out = append(out, filepath.Base(f))
+	ast2.Walk(parsedMarkdown, func(n ast2.Node, entering bool) (ast2.WalkStatus, error) {
+		if n.Kind() == ast2.KindHeading {
+			nHeading := n.(*ast2.Heading)
+			if !entering {
+				t := fmt.Sprintf("%s", n.Text(markdownBytes))
+
+				if nHeading.Level == 1 {
+					h1s = append(h1s, t)
+					n.Parent().ReplaceChild(n.Parent(), n, ast2.NewString([]byte("```godoc\nheading_1\n```")))
+				}
+				if nHeading.Level == 2 {
+					h2s = append(h2s, t)
+					//eentries = append(entries, currentEntry)
+				}
 			}
-			return out
-		},
-	})
-	t, _ = t.Parse(htmlRaw)
-	byteBuffer := bytes.Buffer{}
-
-	//t.Lookup("q").Execute(&byteBuffer, metadata)
-	//fmt.Println(byteBuffer.String())
-	byteBuffer = bytes.Buffer{}
-	metadata.Content = template.HTML(html)
-	err = t.Execute(&byteBuffer, metadata)
-	if err != nil {
-		fmt.Println("template err", err)
-		os.Exit(1)
-	}
-
-	ferr := os.Mkdir("out", 0755)
-	if ferr != nil {
-		if !errors.Is(ferr, os.ErrExist) {
-			fmt.Println(ferr)
-			os.Exit(1)
 		}
+		return ast2.WalkContinue, nil
+	})
+	step2 := bytes.Buffer{}
+	goldmark.DefaultRenderer().Render(&step2, markdownBytes, parsedMarkdown)
+
+	const SEP = "```godoc\nheading_1\n```"
+	for i, s := range strings.Split(step2.String(), SEP) {
+		distFile := CreateDist(h1s[i] + ".html")
+		fmt.Println(s)
+		headingBuf := bytes.Buffer{}
+		goldmark.New().Convert([]byte(s), &headingBuf)
+		ReadTempl("/html/base.html", nil).Execute(distFile, template.HTML(headingBuf.String()))
 	}
-	f, _ := os.Create("out/index.html")
-	f.Write(byteBuffer.Bytes())
-	outAbs, _ := filepath.Abs("./out/index.html")
-	return outAbs
+
 }

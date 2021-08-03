@@ -207,7 +207,7 @@ func Generate() (distPath string) {
 		PackageNames: pkgNameList,
 	}
 	distPath = GenerateHTML(string(bufOut), metadata) */
-	distPath = GenerateHTML2(_modDoc)
+	GenerateHTML2(_modDoc)
 	return
 }
 
@@ -220,7 +220,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		distPath = Generate()
-		http.FileServer(http.Dir(filepath.Dir(distPath))).ServeHTTP(writer, request)
+		http.FileServer(http.Dir("./out")).ServeHTTP(writer, request)
 	})
 	http.ListenAndServe(":8080", mux)
 }

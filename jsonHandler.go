@@ -103,3 +103,27 @@ func parseJson(getSegment func(segment text.Segment) string, node mdAst.Node) ma
 	}
 	return out
 }
+
+
+func ParseHeadings(doc mdAst.Node) {
+	var l1, l2 mdAst.Node
+
+
+	N := doc.FirstChild()
+	for
+	{
+		if N.Kind() == mdAst.KindHeading {
+			if l2 != nil {
+				fmt.Println(l1.FirstChild().Kind(), l2.FirstChild().Kind())
+			}
+			if l1 == nil {
+				l1 = N
+			}
+			if l2 == nil {
+				l2 = N
+			}
+		}
+		N = N.NextSibling()
+		if N == doc.LastChild() || N == nil { break }
+	}
+}
