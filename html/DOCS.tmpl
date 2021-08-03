@@ -1,20 +1,11 @@
-{{ define "snip" }}
-{{ range $idx, $p := . }}
-### {{ .Name }} [{{.FoundInFile}}]
-{{ .Doc }}
-```go
-{{ .Snippet }}
-```
-{{ end }}
-{{ end }}
+# Intro
 
-{{ .ImportPath }}
-{{ range $idx, $x := .Packages }}
+Welcome to the documentation.
+
+{{ range .Packages }}
+
 # {{ .Name }}
-
-`{{ .RelativePath }}`
-
-Documentation:
+## Documentation
 
 {{ .Doc }}
 

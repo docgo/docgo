@@ -11,7 +11,7 @@ import (
 	"go/ast"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
-	ast2 "github.com/yuin/goldmark/ast"
+	mdAst "github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
 	"strings"
 	"path/filepath"
@@ -35,6 +35,15 @@ func CreateDist(file string) *os.File{
 }
 func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 	t := template.New("main")
+	t.New("snip").Parse(`
+{{ range $idx, $p := . }}
+### {{ .Name }} [{{.FoundInFile}}]
+{{ .Doc }}
+` + "```" + `go
+{{ .Snippet }}
+` + "```" + `
+{{ end }}
+`)
 	raw, err := pkger.Open(name)
 	if err != nil {
 		fmt.Println("pkger error: ", err)
@@ -55,14 +64,15 @@ func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 
 func GenerateHTML2(doc *ModuleDoc)  {
 	os.RemoveAll("./out")
-	buf := bytes.Buffer{}
+	markdownOutputBuffer := bytes.Buffer{}
 
 	ReadTempl("/html/DOCS.tmpl", template.FuncMap{
 		"A": func(x int) int{ return 5},
-	}).Execute(&buf, doc)
+	}).Execute(&markdownOutputBuffer, doc)
 
 	//htmlBytes := append([]byte{}, htmlBuf.Bytes()...)
-	markdownBytes := append([]byte{}, buf.Bytes()...)
+	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
+	//fmt.Printf("%s\n", markdownOutputBytes)
 
 	//htmlString := htmlBuf.String()
 
@@ -75,19 +85,21 @@ func GenerateHTML2(doc *ModuleDoc)  {
 
 	var h1s []string
 	var h2s []string
-	parsedMarkdown := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownBytes))
 
-	ast2.Walk(parsedMarkdown, func(n ast2.Node, entering bool) (ast2.WalkStatus, error) {
-		if n.Kind() == ast2.KindHeading {
-			nHeading := n.(*ast2.Heading)
+	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
+
+	mdAst.Walk(markdownAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
+		if n.Kind() == mdAst.KindHeading {
+			nHeading := n.(*mdAst.Heading)
 			if !entering {
-				t := fmt.Sprintf("%s", n.Text(markdownBytes))
+				t := fmt.Sprintf("%s", n.Text(markdownOutputBytes))
 
 				if nHeading.Level == 1 {
 					h1s = append(h1s, t)
-					head := ast2.NewString([]byte("[godoc:heading]"))
-					n.InsertBefore(n.Parent(), n, head)
-					n.InsertAfter(n.Parent(), n, ast2.NewString([]byte("[godoc:heading]")))
+					//head := mdAst.NewString([]byte("[godoc:heading]"))
+					//n.InsertBefore(n.Parent(), n, head)
+					n.RemoveChildren(n)
+					//n.InsertAfter(n.Parent(), n, mdAst.NewString([]byte("[godoc:heading]")))
 				}
 				if nHeading.Level == 2 {
 					h2s = append(h2s, t)
@@ -95,25 +107,25 @@ func GenerateHTML2(doc *ModuleDoc)  {
 				}
 			}
 		}
-		return ast2.WalkContinue, nil
+		return mdAst.WalkContinue, nil
 	})
 	step2 := bytes.Buffer{}
-	goldmark.DefaultRenderer().Render(&step2, markdownBytes, parsedMarkdown)
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&step2, markdownOutputBytes, markdownAST)
 
-	const SEP = "[godoc:heading]"
-	realIdx := 0
-	for i, s := range strings.Split(step2.String(), SEP) {
-		if i % 2 == 1 || i < 2  { continue }
-		distFile := CreateDist(fmt.Sprintf("%d", realIdx) + ".html")
-		//headingBuf := bytes.Buffer{}
-		//goldmark.New().Convert([]byte(s), &headingBuf)
+	realIndex := 0
+	for counter, s := range strings.Split(step2.String(), "<h1></h1>") {
+		if counter == 0 {
+			continue
+		}
+
+		distFile := CreateDist(fmt.Sprintf("%d", realIndex) + ".html")
 		thisPage := Page{
-			Title: h1s[realIdx],
+			Title: h1s[realIndex],
 			Body:  template.HTML(s),
 			Menu:  h1s,
 		}
 		ReadTempl("/html/base.html", nil).Execute(distFile, thisPage)
-		realIdx += 1
+		realIndex += 1
 	}
 
 }

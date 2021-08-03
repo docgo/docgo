@@ -213,13 +213,10 @@ func Generate() (distPath string) {
 
 func main() {
 	cliParse()
-
-	//sf := fmt.Sprintf
-	distPath := Generate()
-
+	Generate()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		distPath = Generate()
+		Generate()
 		http.FileServer(http.Dir("./out")).ServeHTTP(writer, request)
 	})
 	http.ListenAndServe(":8080", mux)
