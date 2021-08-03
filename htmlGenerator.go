@@ -15,7 +15,6 @@ import (
 	"strings"
 	"path/filepath"
 	"math/rand"
-	"encoding/json"
 )
 
 func CreateDist(file string) *os.File {

@@ -1,0 +1,13 @@
+<script src="https://cdn.jsdelivr.net/npm/elasticlunr@0.9.5/elasticlunr.min.js"></script>
+<script> window.godoc = {{ CONTENT }}; </script>
+<script> var index = elasticlunr();
+index.addField('body');
+index.setRef('page');
+
+[...Object.entries(window.godoc)].map( (x, idx) => index.addDoc({id: idx, body: x[1]}) );
+[...Object.entries(window.godoc)].map( (x) => console.log({page: x[0], body: x[1]}) );
+const urlSearchParams = new URLSearchParams(window.location.search);
+const params = Object.fromEntries(urlSearchParams.entries());
+
+console.log(index.search( params.q, {fields: {body: {boost:10} } }));
+</script>
