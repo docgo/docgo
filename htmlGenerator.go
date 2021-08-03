@@ -18,14 +18,14 @@ import (
 )
 
 func CreateDist(file string) *os.File{
-	ferr := os.Mkdir(Cli.Output, 0755)
+	ferr := os.Mkdir(Cli.Out, 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
 			myfmt.Red("creating dist folder error", ferr)
 			os.Exit(1)
 		}
 	}
-	f, _ := os.Create(filepath.Join(Cli.Output, file))
+	f, _ := os.Create(filepath.Join(Cli.Out, file))
 	return f
 }
 func ReadTemplates(funcMap template.FuncMap) *template.Template{
@@ -56,7 +56,7 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template{
 
 
 func GenerateHTML(doc *ModuleDoc)  {
-	os.RemoveAll(Cli.Output)
+	os.RemoveAll(Cli.Out)
 
 	var headingTitles []string
 	var subHeadingTitles []string

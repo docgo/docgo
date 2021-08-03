@@ -22,22 +22,22 @@ import (
 )
 
 var Cli struct {
-	Output string `help"Where to put documentation/assets."`
+	Out    string `help"Where to put documentation/assets."`
 	Module string `arg help:"Path to module/package for documentation generation."`
 	Open   bool
 }
 
 func cliParse() {
 	kong.Parse(&Cli)
-	cliOutputAbs, err := filepath.Abs(Cli.Output)
+	cliOutputAbs, err := filepath.Abs(Cli.Out)
 	if err != nil {
 		myfmt.Red("Couldn't parse directory for output", err)
 		os.Exit(1)
 	}
-	Cli.Output = cliOutputAbs
-	filepath.WalkDir(Cli.Output, func(path string, d fs.DirEntry, err error) error {
+	Cli.Out = cliOutputAbs
+	filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
 		if filepath.Ext(path) != "html" {
-			myfmt.Red("Output path not empty (contains non-assets)")
+			myfmt.Red("Out path not empty (contains non-assets)")
 			os.Exit(1)
 			return filepath.SkipDir
 		}
@@ -210,7 +210,7 @@ func main() {
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		GenerateHTML(_modDoc)
 
-		http.FileServer(http.Dir("./out")).ServeHTTP(writer, request)
+		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 	http.ListenAndServe(":8080", mux)
 }
