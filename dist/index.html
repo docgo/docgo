@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <title>{{ .Title }}</title>
+    <title>Intro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -262,12 +262,20 @@
             <li class="pkg">
                 <h3> Intro </h3>
                 <ul>
-                    {{ $currentIdx := .CurrentPage }}
-                    {{ range $i, $p := .PageLinks }}
+                    
+                    
                     <li
-                    {{ if eq $i $currentIdx }} class="active" {{ end }}
-                    ><a href="{{ $p }}">{{ GetPageTitle $i }}</a></li>
-                    {{ end }}
+                     class="active" 
+                    ><a href="index.html">Intro</a></li>
+                    
+                    <li
+                    
+                    ><a href="pkg1.html">pkg1</a></li>
+                    
+                    <li
+                    
+                    ><a href="pkg2.html">pkg2</a></li>
+                    
                 </ul>
 
             </li>
@@ -300,9 +308,11 @@
     <main>
         <article class="page-center">
             <div>
-                <small>{{ .ModuleDoc.ImportPath }} > {{ .Title }}</small>
-                <h1>{{ .Title }}</h1><br/>
-                {{ .Body }}
+                <small>github.com/fikisipi/godoc-nicer > Intro</small>
+                <h1>Intro</h1><br/>
+                
+<p>Welcome to the documentation.</p>
+
             </div>
         </article>
     </main>

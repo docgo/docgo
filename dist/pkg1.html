@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <title>{{ .Title }}</title>
+    <title>pkg1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -262,12 +262,20 @@
             <li class="pkg">
                 <h3> Intro </h3>
                 <ul>
-                    {{ $currentIdx := .CurrentPage }}
-                    {{ range $i, $p := .PageLinks }}
+                    
+                    
                     <li
-                    {{ if eq $i $currentIdx }} class="active" {{ end }}
-                    ><a href="{{ $p }}">{{ GetPageTitle $i }}</a></li>
-                    {{ end }}
+                    
+                    ><a href="index.html">Intro</a></li>
+                    
+                    <li
+                     class="active" 
+                    ><a href="pkg1.html">pkg1</a></li>
+                    
+                    <li
+                    
+                    ><a href="pkg2.html">pkg2</a></li>
+                    
                 </ul>
 
             </li>
@@ -300,9 +308,36 @@
     <main>
         <article class="page-center">
             <div>
-                <small>{{ .ModuleDoc.ImportPath }} > {{ .Title }}</small>
-                <h1>{{ .Title }}</h1><br/>
-                {{ .Body }}
+                <small>github.com/fikisipi/godoc-nicer > pkg1</small>
+                <h1>pkg1</h1><br/>
+                
+<p>This is some text I wrote for the package numbered one
+in the original file docstring. It follows the standard
+Go practice for documenting the purpose of a package.</p>
+<h3>ExampleFn</h3>
+<p>Converts MyType into an int. Example:</p>
+<pre><code class="language-go">ExampleFn(MyType(3)) == 3, nil
+</code></pre>
+<p>This text goes after the code.</p>
+<pre><code class="language-go">func ExampleFn(t MyType) (x int, err error)
+</code></pre>
+<h3>IntDumper</h3>
+<pre><code class="language-go">type IntDumper struct {
+	mem []int
+}
+</code></pre>
+<h3>MyType</h3>
+<pre><code class="language-go">type MyType struct {
+	num float64
+}
+</code></pre>
+<h3>Dumper</h3>
+<pre><code class="language-go">type Dumper interface {
+	Load(...interface{})
+	Dump() string
+}
+</code></pre>
+
             </div>
         </article>
     </main>
