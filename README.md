@@ -1,11 +1,12 @@
-<img src="https://raw.githubusercontent.com/fikisipi/sponggy/main/how-it-works.png" width="100%">
+<center><h1>goNewDoc</h1></center>
+<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png" width="100%">
 <hr />
 
-TODO:
+**TODO:**
 
-* [x] Generate docs for most kinds
+* [x] Generate docs for most types
 * [x] Implement search
-* [x] Add templating logic
+* [x] Add templating logic for customizing docs
 * [ ] Add template customization tools
 * [ ] Add theme support
 * [ ] Autolink identifiers & better snippet support
