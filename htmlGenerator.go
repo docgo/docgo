@@ -68,7 +68,6 @@ func GenerateHTML(doc *ModuleDoc)  {
 			return headingTitles[idx]
 		},
 		"TransformDoc": func(source string) string {
-			fmt.Println(source)
 			source = strings.ReplaceAll(source, "\r", "")
 			lastLevel := -1
 			finalOut := ""
