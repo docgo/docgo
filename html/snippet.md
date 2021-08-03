@@ -1,6 +1,6 @@
 {{ range $idx, $p := . }}
 ### {{ .Name }}
-{{ .Doc }}
+{{ TransformDoc .Doc }}
 ```go
 {{ .Snippet }}
 ```

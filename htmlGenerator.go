@@ -67,6 +67,32 @@ func GenerateHTML(doc *ModuleDoc)  {
 		"GetPageTitle": func(idx int) string {
 			return headingTitles[idx]
 		},
+		"TransformDoc": func(source string) string {
+			fmt.Println(source)
+			source = strings.ReplaceAll(source, "\r", "")
+			lastLevel := -1
+			finalOut := ""
+			for _, line := range strings.Split(source, "\n") {
+				line = strings.ReplaceAll(line, "\t", "    ")
+				normalLen := len(line)
+				trimmedLen := len(strings.TrimLeft(line, " "))
+				indentLevel := normalLen - trimmedLen
+				if lastLevel == -1 {
+					lastLevel = indentLevel
+				}
+				out := line
+				if indentLevel > lastLevel {
+					out = "\n```go" + line
+				}
+				if indentLevel < lastLevel {
+					out = "\n```" + line
+				}
+				lastLevel = indentLevel
+				finalOut += out + "\n"
+			}
+			fmt.Println(finalOut)
+			return finalOut
+		},
 	}
 	templates := ReadTemplates(templateFunctions)
 
