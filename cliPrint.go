@@ -7,11 +7,13 @@ import (
 	"github.com/markbates/pkger"
 )
 
+// Needed for the `pkger` tool to autoload the required files.
 func _extraOpens() {
 	pkger.Open("/html/base.md")
 	pkger.Open("/html/base.html")
 	pkger.Open("/html/snippet.md")
 }
+
 type _mPrintlnType func(...interface{})
 
 func _mWrapColor(c color.Attribute) _mPrintlnType {
@@ -21,17 +23,18 @@ func _mWrapColor(c color.Attribute) _mPrintlnType {
 func _mDoDebug() _mPrintlnType {
 	if os.Getenv("NODEBUG") != "" {
 		return func(i ...interface{}) {
-			// noop
+			_ = i // Do not print anything if not in DEBUG mode.
+			return
 		}
 	}
 	return log.New(os.Stdout, "DBG ", log.Flags()).Println
 }
 
 var myfmt = struct {
-	Red   _mPrintlnType
-	Green _mPrintlnType
+	Red    _mPrintlnType
+	Green  _mPrintlnType
 	Yellow _mPrintlnType
-	Debug _mPrintlnType
+	Debug  _mPrintlnType
 }{
 	_mWrapColor(color.FgRed), _mWrapColor(color.FgGreen), _mWrapColor(color.FgHiYellow), _mDoDebug(),
 }
