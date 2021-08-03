@@ -18,6 +18,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 	"time"
 	"go/token"
+	"io/fs"
 )
 
 var Cli struct {
@@ -28,6 +29,20 @@ var Cli struct {
 
 func cliParse() {
 	kong.Parse(&Cli)
+	cliOutputAbs, err := filepath.Abs(Cli.Output)
+	if err != nil {
+		myfmt.Red("Couldn't parse directory for output", err)
+		os.Exit(1)
+	}
+	Cli.Output = cliOutputAbs
+	filepath.WalkDir(Cli.Output, func(path string, d fs.DirEntry, err error) error {
+		if filepath.Ext(path) != "html" {
+			myfmt.Red("Detected bad path")
+		}
+		return nil
+	})
+	os.Exit(1)
+
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
 	if err != nil {
