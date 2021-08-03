@@ -5,7 +5,6 @@ Welcome to the documentation.
 {{ range .Packages }}
 
 # {{ .Name }}
-## Documentation
 
 {{ .Doc }}
 

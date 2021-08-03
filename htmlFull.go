@@ -89,6 +89,7 @@ func GenerateHTML2(doc *ModuleDoc)  {
 		Body template.HTML
 		PageLinks map[int]string
 		CurrentPage int
+		ModuleDoc *ModuleDoc
 	}
 
 	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
@@ -143,6 +144,7 @@ func GenerateHTML2(doc *ModuleDoc)  {
 				Body:      template.HTML(s),
 				PageLinks: pageLinks,
 				CurrentPage: realIndex,
+				ModuleDoc: doc,
 			}
 			templates.Lookup("baseHTML").Execute(distFile, thisPage)
 		}(realIndex, s)

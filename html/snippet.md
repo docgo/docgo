@@ -1,5 +1,5 @@
 {{ range $idx, $p := . }}
-### {{ .Name }} [{{.FoundInFile}}]
+### {{ .Name }}
 {{ .Doc }}
 ```go
 {{ .Snippet }}
