@@ -39,9 +39,6 @@ func cliParse() {
 	}
 
 	_modDoc = ModuleParse(mDirPath)
-
-	ModulePath = mDirPath
-	MdPackages = ParsePackages(mDirPath)
 }
 
 var _modDoc *ModuleDoc = nil
@@ -183,31 +180,10 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 }
 
 var ModulePath string
-var MdPackages map[string]map[string]MarkdownFile
 
 func Generate() (distPath string) {
 	fmt.Println("ModulePath =", ModulePath)
-	/*
-	m := token.NewFileSet()
-
-	files := make([]*ast.File, 0)
-	paths := make(map[string]bool)
-
-	w := bytes.Buffer{}
-	goldmark.New(goldmark.WithRendererOptions(html.WithXHTML())).Convert([]byte(buffer), &w)
-
-	bufOut, _ := io.ReadAll(&w)
-
-	pkgNameList := make([]string, 0)
-	for pkgName, _ := range myPkgs {
-		pkgNameList = append(pkgNameList, pkgName)
-	}
-	metadata := Meta{
-		Packages:     myPkgs,
-		PackageNames: pkgNameList,
-	}
-	distPath = GenerateHTML(string(bufOut), metadata) */
-	GenerateHTML2(_modDoc)
+	GenerateHTML(_modDoc)
 	return
 }
 

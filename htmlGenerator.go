@@ -8,7 +8,6 @@ import (
 	"errors"
 	"html/template"
 	"bytes"
-	"go/ast"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	mdAst "github.com/yuin/goldmark/ast"
@@ -18,11 +17,6 @@ import (
 	"math/rand"
 )
 
-type Meta struct {
-	Packages map[string]*ast.Package
-	PackageNames []string
-	Content template.HTML
-}
 func CreateDist(file string) *os.File{
 	ferr := os.Mkdir("out", 0755)
 	if ferr != nil {
@@ -61,7 +55,7 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template{
 }
 
 
-func GenerateHTML2(doc *ModuleDoc)  {
+func GenerateHTML(doc *ModuleDoc)  {
 	os.RemoveAll("./out")
 
 	var headingTitles []string
