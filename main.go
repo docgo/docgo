@@ -22,7 +22,7 @@ import (
 )
 
 var Cli struct {
-	Output string `help"Where to put documentation/assets.'`
+	Output string `help"Where to put documentation/assets."`
 	Module string `arg help:"Path to module/package for documentation generation."`
 	Open   bool
 }
@@ -37,11 +37,12 @@ func cliParse() {
 	Cli.Output = cliOutputAbs
 	filepath.WalkDir(Cli.Output, func(path string, d fs.DirEntry, err error) error {
 		if filepath.Ext(path) != "html" {
-			myfmt.Red("Detected bad path")
+			myfmt.Red("Output path not empty (contains non-assets)")
+			os.Exit(1)
+			return filepath.SkipDir
 		}
 		return nil
 	})
-	os.Exit(1)
 
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
