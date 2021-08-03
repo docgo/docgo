@@ -35,6 +35,12 @@ func cliParse() {
 		os.Exit(1)
 	}
 	Cli.Out = cliOutputAbs
+	if cliStat, err := os.Stat(Cli.Out); err == nil {
+		if !cliStat.IsDir() {
+			myfmt.Red("Output is not a directory, but a file.")
+			os.Exit(1)
+		}
+	}
 	filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
 		if filepath.Ext(path) != "html" {
 			myfmt.Red("Out path not empty (contains non-assets)")
