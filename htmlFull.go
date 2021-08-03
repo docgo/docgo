@@ -66,7 +66,7 @@ func GenerateHTML2(doc *ModuleDoc) string {
 	if errT != nil {
 		fmt.Println(errT)
 	}
-	if y, err := filepath.Abs("./html/out.html"); err == nil {
+	if y, err := filepath.Abs("./out/index.html"); err == nil {
 		return y
 	}
 	return ""
