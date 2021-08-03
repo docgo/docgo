@@ -48,7 +48,12 @@ func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 }
 func GenerateHTML2(doc *ModuleDoc) string {
 	distFile := CreateDist()
-	ReadTempl("base.html", nil).Execute(distFile, doc)
+	errT := ReadTempl("base.html", template.FuncMap{
+		"A": func(x int) int{ return 5},
+	}).Execute(distFile, doc)
+	if errT != nil {
+		fmt.Println(errT)
+	}
 	if y, err := filepath.Abs("./out/index.html"); err == nil {
 		return y
 	}

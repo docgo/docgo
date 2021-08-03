@@ -1,3 +1,6 @@
+// This is some text I wrote for the package numbered one
+// in the original file docstring. It follows the standard
+// Go practice for documenting the purpose of a package.
 package pkg1
 
 import (
@@ -9,8 +12,10 @@ type MyType struct {
 	num float64
 }
 
-// Does something
-func PublicFunction(t MyType) (x int, err error) {
+// Converts MyType into an int. Example:
+//   ExampleFn(MyType(3)) == 3, nil
+// This text goes after the code.
+func ExampleFn(t MyType) (x int, err error) {
 	return int(t.num), nil
 }
 

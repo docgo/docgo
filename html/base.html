@@ -255,14 +255,7 @@
                 <ul>
                     <li class="active">Home</li>
                 </ul>
-                {{ range $p, $ast := .Packages }}
-                <h3>{{ $p }}</h3>
-                <ul>
-                    {{ range $name := PackageFiles $ast }}
-                    <li> {{ $name }}</li>
-                    {{ end }}
-                </ul>
-                {{ end }}
+
             </li>
         </ul>
     </div>
@@ -291,20 +284,30 @@
     </header>
 
     <main>
+        {{ define "snip" }}
+        {{ range $idx, $p := . }}
+        <h3>{{ .Name }}</h3>
+        {{ .Doc }}
+        <pre><code class="language-go">{{ .Snippet }}</code></pre>
+        {{ end }}
+        {{ end }}
+
         <article class="page-center">
             <div>
                 <small>bread > crumb</small>
                 <h1>Your docs</h1><br/>
-                {{.Content}}
-                some content<br>
-                <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() { paths[path] = true; return nil }
-		if !strings.HasSuffix(d.Name(), ".go") { return nil }
-		//fullpath := filepath.Join(path, d.Name())
-		inf, _ := d.Info()
-		m.AddFile(path, m.Base(), int(inf.Size()))
-		return nil
-	})</code></pre>
+                {{ .ImportPath }}
+                {{ range $idx, $x := .Packages }}
+                <h2> {{ .Name }} </h2>
+                <code>{{ .RelativePath }}</code>
+                <hr/>
+                <p>{{ .Doc }}</p>
+                <p><br></p>
+                {{ template "snip" .Functions }}
+                {{ template "snip" .Structs }}
+                {{ template "snip" .Interfaces }}
+
+                {{ end }}
             </div>
         </article>
     </main>

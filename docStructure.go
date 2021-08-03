@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ModuleDoc struct {
@@ -37,7 +38,11 @@ type Snippet struct {
 	SnippetText string
 }
 
-func CreateSnippet(node ast.Node, pkg *PackageDoc) Snippet {
+func (s Snippet) String() string {
+	return s.SnippetText
+}
+
+func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) Snippet {
 	snipFile := pkg.FileSet.File(node.Pos())
 	baseName := filepath.Base(snipFile.Name())
 	q, _ := os.ReadFile(filepath.Join(pkg.AbsolutePath, baseName))
@@ -46,7 +51,7 @@ func CreateSnippet(node ast.Node, pkg *PackageDoc) Snippet {
 		os.Exit(1)
 	}
 	snipStr := string(q)[snipFile.Offset(node.Pos())  : snipFile.Offset(node.End()) ]
-	return Snippet{snipStr}
+	return Snippet{strings.Join(prefix, "") + snipStr}
 }
 
 type FunctionDef struct {
@@ -58,12 +63,14 @@ type FunctionDef struct {
 type StructDef struct {
 	Snippet
 	Name string
+	Doc             string
 	Type *ast.StructType
 }
 
 type InterfaceDef struct {
 	Snippet
 	Name string
+	Doc         string
 	Type *ast.InterfaceType
 }
 

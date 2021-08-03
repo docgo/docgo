@@ -255,28 +255,7 @@
                 <ul>
                     <li class="active">Home</li>
                 </ul>
-                
-                <h3>main</h3>
-                <ul>
-                    
-                    <li> main.go</li>
-                    
-                </ul>
-                
-                <h3>pkg1</h3>
-                <ul>
-                    
-                    <li> file1.go</li>
-                    
-                </ul>
-                
-                <h3>pkg2</h3>
-                <ul>
-                    
-                    <li> pkg2.go</li>
-                    
-                </ul>
-                
+
             </li>
         </ul>
     </div>
@@ -305,62 +284,88 @@
     </header>
 
     <main>
+        
+
         <article class="page-center">
             <div>
                 <small>bread > crumb</small>
                 <h1>Your docs</h1><br/>
-                <p>Package two documentation contains blah.</p>
-<h1>main</h1>
-<h3>interface BType</h3>
-<pre><code class="language-go">type BType interface {
-  CInterface
-  SomeFunction(func() int) int
-}
-</code></pre>
-<h3>interface CInterface</h3>
-<pre><code class="language-go">type CInterface interface {
-}
-</code></pre>
-<h1>file1</h1>
-<h3>PublicFunction</h3>
-<pre><code class="language-go">func PublicFunction(t MyType) (x int, err error)
-</code></pre>
-<p>Does something</p>
-<h3>struct IntDumper</h3>
-<pre><code class="language-go">type IntDumper struct {
-}
-</code></pre>
-<pre><code class="language-go">func (i IntDumper) Dump() string
-</code></pre>
-<pre><code class="language-go">func (i IntDumper) Load(data ...interface{})
-</code></pre>
-<h3>struct MyType</h3>
-<pre><code class="language-go">type MyType struct {
-}
-</code></pre>
-<h1>pkg2</h1>
-<h3>MulTwo</h3>
-<pre><code class="language-go">func MulTwo(x Num) int
-</code></pre>
-<p>Multiply a number by two</p>
-<h3>struct Num</h3>
-<pre><code class="language-go">type Num struct {
-}
-</code></pre>
-<h3>CreateNum</h3>
-<pre><code class="language-go">func CreateNum(x int) Num
-</code></pre>
-<p>Creates a Num from an integer</p>
+                example.com/demomod
+                
+                <h2> pkg1 </h2>
+                <code>/pkg1</code>
+                <hr/>
+                <p>This is some text I wrote for the package numbered one
+in the original file docstring. It follows the standard
+Go practice for documenting the purpose of a package.
+</p>
+                <p><br></p>
+                
+        
+        <h3>ExampleFn</h3>
+        Converts MyType into an int. Example:
+  ExampleFn(MyType(3)) == 3, nil
+This text goes after the code.
 
-                some content<br>
-                <pre><code class="language-go">fs.WalkDir(os.DirFS("."), ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() { paths[path] = true; return nil }
-		if !strings.HasSuffix(d.Name(), ".go") { return nil }
-		//fullpath := filepath.Join(path, d.Name())
-		inf, _ := d.Info()
-		m.AddFile(path, m.Base(), int(inf.Size()))
-		return nil
-	})</code></pre>
+        <pre><code class="language-go">func ExampleFn(t MyType) (x int, err error)</code></pre>
+        
+        
+                
+        
+        <h3>IntDumper</h3>
+        
+        <pre><code class="language-go">type IntDumper struct {
+	mem []int
+}</code></pre>
+        
+        <h3>MyType</h3>
+        
+        <pre><code class="language-go">type MyType struct {
+	num float64
+}</code></pre>
+        
+        
+                
+        
+        <h3>Dumper</h3>
+        
+        <pre><code class="language-go">type Dumper interface {
+	Load(...interface{})
+	Dump() string
+}</code></pre>
+        
+        
+
+                
+                <h2> pkg2 </h2>
+                <code>/pkg1/pkg2</code>
+                <hr/>
+                <p>This is the second package in the
+module and it contains even more code.
+</p>
+                <p><br></p>
+                
+        
+        <h3>MulTwo</h3>
+        Multiply a number by two
+
+        <pre><code class="language-go">func MulTwo(x Num) int</code></pre>
+        
+        
+                
+        
+        <h3>Num</h3>
+        
+        <pre><code class="language-go">type Num struct {
+	int
+}</code></pre>
+        
+        
+                
+        
+        
+
+                
             </div>
         </article>
     </main>

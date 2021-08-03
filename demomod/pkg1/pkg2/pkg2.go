@@ -1,4 +1,5 @@
-// Package two documentation contains blah.
+// This is the second package in the
+// module and it contains even more code.
 package pkg2
 
 type Num struct {
