@@ -90,7 +90,6 @@ func GenerateHTML(doc *ModuleDoc)  {
 				lastLevel = indentLevel
 				finalOut += out + "\n"
 			}
-			fmt.Println(finalOut)
 			return finalOut
 		},
 	}

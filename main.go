@@ -21,13 +21,14 @@ import (
 )
 
 var Cli struct {
-	ModulePath string `arg help:"RelativePath to module"`
-	Open       bool
+	Output string `help"Where to put documentation/assets.'`
+	Module string `arg help:"Path to module/package for documentation generation."`
+	Open   bool
 }
 
 func cliParse() {
 	kong.Parse(&Cli)
-	absModPath, err := filepath.Abs(Cli.ModulePath)
+	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
 	if err != nil {
 		fmt.Println("Error loading '", mInfo, "': ", err)
@@ -35,7 +36,7 @@ func cliParse() {
 	}
 	mDirPath := absModPath
 	if !mInfo.IsDir() {
-		mDirPath = filepath.Dir(Cli.ModulePath)
+		mDirPath = filepath.Dir(Cli.Module)
 	}
 
 	_modDoc = ModuleParse(mDirPath)
@@ -182,7 +183,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 var ModulePath string
 
 func Generate() (distPath string) {
-	fmt.Println("ModulePath =", ModulePath)
+	fmt.Println("Module =", ModulePath)
 	GenerateHTML(_modDoc)
 	return
 }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/goSuperDoc.iml" filepath="$PROJECT_DIR$/.idea/goSuperDoc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/godoc-nicer.iml" filepath="$PROJECT_DIR$/.idea/godoc-nicer.iml" />
     </modules>
   </component>
 </project>
