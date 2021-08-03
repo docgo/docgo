@@ -61,7 +61,7 @@ func GenerateHTML2(doc *ModuleDoc) string {
 	md.Convert(buf.Bytes(), &buf2)
 
 	markdownHTML := buf2.String()
-	ReadTempl("/html/base.html", nil).Execute(distFile, markdownHTML)
+	ReadTempl("/html/base.html", nil).Execute(distFile, template.HTML(markdownHTML))
 
 	if errT != nil {
 		fmt.Println(errT)

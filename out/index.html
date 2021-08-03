@@ -289,20 +289,6 @@
                 <small>bread > crumb</small>
                 <h1>Your docs</h1><br/>
                 &lt;p&gt;example.com/demomod&lt;/p&gt;
-&lt;h1&gt;pkg2&lt;/h1&gt;
-&lt;p&gt;&lt;code&gt;/pkg1/pkg2&lt;/code&gt;&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;This is the second package in the&lt;br&gt;
-module and it contains even more code.&lt;/p&gt;
-&lt;h3&gt;MulTwo [/pkg1/pkg2/someFile.go]&lt;/h3&gt;
-&lt;p&gt;Multiply a number by two&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func MulTwo(x Num) int
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h3&gt;Num [/pkg1/pkg2/someFile.go]&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Num struct {
-	int
-}
-&lt;/code&gt;&lt;/pre&gt;
 &lt;h1&gt;pkg1&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;/pkg1&lt;/code&gt;&lt;/p&gt;
 &lt;hr&gt;
@@ -329,6 +315,20 @@ This text goes after the code.&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Dumper interface {
 	Load(...interface{})
 	Dump() string
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1&gt;pkg2&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;/pkg1/pkg2&lt;/code&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;This is the second package in the&lt;br&gt;
+module and it contains even more code.&lt;/p&gt;
+&lt;h3&gt;MulTwo [/pkg1/pkg2/someFile.go]&lt;/h3&gt;
+&lt;p&gt;Multiply a number by two&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func MulTwo(x Num) int
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;Num [/pkg1/pkg2/someFile.go]&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Num struct {
+	int
 }
 &lt;/code&gt;&lt;/pre&gt;
 
