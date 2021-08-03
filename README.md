@@ -1,5 +1,5 @@
 <h3 align="center">newGodoc <br><small>a <i>different</i> static docs generator for Go</small><br>
-<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png?1" width="60%">
+<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/html/how-it-works.png?1" width="60%">
 </h3>
 <hr />
 
