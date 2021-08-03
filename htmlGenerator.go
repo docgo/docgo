@@ -17,7 +17,7 @@ import (
 	"math/rand"
 )
 
-func CreateDist(file string) *os.File{
+func CreateDist(file string) *os.File {
 	ferr := os.Mkdir(Cli.Out, 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
@@ -28,7 +28,7 @@ func CreateDist(file string) *os.File{
 	f, _ := os.Create(filepath.Join(Cli.Out, file))
 	return f
 }
-func ReadTemplates(funcMap template.FuncMap) *template.Template{
+func ReadTemplates(funcMap template.FuncMap) *template.Template {
 	t := template.New("main")
 	if funcMap != nil {
 		t.Funcs(funcMap)
@@ -55,10 +55,11 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template{
 }
 
 type PkgConfig string
+
 func (c PkgConfig) Group(x ...string) {
 	myfmt.Debug(x)
 }
-func GenerateHTML(doc *ModuleDoc)  {
+func GenerateHTML(doc *ModuleDoc) {
 	os.RemoveAll(Cli.Out)
 
 	var headingTitles []string
@@ -93,7 +94,7 @@ func GenerateHTML(doc *ModuleDoc)  {
 			}
 			return finalOut
 		},
-		"PackageConfig": func (pkgName string) PkgConfig {
+		"PackageConfig": func(pkgName string) PkgConfig {
 			return PkgConfig(pkgName)
 		},
 	}
@@ -108,11 +109,11 @@ func GenerateHTML(doc *ModuleDoc)  {
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
 
 	type Page struct {
-		Title string
-		Body template.HTML
-		PageLinks map[int]string
+		Title       string
+		Body        template.HTML
+		PageLinks   map[int]string
 		CurrentPage int
-		ModuleDoc *ModuleDoc
+		ModuleDoc   *ModuleDoc
 	}
 
 	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
@@ -163,11 +164,11 @@ func GenerateHTML(doc *ModuleDoc)  {
 		defer func(realIndex int, s string) {
 			distFile := CreateDist(pageLinks[realIndex])
 			thisPage := Page{
-				Title:     headingTitles[realIndex],
-				Body:      template.HTML(s),
-				PageLinks: pageLinks,
+				Title:       headingTitles[realIndex],
+				Body:        template.HTML(s),
+				PageLinks:   pageLinks,
 				CurrentPage: realIndex,
-				ModuleDoc: doc,
+				ModuleDoc:   doc,
 			}
 			templates.Lookup("baseHTML").Execute(distFile, thisPage)
 		}(realIndex, s)

@@ -18,10 +18,10 @@ type ModuleDoc struct {
 
 type ScopedIdentifier struct {
 	PackagePath string
-	Name string
-	IsFunction bool
-	IsMethod bool
-	isType bool
+	Name        string
+	IsFunction  bool
+	IsMethod    bool
+	isType      bool
 }
 
 type ExportType string
@@ -50,7 +50,7 @@ func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) Snippet {
 		fmt.Println(pkg.AbsolutePath, baseName)
 		os.Exit(1)
 	}
-	snipStr := string(q)[snipFile.Offset(node.Pos())  : snipFile.Offset(node.End()) ]
+	snipStr := string(q)[snipFile.Offset(node.Pos()):snipFile.Offset(node.End())]
 	return Snippet{strings.Join(prefix, "") + snipStr}
 }
 
@@ -66,45 +66,44 @@ type BaseDef struct {
 type FunctionDef struct {
 	BaseDef
 	Name string
-	Doc string
+	Doc  string
 }
 
 type StructDef struct {
 	BaseDef
 	Name string
-	Doc             string
+	Doc  string
 	Type *ast.StructType
 }
 
 type InterfaceDef struct {
 	BaseDef
 	Name string
-	Doc         string
+	Doc  string
 	Type *ast.InterfaceType
 }
 
 type Method struct {
 	BaseDef
 }
-type Typedef struct{
+type Typedef struct {
 	BaseDef
 }
 
 type CodeDef struct {
-	Functions []FunctionDef
-	Methods []Method
-	Typedefs []Typedef
-	Structs []StructDef
+	Functions  []FunctionDef
+	Methods    []Method
+	Typedefs   []Typedef
+	Structs    []StructDef
 	Interfaces []InterfaceDef
 }
 
 type PackageDoc struct {
 	CodeDef
-	Name            string
-	Doc             string
-	AbsolutePath    string
-	RelativePath    string
-	FileSet         *token.FileSet
-	ParentModule    *ModuleDoc
+	Name         string
+	Doc          string
+	AbsolutePath string
+	RelativePath string
+	FileSet      *token.FileSet
+	ParentModule *ModuleDoc
 }
-

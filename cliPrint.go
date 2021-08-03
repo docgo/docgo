@@ -7,7 +7,11 @@ import (
 )
 
 type _mPrintlnType func(...interface{})
-func _mWrapColor(c color.Attribute) _mPrintlnType { return func(x ...interface{}) { color.New(c).Println(x...) } }
+
+func _mWrapColor(c color.Attribute) _mPrintlnType {
+	return func(x ...interface{}) { color.New(c).Println(x...) }
+}
+
 var myfmt = struct {
 	Red   _mPrintlnType
 	Green _mPrintlnType
