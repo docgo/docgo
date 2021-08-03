@@ -22,7 +22,7 @@ import (
 )
 
 var Cli struct {
-	Out    string `help"Where to put documentation/assets."`
+	Out    string `short:"o" help"Where to put documentation/assets."`
 	Module string `arg help:"Path to module/package for documentation generation."`
 	Open   bool
 }

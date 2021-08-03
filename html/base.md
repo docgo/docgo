@@ -13,3 +13,6 @@ Welcome to the documentation.
 {{ template "snippet" .Interfaces }}
 
 {{ end }}
+
+{{ $x := PackageConfig "myPkg" }}
+{{ $x.Group "a.go" "b.go" "Name" }}

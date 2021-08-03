@@ -54,7 +54,10 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template{
 	return t
 }
 
-
+type PkgConfig string
+func (c PkgConfig) Group(x ...string) {
+	myfmt.Debug(x)
+}
 func GenerateHTML(doc *ModuleDoc)  {
 	os.RemoveAll(Cli.Out)
 
@@ -62,7 +65,6 @@ func GenerateHTML(doc *ModuleDoc)  {
 	var subHeadingTitles []string
 
 	markdownOutputBuffer := bytes.Buffer{}
-
 	templateFunctions := template.FuncMap{
 		"GetPageTitle": func(idx int) string {
 			return headingTitles[idx]
@@ -90,6 +92,9 @@ func GenerateHTML(doc *ModuleDoc)  {
 				finalOut += out + "\n"
 			}
 			return finalOut
+		},
+		"PackageConfig": func (pkgName string) PkgConfig {
+			return PkgConfig(pkgName)
 		},
 	}
 	templates := ReadTemplates(templateFunctions)

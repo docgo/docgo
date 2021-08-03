@@ -1,6 +1,6 @@
 {{ range $idx, $p := . }}
 ### {{ .Name }}
-asdf
+
 {{ TransformDoc .Doc }}
 
 ```go
