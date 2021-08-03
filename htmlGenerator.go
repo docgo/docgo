@@ -80,12 +80,12 @@ func GenerateHTML(doc *ModuleDoc)  {
 				if lastLevel == -1 {
 					lastLevel = indentLevel
 				}
-				out := line
+				out := strings.TrimLeft(line, " ")
 				if indentLevel > lastLevel {
-					out = "\n```go\n" + line
+					out = "\n```go\n" + out
 				}
 				if indentLevel < lastLevel {
-					out = "\n```" + line
+					out = "```\n" + out
 				}
 				lastLevel = indentLevel
 				finalOut += out + "\n"
