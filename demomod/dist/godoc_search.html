@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+    <title>Doc search</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/elasticlunr@0.9.5/elasticlunr.min.js"></script>
+    <style>
+        body {
+            background: #202229;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Liberation Sans", sans-serif;
+            color: #fff; font-size: 20px; font-weight: 300;
+            margin: 0; padding: 2em;
+        }
+        ul { list-style: none; }
+        ul li { border-bottom: 1px dashed #999; margin: 20px 0; padding: 1em 0; }
+        li > small { display: block; color: #999; margin-bottom: 10px; }
+        .back, .back:visited { color: #fff; display: block; text-align: center; }
+    </style>
+</head>
+
+<body>
+<a href="index.html" class="back">&laquo; Go back</a>
+<ul id="searchList">
+</ul>
+
+<script>
+    const godoc = {"index":"\n\u003cp\u003eWelcome to the documentation.\u003c/p\u003e\n","pkg1":"\n\u003cp\u003eThis is some text I wrote for the package numbered one\nin the original file docstring. It follows the standard\nGo practice for documenting the purpose of a package.\u003c/p\u003e\n\u003ch3\u003eExampleFn\u003c/h3\u003e\n\u003cp\u003eConverts MyType into an int. Example:\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003eExampleFn(MyType(3)) == 3, nil\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThis text goes after the code.\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003efunc ExampleFn(t MyType) (x int, err error)\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch3\u003eIntDumper\u003c/h3\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003etype IntDumper struct {\n\tmem []int\n}\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch3\u003eMyType\u003c/h3\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003etype MyType struct {\n\tnum float64\n}\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch3\u003eDumper\u003c/h3\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003etype Dumper interface {\n\tLoad(...interface{})\n\tDump() string\n}\r\n\u003c/code\u003e\u003c/pre\u003e\n","pkg2":"\n\u003cp\u003eThis is the second package in the\nmodule and it contains even more code.\u003c/p\u003e\n\u003ch3\u003eMulTwo\u003c/h3\u003e\n\u003cp\u003eMultiply a number by two\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003efunc MulTwo(x Num) int\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003ch3\u003eNum\u003c/h3\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003etype Num struct {\n\tint\n}\r\n\u003c/code\u003e\u003c/pre\u003e\n"};
+    function stripHtml(html)
+    {
+        let tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
+    for(var key in godoc) {
+        godoc[key] = stripHtml(godoc[key])
+    }
+    var index = elasticlunr();
+    index.addField('body');
+    index.setRef('page');
+
+    [...Object.entries(godoc)].map((x, idx) => index.addDoc({page: x[0], body: x[1]}));
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+
+    const searchResults = index.search(params.q, {fields: {body: {boost: 10}}});
+    console.log(searchResults)
+    searchResults.map(x => {
+        let contents = godoc[x.ref];
+        const listItem = document.createElement('li');
+        params.q.split(/\s/g).map(x => contents = contents.replaceAll(x, `<b>${stripHtml(x)}</b>`))
+        listItem.innerHTML = `<small>${stripHtml(x.ref)}</small>`;
+        listItem.innerHTML += contents;
+        searchList.append(listItem);
+    })
+</script>
+</body>
+</html>
