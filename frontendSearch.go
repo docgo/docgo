@@ -21,4 +21,4 @@ func GenerateSearch(index map[string]string) {
 	}
 	outHtml := strings.ReplaceAll(SEARCH_PAGE_HTML, "{{ CONTENT }}", string(searchJson))
 	_, err = CreateDist("godoc_search.html").WriteString(outHtml)
-}`
+}
