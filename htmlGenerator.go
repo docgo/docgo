@@ -82,7 +82,7 @@ func GenerateHTML(doc *ModuleDoc)  {
 				}
 				out := line
 				if indentLevel > lastLevel {
-					out = "\n```go" + line
+					out = "\n```go\n" + line
 				}
 				if indentLevel < lastLevel {
 					out = "\n```" + line
