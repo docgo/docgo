@@ -45,14 +45,15 @@ func cliParse() {
 		mDirPath = filepath.Dir(Cli.ModulePath)
 	}
 
-	ModuleParse(mDirPath)
+	_modDoc = ModuleParse(mDirPath)
 
 	ModulePath = mDirPath
 	MdPackages = ParsePackages(mDirPath)
 }
+var _modDoc *ModuleDoc = nil
 
-func ModuleParse(modFilePath string) {
-	var parsedModuleDoc = new(ModuleDoc)
+func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
+	parsedModuleDoc = new(ModuleDoc)
 	parsedModuleDoc.Packages = []*PackageDoc{}
 	parsedModuleDoc.SimpleExports = SimpleExportsByType{}
 
@@ -138,6 +139,7 @@ func ModuleParse(modFilePath string) {
 
 		//fmt.Println(info.CallGraphIndex)
 	}
+	return
 }
 
 func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
@@ -326,6 +328,7 @@ func Generate() (distPath string) {
 		PackageNames: pkgNameList,
 	}
 	distPath = GenerateHTML(string(bufOut), metadata)
+	distPath = GenerateHTML2(_modDoc)
 	return
 }
 
@@ -337,7 +340,6 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		distPath = Generate()
 		http.FileServer(http.Dir(filepath.Dir(distPath))).ServeHTTP(writer, request)
 	})
 	http.ListenAndServe(":8080", mux)

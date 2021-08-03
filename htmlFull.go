@@ -17,6 +17,36 @@ type Meta struct {
 	PackageNames []string
 	Content template.HTML
 }
+func CreateDist() *os.File{
+	ferr := os.Mkdir("out", 0755)
+	if ferr != nil {
+		if !errors.Is(ferr, os.ErrExist) {
+			fmt.Println("creating dist folder error", ferr)
+			os.Exit(1)
+		}
+	}
+	f, _ := os.Create("out/index.html")
+	return f
+}
+func ReadTempl(name string) *template.Template{
+	t := template.New("main")
+	raw, err := pkger.Open("/html/" + name)
+	if err != nil {
+		fmt.Println("pkger error: ", err)
+		os.Exit(1)
+	}
+	data, _ := io.ReadAll(raw)
+	templ, err := t.Parse(string(data))
+	if err != nil {
+		fmt.Println("template loading error", err)
+		os.Exit(1)
+	}
+	return templ
+}
+func GenerateHTML2(doc *ModuleDoc) {
+	
+}
+
 func GenerateHTML(html string, metadata Meta) (path string) {
 	t := template.New("main")
 	raw, err := pkger.Open("/html/index.html")
