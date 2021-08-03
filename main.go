@@ -18,7 +18,6 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 	"time"
 	"go/token"
-	"io/fs"
 )
 
 var Cli struct {
@@ -40,15 +39,15 @@ func cliParse() {
 			myfmt.Red("Output is not a directory, but a file.")
 			os.Exit(1)
 		}
+		filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
+			if filepath.Ext(path) != "html" {
+				myfmt.Red("Out path not empty (contains non-assets)")
+				os.Exit(1)
+				return filepath.SkipDir
+			}
+			return nil
+		})
 	}
-	filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
-		if filepath.Ext(path) != "html" {
-			myfmt.Red("Out path not empty (contains non-assets)")
-			os.Exit(1)
-			return filepath.SkipDir
-		}
-		return nil
-	})
 
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
