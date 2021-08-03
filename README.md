@@ -1,4 +1,4 @@
-<center><h1>goNewDoc</h1></center>
+<h3 align="center">goNewDoc <br><small>a different static docs generator for Go</small></h1>
 <img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/how-it-works.png" width="100%">
 <hr />
 
