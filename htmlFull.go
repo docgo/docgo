@@ -54,22 +54,22 @@ func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 
 
 func GenerateHTML2(doc *ModuleDoc)  {
+	os.RemoveAll("./out")
 	buf := bytes.Buffer{}
-
-	md := goldmark.New(goldmark.WithExtensions(extension.GFM))
 
 	ReadTempl("/html/DOCS.tmpl", template.FuncMap{
 		"A": func(x int) int{ return 5},
 	}).Execute(&buf, doc)
-	htmlBuf := bytes.Buffer{}
+
+	//htmlBytes := append([]byte{}, htmlBuf.Bytes()...)
 	markdownBytes := append([]byte{}, buf.Bytes()...)
-	md.Convert(markdownBytes, &htmlBuf)
+
 	//htmlString := htmlBuf.String()
 
-	type Entry struct {
-		h1 string
-		h2 string
-		markdownRest string
+	type Page struct {
+		Title string
+		Body template.HTML
+		Menu []string
 	}
 	//entries := []Entry{}
 
@@ -85,7 +85,9 @@ func GenerateHTML2(doc *ModuleDoc)  {
 
 				if nHeading.Level == 1 {
 					h1s = append(h1s, t)
-					n.Parent().ReplaceChild(n.Parent(), n, ast2.NewString([]byte("```godoc\nheading_1\n```")))
+					head := ast2.NewString([]byte("[godoc:heading]"))
+					n.InsertBefore(n.Parent(), n, head)
+					n.InsertAfter(n.Parent(), n, ast2.NewString([]byte("[godoc:heading]")))
 				}
 				if nHeading.Level == 2 {
 					h2s = append(h2s, t)
@@ -98,13 +100,20 @@ func GenerateHTML2(doc *ModuleDoc)  {
 	step2 := bytes.Buffer{}
 	goldmark.DefaultRenderer().Render(&step2, markdownBytes, parsedMarkdown)
 
-	const SEP = "```godoc\nheading_1\n```"
+	const SEP = "[godoc:heading]"
+	realIdx := 0
 	for i, s := range strings.Split(step2.String(), SEP) {
-		distFile := CreateDist(fmt.Sprintf("%d", i) + ".html")
-		fmt.Println(s)
-		headingBuf := bytes.Buffer{}
-		goldmark.New().Convert([]byte(s), &headingBuf)
-		ReadTempl("/html/base.html", nil).Execute(distFile, template.HTML(headingBuf.String()))
+		if i % 2 == 1 || i < 2  { continue }
+		distFile := CreateDist(fmt.Sprintf("%d", realIdx) + ".html")
+		//headingBuf := bytes.Buffer{}
+		//goldmark.New().Convert([]byte(s), &headingBuf)
+		thisPage := Page{
+			Title: h1s[realIdx],
+			Body:  template.HTML(s),
+			Menu:  h1s,
+		}
+		ReadTempl("/html/base.html", nil).Execute(distFile, thisPage)
+		realIdx += 1
 	}
 
 }

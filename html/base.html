@@ -253,7 +253,9 @@
             <li class="pkg">
                 <h3> Intro </h3>
                 <ul>
-                    <li class="active">Home</li>
+                    {{ range $i, $p := .Menu }}
+                    <li><a href="{{$i}}.html">{{ $p }}</a></li>
+                    {{ end }}
                 </ul>
 
             </li>
@@ -286,9 +288,9 @@
     <main>
         <article class="page-center">
             <div>
-                <small>bread > crumb</small>
-                <h1>Your docs</h1><br/>
-                {{ . }}
+                <small>bread > {{ .Title }}</small>
+                <h1>{{ .Title }}</h1><br/>
+                {{ .Body }}
             </div>
         </article>
     </main>
