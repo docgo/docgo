@@ -1,4 +1,4 @@
-module github.com/fikisipi/godoc-nicer
+module github.com/fikisipi/newgodoc
 
 go 1.16
 
