@@ -18,8 +18,6 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 	"time"
 	"go/token"
-	"github.com/fatih/color"
-	"log"
 )
 
 var Cli struct {
@@ -28,22 +26,12 @@ var Cli struct {
 	Open   bool
 }
 
-type _mPrintlnType func(...interface{})
-func _mWrapColor(c color.Attribute) _mPrintlnType { return func(x ...interface{}) { color.New(c).Println(x...) } }
-var cliPrint = struct {
-	Red   _mPrintlnType
-	Green _mPrintlnType
-	Debug _mPrintlnType
-}{
-	_mWrapColor(color.FgRed), _mWrapColor(color.FgGreen), log.New(os.Stdout, "DBG ", log.Flags()).Println,
-}
-
 func cliParse() {
 	kong.Parse(&Cli)
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
 	if err != nil {
-		cliPrint.Red("Error loading '", mInfo, "': ", err)
+		myfmt.Red("Error loading '", mInfo, "': ", err)
 		os.Exit(1)
 	}
 	mDirPath := absModPath
@@ -61,7 +49,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	parsedModuleDoc.Packages = []*PackageDoc{}
 	parsedModuleDoc.SimpleExports = SimpleExportsByType{}
 
-	cliPrint.Debug("modFilePath", modFilePath)
+	myfmt.Debug("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
 
 	err := c.Init()
@@ -103,7 +91,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 	}
 	parsedModuleDoc.DebugPrint()
-	printGreen("Loaded packages:", pkgList)
+	myfmt.Green("Loaded packages:", pkgList)
 
 	godocPresentation := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {

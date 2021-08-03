@@ -21,7 +21,7 @@ func CreateDist(file string) *os.File{
 	ferr := os.Mkdir("out", 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
-			fmt.Println("creating dist folder error", ferr)
+			myfmt.Red("creating dist folder error", ferr)
 			os.Exit(1)
 		}
 	}
@@ -37,18 +37,18 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template{
 	for templateName, templatePath := range TEMPLATES {
 		file, err := pkger.Open(templatePath)
 		if err != nil {
-			fmt.Println("Error opening", templatePath, err)
+			myfmt.Red("Error opening", templatePath, err)
 			os.Exit(1)
 		}
 		templateRawBytes, err := io.ReadAll(file)
 		if err != nil {
-			fmt.Println("Error reading", templatePath, err)
+			myfmt.Red("Error reading", templatePath, err)
 			os.Exit(1)
 		}
 
 		_, err = t.New(templateName).Parse(string(templateRawBytes))
 		if err != nil {
-			fmt.Println("Error in template", templateName, err)
+			myfmt.Red("Error in template", templateName, err)
 		}
 	}
 	return t
