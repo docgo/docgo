@@ -100,7 +100,7 @@ func GenerateHTML2(doc *ModuleDoc)  {
 
 	const SEP = "```godoc\nheading_1\n```"
 	for i, s := range strings.Split(step2.String(), SEP) {
-		distFile := CreateDist(h1s[i] + ".html")
+		distFile := CreateDist(fmt.Sprintf("%d", i) + ".html")
 		fmt.Println(s)
 		headingBuf := bytes.Buffer{}
 		goldmark.New().Convert([]byte(s), &headingBuf)
