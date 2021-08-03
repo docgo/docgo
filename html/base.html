@@ -284,30 +284,11 @@
     </header>
 
     <main>
-        {{ define "snip" }}
-        {{ range $idx, $p := . }}
-        <h3>{{ .Name }}</h3>
-        {{ .Doc }}
-        <pre><code class="language-go">{{ .Snippet }}</code></pre>
-        {{ end }}
-        {{ end }}
-
         <article class="page-center">
             <div>
                 <small>bread > crumb</small>
                 <h1>Your docs</h1><br/>
-                {{ .ImportPath }}
-                {{ range $idx, $x := .Packages }}
-                <h2> {{ .Name }} </h2>
-                <code>{{ .RelativePath }}</code>
-                <hr/>
-                <p>{{ .Doc }}</p>
-                <p><br></p>
-                {{ template "snip" .Functions }}
-                {{ template "snip" .Structs }}
-                {{ template "snip" .Interfaces }}
-
-                {{ end }}
+                {{ . }}
             </div>
         </article>
     </main>

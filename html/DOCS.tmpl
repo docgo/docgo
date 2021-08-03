@@ -1,0 +1,25 @@
+{{ define "snip" }}
+{{ range $idx, $p := . }}
+### {{ .Name }} [{{.FoundInFile}}]
+{{ .Doc }}
+```go
+{{ .Snippet }}
+```
+{{ end }}
+{{ end }}
+
+{{ .ImportPath }}
+{{ range $idx, $x := .Packages }}
+# {{ .Name }}
+
+`{{ .RelativePath }}`
+
+----
+
+{{ .Doc }}
+
+{{ template "snip" .Functions }}
+{{ template "snip" .Structs }}
+{{ template "snip" .Interfaces }}
+
+{{ end }}

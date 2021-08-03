@@ -284,88 +284,54 @@
     </header>
 
     <main>
-        
-
         <article class="page-center">
             <div>
                 <small>bread > crumb</small>
                 <h1>Your docs</h1><br/>
-                example.com/demomod
-                
-                <h2> pkg1 </h2>
-                <code>/pkg1</code>
-                <hr/>
-                <p>This is some text I wrote for the package numbered one
-in the original file docstring. It follows the standard
-Go practice for documenting the purpose of a package.
-</p>
-                <p><br></p>
-                
-        
-        <h3>ExampleFn</h3>
-        Converts MyType into an int. Example:
-  ExampleFn(MyType(3)) == 3, nil
-This text goes after the code.
-
-        <pre><code class="language-go">func ExampleFn(t MyType) (x int, err error)</code></pre>
-        
-        
-                
-        
-        <h3>IntDumper</h3>
-        
-        <pre><code class="language-go">type IntDumper struct {
+                &lt;p&gt;example.com/demomod&lt;/p&gt;
+&lt;h1&gt;pkg2&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;/pkg1/pkg2&lt;/code&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;This is the second package in the&lt;br&gt;
+module and it contains even more code.&lt;/p&gt;
+&lt;h3&gt;MulTwo [/pkg1/pkg2/someFile.go]&lt;/h3&gt;
+&lt;p&gt;Multiply a number by two&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func MulTwo(x Num) int
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;Num [/pkg1/pkg2/someFile.go]&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Num struct {
+	int
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1&gt;pkg1&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;/pkg1&lt;/code&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;This is some text I wrote for the package numbered one&lt;br&gt;
+in the original file docstring. It follows the standard&lt;br&gt;
+Go practice for documenting the purpose of a package.&lt;/p&gt;
+&lt;h3&gt;ExampleFn [/pkg1/file1.go]&lt;/h3&gt;
+&lt;p&gt;Converts MyType into an int. Example:&lt;br&gt;
+ExampleFn(MyType(3)) == 3, nil&lt;br&gt;
+This text goes after the code.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;func ExampleFn(t MyType) (x int, err error)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;IntDumper [/pkg1/file2.go]&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type IntDumper struct {
 	mem []int
-}</code></pre>
-        
-        <h3>MyType</h3>
-        
-        <pre><code class="language-go">type MyType struct {
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;MyType [/pkg1/file1.go]&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type MyType struct {
 	num float64
-}</code></pre>
-        
-        
-                
-        
-        <h3>Dumper</h3>
-        
-        <pre><code class="language-go">type Dumper interface {
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;Dumper [/pkg1/file2.go]&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-go&#34;&gt;type Dumper interface {
 	Load(...interface{})
 	Dump() string
-}</code></pre>
-        
-        
+}
+&lt;/code&gt;&lt;/pre&gt;
 
-                
-                <h2> pkg2 </h2>
-                <code>/pkg1/pkg2</code>
-                <hr/>
-                <p>This is the second package in the
-module and it contains even more code.
-</p>
-                <p><br></p>
-                
-        
-        <h3>MulTwo</h3>
-        Multiply a number by two
-
-        <pre><code class="language-go">func MulTwo(x Num) int</code></pre>
-        
-        
-                
-        
-        <h3>Num</h3>
-        
-        <pre><code class="language-go">type Num struct {
-	int
-}</code></pre>
-        
-        
-                
-        
-        
-
-                
             </div>
         </article>
     </main>

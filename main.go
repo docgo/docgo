@@ -17,6 +17,7 @@ import (
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/godoc/vfs"
 	"time"
+	"go/token"
 )
 
 var Cli struct {
@@ -110,6 +111,15 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		parsedModuleDoc.Packages = append(parsedModuleDoc.Packages, parsedPackage)
 
+		info.FSet.Iterate(func(file *token.File) bool {
+			if file == nil { return false }
+			baseName := filepath.Base(file.Name())
+			q, _ := os.ReadFile(filepath.Join(parsedPackage.AbsolutePath, baseName))
+			_ = q
+			//fmt.Println(string(q))
+			return true
+		})
+
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
 				ParseTypeDecl(spec, parsedPackage)
@@ -118,6 +128,8 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, fn := range info.PDoc.Funcs {
 			parsedFn := FunctionDef{}
+
+			parsedFn.FoundInFile = GetDeclFile(fn.Decl, parsedPackage)
 			parsedFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
 			parsedFn.Name = fn.Name
 			parsedFn.Doc = fn.Doc
@@ -144,6 +156,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 	if ok {
 		sDef := StructDef{}
 		sDef.Snippet = CreateSnippet(st, docPackage, "type ", declName, " ")
+		sDef.FoundInFile = GetDeclFile(st, docPackage)
 		sDef.Name = declName
 		sDef.Type = st
 
@@ -157,6 +170,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 			return
 		}
 		interDef := InterfaceDef{}
+		interDef.FoundInFile = GetDeclFile(it, docPackage)
 		interDef.Name = declName
 		interDef.Type = it
 		interDef.Snippet = CreateSnippet(it, docPackage, "type ", declName, " ")

@@ -54,31 +54,40 @@ func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) Snippet {
 	return Snippet{strings.Join(prefix, "") + snipStr}
 }
 
-type FunctionDef struct {
+func GetDeclFile(node ast.Node, pkg *PackageDoc) string {
+	return pkg.FileSet.File(node.Pos()).Name()
+}
+
+type BaseDef struct {
 	Snippet
+	FoundInFile string
+}
+
+type FunctionDef struct {
+	BaseDef
 	Name string
 	Doc string
 }
 
 type StructDef struct {
-	Snippet
+	BaseDef
 	Name string
 	Doc             string
 	Type *ast.StructType
 }
 
 type InterfaceDef struct {
-	Snippet
+	BaseDef
 	Name string
 	Doc         string
 	Type *ast.InterfaceType
 }
 
 type Method struct {
-	Snippet
+	BaseDef
 }
 type Typedef struct{
-	Snippet
+	BaseDef
 }
 
 type CodeDef struct {
@@ -89,15 +98,12 @@ type CodeDef struct {
 	Interfaces []InterfaceDef
 }
 
-type PackageFile struct {}
-
 type PackageDoc struct {
 	CodeDef
 	Name            string
 	Doc             string
 	AbsolutePath    string
 	RelativePath    string
-	Files           []PackageFile
 	FileSet         *token.FileSet
 	ParentModule    *ModuleDoc
 }

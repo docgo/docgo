@@ -10,6 +10,9 @@ import (
 	"html/template"
 	"bytes"
 	"go/ast"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 type Meta struct {
@@ -30,7 +33,7 @@ func CreateDist() *os.File{
 }
 func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 	t := template.New("main")
-	raw, err := pkger.Open("/html/" + name)
+	raw, err := pkger.Open(name)
 	if err != nil {
 		fmt.Println("pkger error: ", err)
 		os.Exit(1)
@@ -48,13 +51,22 @@ func ReadTempl(name string, funcMap template.FuncMap) *template.Template{
 }
 func GenerateHTML2(doc *ModuleDoc) string {
 	distFile := CreateDist()
-	errT := ReadTempl("base.html", template.FuncMap{
+	buf := bytes.Buffer{}
+	md := goldmark.New(goldmark.WithExtensions(extension.GFM), goldmark.WithRendererOptions(html.WithHardWraps()))
+
+	errT := ReadTempl("/html/DOCS.tmpl", template.FuncMap{
 		"A": func(x int) int{ return 5},
-	}).Execute(distFile, doc)
+	}).Execute(&buf, doc)
+	buf2 := bytes.Buffer{}
+	md.Convert(buf.Bytes(), &buf2)
+
+	markdownHTML := buf2.String()
+	ReadTempl("/html/base.html", nil).Execute(distFile, markdownHTML)
+
 	if errT != nil {
 		fmt.Println(errT)
 	}
-	if y, err := filepath.Abs("./out/index.html"); err == nil {
+	if y, err := filepath.Abs("./html/out.html"); err == nil {
 		return y
 	}
 	return ""
