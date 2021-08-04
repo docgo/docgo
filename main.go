@@ -21,6 +21,7 @@ import (
 var Cli struct {
 	Out    string `default:"dist" short:"o" help"Where to put documentation/assets."`
 	Module string `arg help:"Path to module/package for documentation generation."`
+	StartServer bool `help:"Run a server once docs are built."`
 	Open   bool
 }
 
@@ -222,5 +223,12 @@ func main() {
 
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
-	http.ListenAndServe(":8080", mux)
+	if Cli.StartServer {
+		err := http.ListenAndServe(":8080", mux)
+		if err != nil {
+			myFmt.Red("Cannot listen on :8080 ", err)
+			os.Exit(1)
+		}
+		myFmt.Green("Listening on :8080")
+	}
 }
