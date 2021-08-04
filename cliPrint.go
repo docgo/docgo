@@ -32,7 +32,6 @@ func (m myCliFormatter) Debug(args ...interface{}) {
 	if os.Getenv("TERMINAL_EMULATOR") != "JetBrains-JediTerm" {
 		return
 	}
-	spew.Config.DisableCapacities = true
 	spew.Dump(args...)
 }
 

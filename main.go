@@ -78,6 +78,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 	fmt.Debug("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
+	c.IndexEnabled = true
 
 	err := c.Init()
 	if err != nil {
@@ -89,7 +90,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	<-time.NewTicker(time.Millisecond * 200).C
 
 	idx, _ := c.CurrentIndex()
-
+	
 	goModBuffer, err := os.ReadFile(filepath.Join(modFilePath, "go.mod"))
 	modImportPath := modfile.ModulePath(goModBuffer)
 
@@ -155,7 +156,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, varVal := range info.PDoc.Vars {
 			for _, varName := range varVal.Names {
-				fmt.Debug(varName)
+				_ = varName
 			}
 			fmt.Debug("specs", varVal.Decl.Specs)
 			_ = varVal
@@ -163,17 +164,13 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, constVal := range info.PDoc.Consts {
 			for _, constName := range constVal.Names {
-				fmt.Debug(constName)
+				_ = constName
 			}
-			vSPec := constVal.Decl.Specs[0].(*ast.ValueSpec)
-			fmt.Debug(vSPec.Type)
+			fmt.Debug(constVal.Decl)
 			_ = constVal
 		}
 
 		//fmt.Println(info.CallGraphIndex)
-		for file, decls := range parsedPackage.FileDecls {
-			fmt.Debug(file, decls)
-		}
 	}
 
 	return

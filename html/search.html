@@ -37,6 +37,9 @@
     const godoc = {{ CONTENT }};
     function stripHtml(html)
     {
+        // This is a dangerous idea that only works because
+        // the markdown<>html process inside the documentation parser takes care of most of the work.
+        // TODO: Use proper TextNodes and escaped input.
         let tmp = document.createElement("DIV");
         tmp.innerHTML = html;
         var code = [];
@@ -60,26 +63,35 @@
         ignoreLocation: true
     }
     const fuse = new Fuse(objList, fuseOpts)
-    fuse.search(params.q).map(result => {
+    const HIGHLIGHT_MATCH_FACTOR = 0.7;
+    const SPACE_WORD_DELIMITER = /[^\w]+/g;
+    const query = params.q;
+    fuse.search(query).map(result => {
         var out = "";
         result.matches.map(match => {
             var matchStr = match.value;
             var isBold = [...matchStr].map(x => false);
-            var firstLetter = false;
-            var matchArr = [...matchStr];
-            var lastFrom = -1;
             match.indices.map(([from, to]) => {
                     for (var i = from; i <= to; i++) {
                         isBold[i] = true;
                     }
             });
-            matchArr.map((chr, i) => {
-                if(i > 1 && !isBold[i - 1] && matchArr[i - 1] != " " ) isBold[i] = false;
-              if(isBold[i]) {
-                  out += "<span class='highlight'>" + chr + "</span>";
-              } else {
-                  out += chr;
-              }
+            matchStr.split(SPACE_WORD_DELIMITER).map(word => {
+                const fromIdx = matchStr.indexOf(word);
+                const toIdx = fromIdx + word.length;
+                let matches = 0;
+                for(var i = fromIdx; i < toIdx; i++) {
+                    if(!isBold[i]) {
+                        break;
+                    } else {
+                        matches++;
+                    }
+                }
+                /* TODO: Handle HTML escaping properly. */
+                if((matches / word.length) >= HIGHLIGHT_MATCH_FACTOR && (matches / query.length) >= HIGHLIGHT_MATCH_FACTOR)
+                    out += "<span class='highlight'>" + word + "</span> ";
+                else
+                    out += word + " ";
             })
         })
         const listItem = document.createElement('li');
@@ -87,18 +99,6 @@
         listItem.innerHTML += out;
         searchList.append(listItem);
     })
-/*
-    var index = new FlexSearch.Index({language: 'en'});
-    [...Object.entries(godoc)].map((x, idx) => index.add(x[0], x[1].text));
-    const searchResults = index.search(params.q);
-    searchResults.map(x => {
-        let contents = godoc[x].text;
-        const listItem = document.createElement('li');
-        params.q.split(/\s/g).map(x => contents = contents.replaceAll(x, `<b>${x}</b>`))
-        listItem.innerHTML = `<small>${x}</small>`;
-        listItem.innerHTML += contents;
-        searchList.append(listItem);
-    }) */
 </script>
 </body>
 </html>
