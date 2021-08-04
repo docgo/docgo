@@ -28,19 +28,19 @@ func cliParse() {
 	kong.Parse(&Cli)
 	cliOutputAbs, err := filepath.Abs(Cli.Out)
 	if err != nil {
-		myfmt.Red("Couldn't parse directory for output", err)
+		myFmt.Red("Couldn't parse directory for output", err)
 		os.Exit(1)
 	}
 	Cli.Out = cliOutputAbs
 	if cliStat, err := os.Stat(Cli.Out); err == nil {
 		if !cliStat.IsDir() {
-			myfmt.Red("Output is not a directory, but a file.")
+			myFmt.Red("Output is not a directory, but a file.")
 			os.Exit(1)
 		}
 		isFine := true
 		filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
 			if !d.IsDir() && filepath.Ext(path) != ".html" {
-				myfmt.Red("Out path not empty (contains non-assets):", Cli.Out)
+				myFmt.Red("Out path not empty (contains non-assets):", Cli.Out)
 				os.Exit(1)
 				isFine = false
 				return filepath.SkipDir
@@ -52,12 +52,12 @@ func cliParse() {
 		}
 	}
 
-	myfmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
+	myFmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
 
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
 	if err != nil {
-		myfmt.Red("Error loading '", mInfo, "': ", err)
+		myFmt.Red("Error loading '", mInfo, "': ", err)
 		os.Exit(1)
 	}
 	mDirPath := absModPath
@@ -75,7 +75,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	parsedModuleDoc.Packages = []*PackageDoc{}
 	parsedModuleDoc.SimpleExports = SimpleExportsByType{}
 
-	myfmt.Debug("modFilePath", modFilePath)
+	myFmt.Debug("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
 
 	err := c.Init()
@@ -117,7 +117,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 	}
 	parsedModuleDoc.DebugPrint()
-	myfmt.Green("Loaded packages:", pkgList)
+	myFmt.Green("Loaded packages:", pkgList)
 
 	godocPresentation := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {

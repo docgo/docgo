@@ -28,9 +28,9 @@ type ExportType string
 type SimpleExportsByType map[string][]ScopedIdentifier
 
 func (m ModuleDoc) DebugPrint() {
-	myfmt.Debug("ModuleDoc{ ", "AbsolutePath =", m.AbsolutePath, " ImportPath =", m.ImportPath)
+	myFmt.Debug("ModuleDoc{ ", "AbsolutePath =", m.AbsolutePath, " ImportPath =", m.ImportPath)
 	for exportType, exports := range m.SimpleExports {
-		myfmt.Debug(" - ", exportType, ":", exports)
+		myFmt.Debug(" - ", exportType, ":", exports)
 	}
 }
 

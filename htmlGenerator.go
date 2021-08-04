@@ -22,7 +22,7 @@ func CreateDist(file string) *os.File {
 	ferr := os.Mkdir(Cli.Out, 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
-			myfmt.Red("creating dist folder error", ferr)
+			myFmt.Red("creating dist folder error", ferr)
 			os.Exit(1)
 		}
 	}
@@ -38,18 +38,18 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 	for templateName, templatePath := range TEMPLATES {
 		file, err := pkger.Open(templatePath)
 		if err != nil {
-			myfmt.Red("Error opening", templatePath, err)
+			myFmt.Red("Error opening", templatePath, err)
 			os.Exit(1)
 		}
 		templateRawBytes, err := io.ReadAll(file)
 		if err != nil {
-			myfmt.Red("Error reading", templatePath, err)
+			myFmt.Red("Error reading", templatePath, err)
 			os.Exit(1)
 		}
 
 		_, err = t.New(templateName).Parse(string(templateRawBytes))
 		if err != nil {
-			myfmt.Red("Error in template", templateName, err)
+			myFmt.Red("Error in template", templateName, err)
 		}
 	}
 	return t
@@ -58,7 +58,7 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 type PkgConfig string
 
 func (c PkgConfig) Group(x ...string) {
-	myfmt.Debug(x)
+	myFmt.Debug(x)
 }
 func GenerateHTML(doc *ModuleDoc) {
 	os.RemoveAll(Cli.Out)
@@ -178,7 +178,7 @@ func GenerateHTML(doc *ModuleDoc) {
 			}
 			err := templates.Lookup("baseHTML").Execute(distFile, thisPage)
 			if err != nil {
-				myfmt.Red(err)
+				myFmt.Red(err)
 				return
 			}
 		}(realIndex, s)
