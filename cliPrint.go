@@ -7,31 +7,37 @@ import (
 	"github.com/markbates/pkger"
 )
 
-func _extraOpens() {
+// Needed for the `pkger` tool to autoload the required files.
+func extraPkgerOpens() {
 	pkger.Open("/html/base.md")
 	pkger.Open("/html/base.html")
 	pkger.Open("/html/snippet.md")
 }
-type _mPrintlnType func(...interface{})
 
-func _mWrapColor(c color.Attribute) _mPrintlnType {
-	return func(x ...interface{}) { color.New(c).Println(x...) }
+type myCliFormatterFn func(args ...interface{})
+
+type myCliFormatter struct {
+	dbgLogger *log.Logger
+	Red       myCliFormatterFn
+	Green     myCliFormatterFn
+	Yellow    myCliFormatterFn
 }
 
-func _mDoDebug() _mPrintlnType {
+var fmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen), myCliColor(color.FgHiYellow)}
+
+func (m myCliFormatter) Debug(args ...interface{}) {
 	if os.Getenv("NODEBUG") != "" {
-		return func(i ...interface{}) {
-			// noop
-		}
+		return
 	}
-	return log.New(os.Stdout, "DBG ", log.Flags()).Println
+	if m.dbgLogger == nil {
+		m.dbgLogger = log.New(os.Stdout, "", (0))
+	}
+	m.dbgLogger.Println(args...)
 }
 
-var myfmt = struct {
-	Red   _mPrintlnType
-	Green _mPrintlnType
-	Yellow _mPrintlnType
-	Debug _mPrintlnType
-}{
-	_mWrapColor(color.FgRed), _mWrapColor(color.FgGreen), _mWrapColor(color.FgHiYellow), _mDoDebug(),
+func myCliColor(attribute color.Attribute) myCliFormatterFn {
+	c := color.New(attribute)
+	return func(args ...interface{}) {
+		c.Println(args...)
+	}
 }

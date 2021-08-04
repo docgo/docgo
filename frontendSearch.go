@@ -16,7 +16,7 @@ func GenerateSearch(index map[string]string) {
 
 	searchJson, err := json.Marshal(index)
 	if err != nil {
-		myfmt.Red(err)
+		fmt.Red(err)
 		os.Exit(1)
 	}
 	outHtml := strings.ReplaceAll(SEARCH_PAGE_HTML, "{{ CONTENT }}", string(searchJson))
