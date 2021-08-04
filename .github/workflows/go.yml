@@ -16,12 +16,7 @@ jobs:
     - name: Build and install
       run: go install .
     - name: dist
-      run: newgodoc -o dist .
-    - name: Deploy to GitHub Pages
-      uses: crazy-max/ghaction-github-pages@v2
-      with:
-        target_branch: gh-pages
-        build_dir: dist
+      run: docgo -p 0 .
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
