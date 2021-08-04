@@ -3,8 +3,13 @@
     <title>Doc search</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FlexSearch/0.7.2/flexsearch.bundle.min.js" integrity="sha512-nFmzFs0vxLvw95r3kpEArM496n1udEDP2OJ+uoyv00RaP4B6NOHbciX0Gr2V9/DxeaHi3fKXLYty8YTLgVkquw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        (function(self){'use strict';self.FlexSearch.registerLanguage("en",{filter:"a about above after again against all also am an and any are aren't as at be because been before being below both but by can cannot can't come could couldn't did didn't do does doesn't doing dont down during each even few first for from further get go had hadn't has hasn't have haven't having he hed her here here's hers herself hes him himself his how how's i id if ill im in into is isn't it it's itself i've just know let's like make me more most mustn't my myself new no nor not now of off on once only or other ought our our's ourselves out over own same say see shan't she she'd shell shes should shouldn't so some such than that that's the their theirs them themselves then there there's these they they'd they'll they're they've this those through time to too until up us very want was wasn't way we wed well were weren't we've what what's when when's where where's which while who whom who's why why's will with won't would wouldn't you you'd you'll your you're your's yourself yourselves you've".split(" "),
+            h:{ational:"ate",iveness:"ive",fulness:"ful",ousness:"ous",ization:"ize",tional:"tion",biliti:"ble",icate:"ic",ative:"",alize:"al",iciti:"ic",entli:"ent",ousli:"ous",alism:"al",ation:"ate",aliti:"al",iviti:"ive",ement:"",enci:"ence",anci:"ance",izer:"ize",alli:"al",ator:"ate",logi:"log",ical:"ic",ance:"",ence:"",ness:"",able:"",ible:"",ment:"",eli:"e",bli:"ble",ful:"",ant:"",ent:"",ism:"",ate:"",iti:"",ous:"",ive:"",ize:"",al:"",ou:"",er:"",ic:""},g:{}});}(this));
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
+
     <style>
         body {
             background: #202229;
@@ -25,28 +30,49 @@
 </ul>
 
 <script>
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+
+
     const godoc = {{ CONTENT }};
     function stripHtml(html)
     {
         let tmp = document.createElement("DIV");
         tmp.innerHTML = html;
-        return tmp.textContent || tmp.innerText || "";
+        var code = [];
+        [...tmp.querySelectorAll('code')].map(x => {
+            code.push(x.textContent)
+            x.remove();
+        })
+        return { text: tmp.textContent, code: code };
     }
+    var objList = []
     for(var key in godoc) {
         godoc[key] = stripHtml(godoc[key])
+        objList.push(Object.assign(godoc[key], {key: key}))
     }
-    var index = new FlexSearch.Index();
 
-    [...Object.entries(godoc)].map((x, idx) => index.add(x[0], x[1]));
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(urlSearchParams.entries());
+    const fuseOpts = {
+        includeScore: true,
+        keys: ['text', 'code'],
+        includeMatches: true
+    }
+    /*
+    const fuse = new Fuse(Object.entries(godoc).map(x => x[1]), fuseOpts)
+    fuse.search(params.q).map(result => {
+        result.matches.map(x => {
+          result.item[x.key]
+        })
+    }) */
 
+    var index = new FlexSearch.Index({language: 'en'});
+    [...Object.entries(godoc)].map((x, idx) => index.add(x[0], x[1].text));
     const searchResults = index.search(params.q);
     searchResults.map(x => {
-        let contents = godoc[x];
+        let contents = godoc[x].text;
         const listItem = document.createElement('li');
-        params.q.split(/\s/g).map(x => contents = contents.replaceAll(x, `<b>${stripHtml(x)}</b>`))
-        listItem.innerHTML = `<small>${stripHtml(x)}</small>`;
+        params.q.split(/\s/g).map(x => contents = contents.replaceAll(x, `<b>${x}</b>`))
+        listItem.innerHTML = `<small>${x}</small>`;
         listItem.innerHTML += contents;
         searchList.append(listItem);
     })
