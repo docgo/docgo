@@ -4,7 +4,7 @@ import (
 	"os"
 	"github.com/markbates/pkger"
 	"io"
-	"fmt"
+	oldFmt "fmt"
 	"errors"
 	"html/template"
 	"bytes"
@@ -22,7 +22,7 @@ func CreateDist(file string) *os.File {
 	ferr := os.Mkdir(Cli.Out, 0755)
 	if ferr != nil {
 		if !errors.Is(ferr, os.ErrExist) {
-			myFmt.Red("creating dist folder error", ferr)
+			fmt.Red("creating dist folder error", ferr)
 			os.Exit(1)
 		}
 	}
@@ -38,18 +38,18 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 	for templateName, templatePath := range TEMPLATES {
 		file, err := pkger.Open(templatePath)
 		if err != nil {
-			myFmt.Red("Error opening", templatePath, err)
+			fmt.Red("Error opening", templatePath, err)
 			os.Exit(1)
 		}
 		templateRawBytes, err := io.ReadAll(file)
 		if err != nil {
-			myFmt.Red("Error reading", templatePath, err)
+			fmt.Red("Error reading", templatePath, err)
 			os.Exit(1)
 		}
 
 		_, err = t.New(templateName).Parse(string(templateRawBytes))
 		if err != nil {
-			myFmt.Red("Error in template", templateName, err)
+			fmt.Red("Error in template", templateName, err)
 		}
 	}
 	return t
@@ -58,7 +58,7 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 type PkgConfig string
 
 func (c PkgConfig) Group(x ...string) {
-	myFmt.Debug(x)
+	fmt.Debug(x)
 }
 func GenerateHTML(doc *ModuleDoc) {
 	os.RemoveAll(Cli.Out)
@@ -103,7 +103,7 @@ func GenerateHTML(doc *ModuleDoc) {
 
 	err := templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
 	if err != nil {
-		fmt.Println("Error parsing markdown", err)
+		fmt.Red("Error parsing markdown", err)
 		os.Exit(1)
 	}
 
@@ -123,7 +123,7 @@ func GenerateHTML(doc *ModuleDoc) {
 		if n.Kind() == mdAst.KindHeading {
 			nHeading := n.(*mdAst.Heading)
 			if !entering {
-				t := fmt.Sprintf("%s", n.Text(markdownOutputBytes))
+				t := oldFmt.Sprintf("%s", n.Text(markdownOutputBytes))
 
 				if nHeading.Level == 1 {
 					headingTitles = append(headingTitles, t)
@@ -139,7 +139,7 @@ func GenerateHTML(doc *ModuleDoc) {
 	htmlBuffer := bytes.Buffer{}
 	err = goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
 	if err != nil {
-		fmt.Println("Error rendering markdown to HTML", err)
+		fmt.Red("Error rendering markdown to HTML", err)
 		os.Exit(1)
 	}
 
@@ -160,7 +160,7 @@ func GenerateHTML(doc *ModuleDoc) {
 		} else {
 			dumbLink := strings.Join(strings.Fields(headingTitles[realIndex]), "-")
 			if _, exists := pageLinksInverted[dumbLink]; exists {
-				dumbLink += fmt.Sprintf("%d", rand.Uint32())
+				dumbLink += oldFmt.Sprintf("%d", rand.Uint32())
 			}
 			pageName = dumbLink
 			pageLinks[realIndex] = dumbLink + ".html"
@@ -178,7 +178,7 @@ func GenerateHTML(doc *ModuleDoc) {
 			}
 			err := templates.Lookup("baseHTML").Execute(distFile, thisPage)
 			if err != nil {
-				myFmt.Red(err)
+				fmt.Red(err)
 				return
 			}
 		}(realIndex, s)

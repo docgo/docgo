@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"os"
@@ -28,9 +27,9 @@ type ExportType string
 type SimpleExportsByType map[string][]ScopedIdentifier
 
 func (m ModuleDoc) DebugPrint() {
-	myFmt.Debug("ModuleDoc{ ", "AbsolutePath =", m.AbsolutePath, " ImportPath =", m.ImportPath)
+	fmt.Debug("ModuleDoc{ ", "AbsolutePath =", m.AbsolutePath, " ImportPath =", m.ImportPath)
 	for exportType, exports := range m.SimpleExports {
-		myFmt.Debug(" - ", exportType, ":", exports)
+		fmt.Debug(" - ", exportType, ":", exports)
 	}
 }
 
@@ -47,38 +46,41 @@ func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) Snippet {
 	baseName := filepath.Base(snipFile.Name())
 	q, _ := os.ReadFile(filepath.Join(pkg.AbsolutePath, baseName))
 	if len(q) == 0 {
-		fmt.Println(pkg.AbsolutePath, baseName)
+		fmt.Red(pkg.AbsolutePath, baseName)
 		os.Exit(1)
 	}
 	snipStr := string(q)[snipFile.Offset(node.Pos()):snipFile.Offset(node.End())]
 	return Snippet{strings.Join(prefix, "") + snipStr}
 }
 
-func GetDeclFile(node ast.Node, pkg *PackageDoc) string {
-	return pkg.FileSet.File(node.Pos()).Name()
+func GetDeclFile(node ast.Node, ourDecl BaseDef, pkg *PackageDoc) string {
+	fileName := pkg.FileSet.File(node.Pos()).Name()
+	if pkg.FileDecls[fileName] == nil {
+		pkg.FileDecls[fileName] = make([]BaseDef, 0)
+	}
+	pkg.FileDecls[fileName] = append(pkg.FileDecls[fileName], ourDecl)
+	return fileName
 }
 
 type BaseDef struct {
 	Snippet
+	Name  string
 	FoundInFile string
 }
 
 type FunctionDef struct {
 	BaseDef
-	Name string
 	Doc  string
 }
 
 type StructDef struct {
 	BaseDef
-	Name string
 	Doc  string
 	Type *ast.StructType
 }
 
 type InterfaceDef struct {
 	BaseDef
-	Name string
 	Doc  string
 	Type *ast.InterfaceType
 }
@@ -98,6 +100,11 @@ type CodeDef struct {
 	Interfaces []InterfaceDef
 }
 
+type PackageFileDoc struct {
+	CodeDef
+	Name string
+}
+
 type PackageDoc struct {
 	CodeDef
 	Name         string
@@ -106,4 +113,5 @@ type PackageDoc struct {
 	RelativePath string
 	FileSet      *token.FileSet
 	ParentModule *ModuleDoc
+	FileDecls    map[string][]BaseDef
 }

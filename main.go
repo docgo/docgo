@@ -4,7 +4,6 @@ package main
 
 import (
 	"go/ast"
-	"fmt"
 	"os"
 	"strings"
 	"path/filepath"
@@ -14,8 +13,8 @@ import (
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/godoc/vfs"
 	"time"
-	"go/token"
 	"io/fs"
+	"reflect"
 )
 
 var Cli struct {
@@ -29,19 +28,19 @@ func cliParse() {
 	kong.Parse(&Cli)
 	cliOutputAbs, err := filepath.Abs(Cli.Out)
 	if err != nil {
-		myFmt.Red("Couldn't parse directory for output", err)
+		fmt.Red("Couldn't parse directory for output", err)
 		os.Exit(1)
 	}
 	Cli.Out = cliOutputAbs
 	if cliStat, err := os.Stat(Cli.Out); err == nil {
 		if !cliStat.IsDir() {
-			myFmt.Red("Output is not a directory, but a file.")
+			fmt.Red("Output is not a directory, but a file.")
 			os.Exit(1)
 		}
 		isFine := true
 		filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
 			if !d.IsDir() && filepath.Ext(path) != ".html" {
-				myFmt.Red("Out path not empty (contains non-assets):", Cli.Out)
+				fmt.Red("Out path not empty (contains non-assets):", Cli.Out)
 				os.Exit(1)
 				isFine = false
 				return filepath.SkipDir
@@ -53,12 +52,12 @@ func cliParse() {
 		}
 	}
 
-	myFmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
+	fmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
 
 	absModPath, err := filepath.Abs(Cli.Module)
 	mInfo, err := os.Stat(absModPath)
 	if err != nil {
-		myFmt.Red("Error loading '", mInfo, "': ", err)
+		fmt.Red("Error loading '", mInfo, "': ", err)
 		os.Exit(1)
 	}
 	mDirPath := absModPath
@@ -76,12 +75,12 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	parsedModuleDoc.Packages = []*PackageDoc{}
 	parsedModuleDoc.SimpleExports = SimpleExportsByType{}
 
-	myFmt.Debug("modFilePath", modFilePath)
+	fmt.Debug("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
 
 	err := c.Init()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Red(err)
 	}
 	go func() {
 		c.RunIndexer()
@@ -118,7 +117,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 	}
 	parsedModuleDoc.DebugPrint()
-	myFmt.Green("Loaded packages:", pkgList)
+	fmt.Green("Loaded packages:", pkgList)
 
 	godocPresentation := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {
@@ -128,6 +127,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			continue
 		}
 
+		parsedPackage.FileDecls = make(map[string][]BaseDef)
 		parsedPackage.ParentModule = parsedModuleDoc
 		parsedPackage.AbsolutePath = filepath.Join(modFilePath, strings.TrimPrefix(path, "/"))
 		parsedPackage.FileSet = info.FSet
@@ -136,17 +136,6 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		parsedPackage.Doc = info.PDoc.Doc
 
 		parsedModuleDoc.Packages = append(parsedModuleDoc.Packages, parsedPackage)
-
-		info.FSet.Iterate(func(file *token.File) bool {
-			if file == nil {
-				return false
-			}
-			baseName := filepath.Base(file.Name())
-			q, _ := os.ReadFile(filepath.Join(parsedPackage.AbsolutePath, baseName))
-			_ = q
-			//fmt.Println(string(q))
-			return true
-		})
 
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
@@ -157,23 +146,35 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		for _, fn := range info.PDoc.Funcs {
 			parsedFn := FunctionDef{}
 
-			parsedFn.FoundInFile = GetDeclFile(fn.Decl, parsedPackage)
 			parsedFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
 			parsedFn.Name = fn.Name
 			parsedFn.Doc = fn.Doc
 			parsedPackage.Functions = append(parsedPackage.Functions, parsedFn)
+			parsedFn.FoundInFile = GetDeclFile(fn.Decl, parsedFn.BaseDef, parsedPackage)
 		}
 
 		for _, varVal := range info.PDoc.Vars {
+			for _, varName := range varVal.Names {
+				fmt.Debug(varName)
+			}
+			fmt.Debug("specs", varVal.Decl.Specs)
 			_ = varVal
 		}
 
 		for _, constVal := range info.PDoc.Consts {
+			for _, constName := range constVal.Names {
+				fmt.Debug(constName)
+			}
+			fmt.Debug(reflect.TypeOf(constVal.Decl.Specs[0]))
 			_ = constVal
 		}
 
 		//fmt.Println(info.CallGraphIndex)
+		for file, decls := range parsedPackage.FileDecls {
+			fmt.Debug(file, decls)
+		}
 	}
+
 	return
 }
 
@@ -184,9 +185,9 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 	if ok {
 		sDef := StructDef{}
 		sDef.Snippet = CreateSnippet(st, docPackage, "type ", declName, " ")
-		sDef.FoundInFile = GetDeclFile(st, docPackage)
 		sDef.Name = declName
 		sDef.Type = st
+		sDef.FoundInFile = GetDeclFile(st, sDef.BaseDef, docPackage)
 
 		for _, field := range st.Fields.List {
 			_ = field
@@ -198,7 +199,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 			return
 		}
 		interDef := InterfaceDef{}
-		interDef.FoundInFile = GetDeclFile(it, docPackage)
+		interDef.FoundInFile = GetDeclFile(it, interDef.BaseDef, docPackage)
 		interDef.Name = declName
 		interDef.Type = it
 		interDef.Snippet = CreateSnippet(it, docPackage, "type ", declName, " ")
@@ -223,12 +224,13 @@ func main() {
 
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
+
 	if Cli.StartServer {
 		err := http.ListenAndServe(":8080", mux)
 		if err != nil {
-			myFmt.Red("Cannot listen on :8080 ", err)
+			fmt.Red("Cannot listen on :8080 ", err)
 			os.Exit(1)
 		}
-		myFmt.Green("Listening on :8080")
+		fmt.Green("Listening on :8080")
 	}
 }

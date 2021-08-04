@@ -23,14 +23,14 @@ type myCliFormatter struct {
 	Yellow    myCliFormatterFn
 }
 
-var myFmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen), myCliColor(color.FgHiYellow)}
+var fmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen), myCliColor(color.FgHiYellow)}
 
 func (m myCliFormatter) Debug(args ...interface{}) {
 	if os.Getenv("NODEBUG") != "" {
 		return
 	}
 	if m.dbgLogger == nil {
-		m.dbgLogger = log.New(os.Stdout, "dbg ", log.Flags())
+		m.dbgLogger = log.New(os.Stdout, "", (0))
 	}
 	m.dbgLogger.Println(args...)
 }
