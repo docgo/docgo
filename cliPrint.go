@@ -6,10 +6,12 @@ import (
 	"os"
 	"github.com/markbates/pkger"
 	"github.com/davecgh/go-spew/spew"
+	"reflect"
 )
 
 // Needed for the `pkger` tool to autoload the required files.
 func extraPkgerOpens() {
+	pkger.Stat("/go.mod")
 	pkger.Open("/html/base.md")
 	pkger.Open("/html/base.html")
 	pkger.Open("/html/snippet.md")
@@ -33,7 +35,13 @@ func (m myCliFormatter) Debug(args ...interface{}) {
 		return
 	}
 	spew.Config.DisableCapacities = true
-	spew.Dump(args...)
+	for i, arg := range args {
+		if arg != nil && reflect.TypeOf(arg) != nil && reflect.TypeOf(arg).Kind() == reflect.String {
+			os.Stdout.WriteString(" " + arg.(string) + " ")
+		} else {
+			spew.Dump(args[i])
+		}
+	}
 }
 
 func myCliColor(attribute color.Attribute) myCliFormatterFn {

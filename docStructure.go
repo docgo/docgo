@@ -97,11 +97,11 @@ type PackageDoc struct {
 }
 
 type CodeDef struct {
-	Functions  []FunctionDef
-	Methods    []Method
-	Typedefs   []Typedef
-	Structs    []StructDef
-	Interfaces []InterfaceDef
+	Functions  []*FunctionDef
+	Methods    []*Method
+	Typedefs   []*Typedef
+	Structs    []*StructDef
+	Interfaces []*InterfaceDef
 }
 
 type PackageFileDoc struct {

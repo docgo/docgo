@@ -96,7 +96,21 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	parsedModuleDoc.AbsolutePath = modFilePath
 	parsedModuleDoc.ImportPath = modImportPath
 
+	for pkgName, exportMap := range idx.Exports() {
+		_ = pkgName
+		for symbolName, val := range exportMap {
+			fmt.Debug(symbolName, val)
+		}
+	}
+
+	i := 0
+	for idx.Snippet(i) != nil{
+		fmt.Debug(idx.Snippet(i))
+		i++
+	}
+
 	pkgList := map[string]string{}
+	pkgList["/"] = "main"
 	for kind, symbols := range idx.Idents() {
 		if kind.Name() == "Packages" {
 			for _, sym := range symbols {
@@ -149,7 +163,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			parsedFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
 			parsedFn.Name = fn.Name
 			parsedFn.Doc = fn.Doc
-			parsedPackage.Functions = append(parsedPackage.Functions, parsedFn)
+			parsedPackage.Functions = append(parsedPackage.Functions, &parsedFn)
 			parsedFn.FoundInFile = GetDeclFile(fn.Decl, parsedFn.BaseDef, parsedPackage)
 		}
 
@@ -166,8 +180,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 				fmt.Debug(constName)
 			}
 			vSPec := constVal.Decl.Specs[0].(*ast.ValueSpec)
-			fmt.Debug(vSPec.Type)
-			_ = constVal
+			_ = vSPec
 		}
 
 		//fmt.Println(info.CallGraphIndex)
@@ -193,7 +206,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		for _, field := range st.Fields.List {
 			_ = field
 		}
-		docPackage.Structs = append(docPackage.Structs, sDef)
+		docPackage.Structs = append(docPackage.Structs, &sDef)
 	} else {
 		it, ok := t.Type.(*ast.InterfaceType)
 		if !ok {
@@ -204,7 +217,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		interDef.Name = declName
 		interDef.Type = it
 		interDef.Snippet = CreateSnippet(it, docPackage, "type ", declName, " ")
-		docPackage.Interfaces = append(docPackage.Interfaces, interDef)
+		docPackage.Interfaces = append(docPackage.Interfaces, &interDef)
 
 		for _, meth := range it.Methods.List {
 			_ = meth
