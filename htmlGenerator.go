@@ -36,7 +36,7 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 	}
 	var TEMPLATES = map[string]string{"baseHTML": "/html/base.html", "baseMarkdown": "/html/base.md", "snippet": "/html/snippet.md"}
 	for templateName, templatePath := range TEMPLATES {
-		file, err := pkger.Open(templatePath)
+		file, err := pkger.Open("github.com/fikisipi/docgo:" + templatePath)
 		if err != nil {
 			fmt.Red("Error opening", templatePath, err)
 			os.Exit(1)

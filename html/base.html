@@ -309,7 +309,8 @@
 </section>
 <script>
     headerCheckbox.checked = false;
-    window.onbeforeunload = () => { headerCheckbox.checked = false; }
+    [...document.querySelectorAll('a')].map(x => x.addEventListener('click', () => { headerCheckbox.checked = false; }))
+    //window.onbeforeunload = () => { headerCheckbox.checked = false; }
 </script>
 <style>
     ::-webkit-scrollbar {
