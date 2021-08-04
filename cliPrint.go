@@ -26,8 +26,10 @@ type myCliFormatter struct {
 
 var fmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen), myCliColor(color.FgHiYellow)}
 
+// Pretty-prints a data structure for debugging purposes
+// At the moment, ran only inside JetBrains
 func (m myCliFormatter) Debug(args ...interface{}) {
-	if os.Getenv("NODEBUG") != "" {
+	if os.Getenv("TERMINAL_EMULATOR") != "JetBrains-JediTerm" {
 		return
 	}
 	spew.Config.DisableCapacities = true

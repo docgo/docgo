@@ -14,13 +14,15 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 	"time"
 	"io/fs"
+	"github.com/pkg/browser"
+	"context"
+	"errors"
 )
 
 var Cli struct {
-	Out    string `default:"dist" short:"o" help"Where to put documentation/assets."`
-	Module string `arg help:"Path to module/package for documentation generation."`
-	StartServer bool `help:"Run a server once docs are built."`
-	Open   bool
+	Out        string `default:"dist/" short:"o" help:"Where to put documentation/assets."`
+	ModulePath string `arg help:"Path to module/package for documentation generation."`
+	ServerPort int    `short:"p" default="8080" help:"Port for hot-reload server. 0 to disable server."`
 }
 
 func cliParse() {
@@ -53,7 +55,7 @@ func cliParse() {
 
 	fmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
 
-	absModPath, err := filepath.Abs(Cli.Module)
+	absModPath, err := filepath.Abs(Cli.ModulePath)
 	mInfo, err := os.Stat(absModPath)
 	if err != nil {
 		fmt.Red("Error loading '", mInfo, "': ", err)
@@ -61,7 +63,7 @@ func cliParse() {
 	}
 	mDirPath := absModPath
 	if !mInfo.IsDir() {
-		mDirPath = filepath.Dir(Cli.Module)
+		mDirPath = filepath.Dir(Cli.ModulePath)
 	}
 
 	_modDoc = ModuleParse(mDirPath)
@@ -224,12 +226,20 @@ func main() {
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 
-	if Cli.StartServer {
+	if Cli.ServerPort == 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), 200 * time.Millisecond)
+		go func() {
+			<- ctx.Done()
+			if !errors.Is(ctx.Err(), context.Canceled) {
+				fmt.Green("Listening on :8080")
+				browser.OpenURL("http://localhost:8080")
+			}
+		}()
 		err := http.ListenAndServe(":8080", mux)
 		if err != nil {
-			fmt.Red("Cannot listen on :8080 ", err)
+			cancel()
+			fmt.Red("Cannot listen on :8080\n", err)
 			os.Exit(1)
 		}
-		fmt.Green("Listening on :8080")
 	}
 }
