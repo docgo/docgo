@@ -23,7 +23,7 @@ type myCliFormatter struct {
 	Yellow    myCliFormatterFn
 }
 
-var myFmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen), myCliColor(color.FgYellow)}
+var myFmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen), myCliColor(color.FgHiYellow)}
 
 func (m myCliFormatter) Debug(args ...interface{}) {
 	if os.Getenv("NODEBUG") != "" {
