@@ -103,10 +103,8 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 	}
 
-	i := 0
-	for idx.Snippet(i) != nil{
+	for i := 0; idx.Snippet(i) != nil; i++{
 		fmt.Debug(idx.Snippet(i))
-		i++
 	}
 
 	pkgList := map[string]string{}

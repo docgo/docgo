@@ -11,7 +11,6 @@ import (
 
 // Needed for the `pkger` tool to autoload the required files.
 func extraPkgerOpens() {
-	pkger.Stat("/go.mod")
 	pkger.Open("/html/base.md")
 	pkger.Open("/html/base.html")
 	pkger.Open("/html/snippet.md")
