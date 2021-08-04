@@ -1,7 +1,5 @@
 name: Build page
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 jobs:
   build:
