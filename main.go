@@ -22,7 +22,7 @@ import (
 var Cli struct {
 	Out        string `default:"dist/" short:"o" help:"Where to put documentation/assets."`
 	ModulePath string `arg help:"Path to module/package for documentation generation."`
-	ServerPort int    `short:"p" default="8080" help:"Port for hot-reload server. 0 to disable server."`
+	ServerPort int    `default:8080 short:"p" help:"Port for hot-reload server. 0 to disable server."`
 }
 
 func cliParse() {
@@ -226,7 +226,7 @@ func main() {
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 
-	if Cli.ServerPort == 0 {
+	if Cli.ServerPort != 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 200 * time.Millisecond)
 		go func() {
 			<- ctx.Done()
