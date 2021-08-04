@@ -50,6 +50,7 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 		_, err = t.New(templateName).Parse(string(templateRawBytes))
 		if err != nil {
 			fmt.Red("Error in template", templateName, err)
+			os.Exit(1)
 		}
 	}
 	return t

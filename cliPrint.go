@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"github.com/markbates/pkger"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // Needed for the `pkger` tool to autoload the required files.
@@ -29,10 +30,8 @@ func (m myCliFormatter) Debug(args ...interface{}) {
 	if os.Getenv("NODEBUG") != "" {
 		return
 	}
-	if m.dbgLogger == nil {
-		m.dbgLogger = log.New(os.Stdout, "", (0))
-	}
-	m.dbgLogger.Println(args...)
+	spew.Config.DisableCapacities = true
+	spew.Dump(args...)
 }
 
 func myCliColor(attribute color.Attribute) myCliFormatterFn {
