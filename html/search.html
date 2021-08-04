@@ -21,6 +21,7 @@
         ul li { border-bottom: 1px dashed #999; margin: 20px 0; padding: 1em 0; }
         li > small { display: block; color: #999; margin-bottom: 10px; font-size: 1em; }
         .back, .back:visited { color: #fff; display: block; text-align: center; }
+        .highlight { background: #5F657A; }
     </style>
 </head>
 
@@ -33,7 +34,6 @@
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
 
-
     const godoc = {{ CONTENT }};
     function stripHtml(html)
     {
@@ -44,7 +44,7 @@
             code.push(x.textContent)
             x.remove();
         })
-        return { text: tmp.textContent, code: code };
+        return { text: tmp.textContent, code: code.join(",") };
     }
     var objList = []
     for(var key in godoc) {
@@ -54,17 +54,40 @@
 
     const fuseOpts = {
         includeScore: true,
-        keys: ['text', 'code'],
-        includeMatches: true
+        keys: ['text'],
+        includeMatches: true,
+        threshold: 0.4,
+        ignoreLocation: true
     }
-    /*
-    const fuse = new Fuse(Object.entries(godoc).map(x => x[1]), fuseOpts)
+    const fuse = new Fuse(objList, fuseOpts)
     fuse.search(params.q).map(result => {
-        result.matches.map(x => {
-          result.item[x.key]
+        var out = "";
+        result.matches.map(match => {
+            var matchStr = match.value;
+            var isBold = [...matchStr].map(x => false);
+            var firstLetter = false;
+            var matchArr = [...matchStr];
+            var lastFrom = -1;
+            match.indices.map(([from, to]) => {
+                    for (var i = from; i <= to; i++) {
+                        isBold[i] = true;
+                    }
+            });
+            matchArr.map((chr, i) => {
+                if(i > 1 && !isBold[i - 1] && matchArr[i - 1] != " " ) isBold[i] = false;
+              if(isBold[i]) {
+                  out += "<span class='highlight'>" + chr + "</span>";
+              } else {
+                  out += chr;
+              }
+            })
         })
-    }) */
-
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<small>${result.item.key}</small>`;
+        listItem.innerHTML += out;
+        searchList.append(listItem);
+    })
+/*
     var index = new FlexSearch.Index({language: 'en'});
     [...Object.entries(godoc)].map((x, idx) => index.add(x[0], x[1].text));
     const searchResults = index.search(params.q);
@@ -75,7 +98,7 @@
         listItem.innerHTML = `<small>${x}</small>`;
         listItem.innerHTML += contents;
         searchList.append(listItem);
-    })
+    }) */
 </script>
 </body>
 </html>
