@@ -14,7 +14,6 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 	"time"
 	"io/fs"
-	"reflect"
 )
 
 var Cli struct {
@@ -116,7 +115,6 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			}
 		}
 	}
-	parsedModuleDoc.DebugPrint()
 	fmt.Green("Loaded packages:", pkgList)
 
 	godocPresentation := godoc.NewPresentation(c)
@@ -165,7 +163,8 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			for _, constName := range constVal.Names {
 				fmt.Debug(constName)
 			}
-			fmt.Debug(reflect.TypeOf(constVal.Decl.Specs[0]))
+			vSPec := constVal.Decl.Specs[0].(*ast.ValueSpec)
+			fmt.Debug(vSPec.Type)
 			_ = constVal
 		}
 

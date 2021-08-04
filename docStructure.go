@@ -26,13 +26,6 @@ type ScopedIdentifier struct {
 type ExportType string
 type SimpleExportsByType map[string][]ScopedIdentifier
 
-func (m ModuleDoc) DebugPrint() {
-	fmt.Debug("ModuleDoc{ ", "AbsolutePath =", m.AbsolutePath, " ImportPath =", m.ImportPath)
-	for exportType, exports := range m.SimpleExports {
-		fmt.Debug(" - ", exportType, ":", exports)
-	}
-}
-
 type Snippet struct {
 	SnippetText string
 }
@@ -92,6 +85,17 @@ type Typedef struct {
 	BaseDef
 }
 
+type PackageDoc struct {
+	CodeDef
+	Name         string
+	Doc          string
+	AbsolutePath string
+	RelativePath string
+	FileSet      *token.FileSet
+	ParentModule *ModuleDoc
+	FileDecls    map[string][]BaseDef
+}
+
 type CodeDef struct {
 	Functions  []FunctionDef
 	Methods    []Method
@@ -103,15 +107,4 @@ type CodeDef struct {
 type PackageFileDoc struct {
 	CodeDef
 	Name string
-}
-
-type PackageDoc struct {
-	CodeDef
-	Name         string
-	Doc          string
-	AbsolutePath string
-	RelativePath string
-	FileSet      *token.FileSet
-	ParentModule *ModuleDoc
-	FileDecls    map[string][]BaseDef
 }

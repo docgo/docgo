@@ -1,4 +1,4 @@
-<h3 align="center">newGodoc <br><small>a <i>different</i> static docs generator for Go</small><br>
+<h3 align="center">docgo: <br><small>a <i>different</i> static docs generator for Go</small><br>
 <img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/html/readme-image.png" width="60%">
 </h3>
 <hr />
@@ -16,4 +16,4 @@
 
 **LICENSE**
 
-`goNewDoc is licensed under the GPLv3 License.`
+`docgo is licensed under the GPLv3 License.`
