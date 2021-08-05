@@ -4,17 +4,9 @@ import (
 	"github.com/fatih/color"
 	"log"
 	"os"
-	"github.com/markbates/pkger"
 	"github.com/davecgh/go-spew/spew"
 	"reflect"
 )
-
-// Needed for the `pkger` tool to autoload the required files.
-func extraPkgerOpens() {
-	pkger.Open("/html/base.md")
-	pkger.Open("/html/base.html")
-	pkger.Open("/html/snippet.md")
-}
 
 type myCliFormatterFn func(args ...interface{})
 
