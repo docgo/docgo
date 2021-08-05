@@ -6,7 +6,6 @@ import (
 	"io"
 	oldFmt "fmt"
 	"errors"
-	"html/template"
 	"bytes"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -16,6 +15,8 @@ import (
 	"path/filepath"
 	"math/rand"
 	"github.com/fatih/color"
+	"text/template"
+	templateHtml "html/template"
 )
 
 func CreateDist(file string) *os.File {
@@ -34,9 +35,9 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 	if funcMap != nil {
 		t.Funcs(funcMap)
 	}
-	var TEMPLATES = map[string]string{"baseHTML": "/html/base.html", "baseMarkdown": "/html/base.md", "snippet": "/html/snippet.md"}
+	var TEMPLATES = map[string]string{"baseMarkdown": "/html/base.md", "snippet": "/html/snippet.md"}
 	for templateName, templatePath := range TEMPLATES {
-		file, err := pkger.Open("github.com/fikisipi/docgo:" + templatePath)
+		file, err := pkger.Open(templatePath)
 		if err != nil {
 			fmt.Red("Error opening", templatePath, err)
 			os.Exit(1)
@@ -55,6 +56,26 @@ func ReadTemplates(funcMap template.FuncMap) *template.Template {
 	}
 	return t
 }
+func ReadBaseHTMLTemplate(funcMap templateHtml.FuncMap) *templateHtml.Template{
+	file, err := pkger.Open("/html/base.html")
+	if err != nil {
+		fmt.Red("Error opening base.html", err)
+		os.Exit(1)
+	}
+	templateRawBytes, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Red("Error reading base.html", err)
+		os.Exit(1)
+	}
+
+	t, err := templateHtml.New("baseHtml").Funcs(funcMap).Parse(string(templateRawBytes))
+	if err != nil {
+		fmt.Red("Error in base.html", err)
+		os.Exit(1)
+	}
+
+	return t
+}
 
 type PkgConfig string
 
@@ -68,9 +89,11 @@ func GenerateHTML(doc *ModuleDoc) {
 	var subHeadingTitles []string
 
 	markdownOutputBuffer := bytes.Buffer{}
+	githubRepo := ""
 	templateFunctions := template.FuncMap{
-		"GetPageTitle": func(idx int) string {
-			return headingTitles[idx]
+		"GitHubRepo": func(repo string) string {
+			githubRepo = repo
+			return strings.Repeat(repo, 0)
 		},
 		"TransformDoc": func(source string) string {
 			source = strings.ReplaceAll(source, "\r", "")
@@ -101,6 +124,11 @@ func GenerateHTML(doc *ModuleDoc) {
 		},
 	}
 	templates := ReadTemplates(templateFunctions)
+	htmlTemplate := ReadBaseHTMLTemplate(templateHtml.FuncMap{
+		"GetPageTitle": func(idx int) string {
+			return headingTitles[idx]
+		},
+	})
 
 	err := templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
 	if err != nil {
@@ -112,10 +140,11 @@ func GenerateHTML(doc *ModuleDoc) {
 
 	type Page struct {
 		Title       string
-		Body        template.HTML
+		Body        templateHtml.HTML
 		PageLinks   map[int]string
 		CurrentPage int
 		ModuleDoc   *ModuleDoc
+		GitHubRepo  string
 	}
 
 	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
@@ -168,21 +197,22 @@ func GenerateHTML(doc *ModuleDoc) {
 			pageLinksInverted[dumbLink] = realIndex
 		}
 		pageNameToSearchableContent[pageName] = s
-		defer func(realIndex int, s string) {
+		defer func(realIndex int, s string, repo string) {
 			distFile := CreateDist(pageLinks[realIndex])
 			thisPage := Page{
 				Title:       headingTitles[realIndex],
-				Body:        template.HTML(s),
+				Body:        templateHtml.HTML(s),
+				GitHubRepo:  repo,
 				PageLinks:   pageLinks,
 				CurrentPage: realIndex,
 				ModuleDoc:   doc,
 			}
-			err := templates.Lookup("baseHTML").Execute(distFile, thisPage)
+			err := htmlTemplate.Execute(distFile, thisPage)
 			if err != nil {
 				fmt.Red(err)
 				return
 			}
-		}(realIndex, s)
+		}(realIndex, s, githubRepo)
 		realIndex += 1
 	}
 	GenerateSearch(pageNameToSearchableContent)

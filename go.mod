@@ -1,4 +1,4 @@
-module github.com/fikisipi/docgo
+module github.com/ggodoc/ggodoc
 
 go 1.16
 

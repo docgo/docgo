@@ -26,16 +26,18 @@
 </head>
 
 <body>
+<script src="https://unpkg.com/uhtml"></script>
 <a href="index.html" class="back">&laquo; Go back</a>
 <ul id="searchList">
 </ul>
 
 <script>
+    const { html, render } = uhtml;
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
 
     const godoc = {{ CONTENT }};
-    function stripHtml(html)
+    function _strip(html)
     {
         let tmp = document.createElement("DIV");
         tmp.innerHTML = html;
@@ -46,11 +48,7 @@
         })
         return { text: tmp.textContent, code: code.join(",") };
     }
-    var objList = []
-    for(var key in godoc) {
-        godoc[key] = stripHtml(godoc[key])
-        objList.push(Object.assign(godoc[key], {key: key}))
-    }
+    var objList = Object.entries(godoc).map(x => ({key: x[0], text: x[1] }))
 
     const fuseOpts = {
         includeScore: true,
@@ -60,14 +58,12 @@
         ignoreLocation: true
     }
     const fuse = new Fuse(objList, fuseOpts)
-    fuse.search(params.q).map(result => {
-        var out = "";
+    const outList = fuse.search(params.q).map(result => {
+        var out = [];
         result.matches.map(match => {
             var matchStr = match.value;
             var isBold = [...matchStr].map(x => false);
-            var firstLetter = false;
             var matchArr = [...matchStr];
-            var lastFrom = -1;
             match.indices.map(([from, to]) => {
                     for (var i = from; i <= to; i++) {
                         isBold[i] = true;
@@ -76,17 +72,17 @@
             matchArr.map((chr, i) => {
                 if(i > 1 && !isBold[i - 1] && matchArr[i - 1] != " " ) isBold[i] = false;
               if(isBold[i]) {
-                  out += "<span class='highlight'>" + chr + "</span>";
+                  out.push(html`<span class='highlight'>${chr}</span>`);
               } else {
-                  out += chr;
+                  out.push(html`<span>${chr}</span>`);
               }
             })
         })
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `<small>${result.item.key}</small>`;
-        listItem.innerHTML += out;
-        searchList.append(listItem);
+        return html`<li><small>${result.item.key}</small>
+        ${out}
+        </li>`;
     })
+    render(searchList, html`${outList}`)
 /*
     var index = new FlexSearch.Index({language: 'en'});
     [...Object.entries(godoc)].map((x, idx) => index.add(x[0], x[1].text));

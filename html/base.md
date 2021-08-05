@@ -2,6 +2,8 @@
 
 Welcome to the documentation.
 
+{{ GitHubRepo "ggodoc/ggodoc" }}
+
 {{ range .Packages }}
 
 # {{ .Name }}
