@@ -1,4 +1,4 @@
-module github.com/ggodoc/ggodoc
+module github.com/gGodoc/gGodoc
 
 go 1.16
 

@@ -15,6 +15,7 @@ import (
 	"github.com/fatih/color"
 	"text/template"
 	templateHtml "html/template"
+	"encoding/json"
 )
 
 func CreateDist(file string) *os.File {
@@ -42,10 +43,23 @@ func GenerateHTML(doc *ModuleDoc) {
 
 	markdownOutputBuffer := bytes.Buffer{}
 	githubRepo := ""
+	_ = githubRepo
+	siteInfo := make(map[string]string )
 	templateFunctions := template.FuncMap{
 		"GitHubRepo": func(repo string) string {
 			githubRepo = repo
 			return strings.Repeat(repo, 0)
+		},
+		"SetSiteInfo": func(keyValues ...string) string {
+			if len(keyValues) == 0 || (len(keyValues) % 2) == 1 {
+				fmt.Red("Invalid SetSiteInfo arguments. Must be even 'arg1' 'key1' ...")
+				return ""
+			}
+			for i := 0; i < len(keyValues); i++ {
+				if i % 2 == 1 { continue }
+				siteInfo[keyValues[i]] = keyValues[i + 1]
+			}
+			return ""
 		},
 		"TransformDoc": func(source string) string {
 			source = strings.ReplaceAll(source, "\r", "")
@@ -98,10 +112,27 @@ func GenerateHTML(doc *ModuleDoc) {
 		PageLinks   map[int]string
 		CurrentPage int
 		ModuleDoc   *ModuleDoc
-		GitHubRepo  string
+		SiteInfo  map[string]string
 	}
 
 	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
+	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
+	mdAst.Walk(cleanAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
+		if !entering {
+			if n.Kind() == mdAst.KindCodeBlock || n.Kind() == mdAst.KindFencedCodeBlock || n.Kind() == mdAst.KindCodeSpan {
+				//n.RemoveChildren(n)
+				n.PreviousSibling().SetNextSibling(n.NextSibling())
+			}
+			if n.Kind() == mdAst.KindHeading && n.(*mdAst.Heading).Level == 1 {
+				n.RemoveChildren(n)
+			}
+		}
+		return mdAst.WalkContinue, nil
+	})
+	cleanBuf := bytes.NewBufferString("")
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(cleanBuf, markdownOutputBytes, cleanAST)
+	cleanPages := strings.Split(cleanBuf.String(), "<h1></h1>")
+
 
 	mdAst.Walk(markdownAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
 		if n.Kind() == mdAst.KindHeading {
@@ -150,23 +181,27 @@ func GenerateHTML(doc *ModuleDoc) {
 			pageLinks[realIndex] = dumbLink + ".html"
 			pageLinksInverted[dumbLink] = realIndex
 		}
-		pageNameToSearchableContent[pageName] = s
-		defer func(realIndex int, s string, repo string) {
+		pageNameToSearchableContent[pageName] = cleanPages[counter]
+		defer func(realIndex int, s string, siteInfo map[string]string) {
 			distFile := CreateDist(pageLinks[realIndex])
-			thisPage := Page{
-				Title:       headingTitles[realIndex],
-				Body:        templateHtml.HTML(s),
-				GitHubRepo:  repo,
-				PageLinks:   pageLinks,
-				CurrentPage: realIndex,
-				ModuleDoc:   doc,
+			jsonIndex, _ := json.Marshal(pageNameToSearchableContent)
+			thisPage := struct{
+				Title       string
+				Body        templateHtml.HTML
+				PageLinks   map[int]string
+				CurrentPage int
+				ModuleDoc   *ModuleDoc
+				SiteInfo  map[string]string
+				SearchIndex templateHtml.JS
+			}{
+				headingTitles[realIndex], templateHtml.HTML(s),  pageLinks, realIndex, doc, siteInfo, templateHtml.JS(jsonIndex),
 			}
 			err := baseHtmlTemplate.Execute(distFile, thisPage)
 			if err != nil {
 				fmt.Red(err)
 				return
 			}
-		}(realIndex, s, githubRepo)
+		}(realIndex, s, siteInfo)
 		realIndex += 1
 	}
 	GenerateSearch(htmlTemplates.Lookup("search.html"), pageNameToSearchableContent)

@@ -2,7 +2,9 @@
 
 Welcome to the documentation.
 
-{{ GitHubRepo "ggodoc/ggodoc" }}
+{{ SetSiteInfo
+ "github" "gGodoc/gGodoc"
+ "projectName" "gGodoc" }}
 
 {{ range .Packages }}
 
