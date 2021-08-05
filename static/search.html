@@ -36,7 +36,7 @@
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
 
-    const godoc = {{ CONTENT }};
+    const godoc = {{ .JsonContent }};
     function _strip(html)
     {
         let tmp = document.createElement("DIV");
@@ -46,9 +46,9 @@
             code.push(x.textContent)
             x.remove();
         })
-        return { text: tmp.textContent, code: code.join(",") };
+        return { text: tmp.textContent };
     }
-    var objList = Object.entries(godoc).map(x => ({key: x[0], text: x[1] }))
+    var objList = Object.entries(godoc).map(x => ({key: x[0], text: _strip(x[1]).text }))
 
     const fuseOpts = {
         includeScore: true,

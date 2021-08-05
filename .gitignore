@@ -1,6 +1,6 @@
 *.exe
 *.bin
-/src
 pkged.go
 /dist
+/dist2
 /.idea

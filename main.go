@@ -1,7 +1,5 @@
 package main
 
-// This comment is under.
-
 import (
 	"go/ast"
 	"os"
@@ -232,8 +230,6 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		GenerateHTML(_modDoc)
-
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 

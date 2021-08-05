@@ -123,14 +123,16 @@ func GenerateHTML(doc *ModuleDoc) {
 			return PkgConfig(pkgName)
 		},
 	}
-	templates := ReadTemplates(templateFunctions)
-	htmlTemplate := ReadBaseHTMLTemplate(templateHtml.FuncMap{
+	//templates := ReadTemplates(templateFunctions)
+	templates := LoadMarkdownTemplates(templateFunctions)
+	htmlTemplates := LoadHTMLTemplates(templateHtml.FuncMap{
 		"GetPageTitle": func(idx int) string {
 			return headingTitles[idx]
 		},
 	})
+	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 
-	err := templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
+	err := templates.Lookup("base.md").Execute(&markdownOutputBuffer, doc)
 	if err != nil {
 		fmt.Red("Error parsing markdown", err)
 		os.Exit(1)
@@ -207,7 +209,7 @@ func GenerateHTML(doc *ModuleDoc) {
 				CurrentPage: realIndex,
 				ModuleDoc:   doc,
 			}
-			err := htmlTemplate.Execute(distFile, thisPage)
+			err := baseHtmlTemplate.Execute(distFile, thisPage)
 			if err != nil {
 				fmt.Red(err)
 				return
@@ -215,6 +217,6 @@ func GenerateHTML(doc *ModuleDoc) {
 		}(realIndex, s, githubRepo)
 		realIndex += 1
 	}
-	GenerateSearch(pageNameToSearchableContent)
+	GenerateSearch(htmlTemplates.Lookup("search.html"), pageNameToSearchableContent)
 	color.Green("Generated docs ✔")
 }

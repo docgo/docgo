@@ -2,23 +2,25 @@ package main
 
 import (
 	"encoding/json"
-	"strings"
 	"os"
-	"github.com/markbates/pkger"
-	"io"
+	"bytes"
+	"html/template"
 )
-var SEARCH_PAGE_HTML string
 
-func GenerateSearch(index map[string]string) {
-	searchFile, _ := pkger.Open("/html/search.html")
-	pageBytes, _ := io.ReadAll(searchFile)
-	SEARCH_PAGE_HTML = string(pageBytes)
+func GenerateSearch(searchTpl *template.Template, index map[string]string) {
+	SEARCH_PAGE_HTML := bytes.NewBufferString("")
 
-	searchJson, err := json.Marshal(index)
+	/*searchJson, err := json.Marshal(index)
 	if err != nil {
 		fmt.Red(err)
 		os.Exit(1)
-	}
-	outHtml := strings.ReplaceAll(SEARCH_PAGE_HTML, "{{ CONTENT }}", string(searchJson))
-	_, err = CreateDist("godoc_search.html").WriteString(outHtml)
+	}*/
+	_ = json.Marshal
+	_ = os.Exit
+
+	searchTpl.Execute(SEARCH_PAGE_HTML, struct {
+		JsonContent map[string]string
+	}{index})
+
+	CreateDist("godoc_search.html").Write(SEARCH_PAGE_HTML.Bytes())
 }
