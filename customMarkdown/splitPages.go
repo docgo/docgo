@@ -5,29 +5,37 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/text"
 	gast "github.com/yuin/goldmark/ast"
+	"bytes"
 )
-
-func SplitPages(markdownOutputBytes []byte) []string{
-	pageIdx := make([]int, 0)
+type pair struct { from, to int }
+func SplitPages(markdownOutputBytes []byte) ([]string, []string){
+	pageIdx := []pair{}
+	titles := make([]string, 0)
 	mdString := string(markdownOutputBytes)
 	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM, DocgoExtension)).Parser().Parse(text.NewReader(markdownOutputBytes))
 	gast.Walk(cleanAST, func(n gast.Node, entering bool) (gast.WalkStatus, error) {
 		if !entering {
 			if n.Kind() == DocGoKind {
 				dg := n.(*DocGoNode)
-				pageIdx = append(pageIdx, dg.LineEnd)
+				pageIdx = append(pageIdx, pair{dg.LineStart, dg.LineEnd})
+				titles = append(titles, dg.Vars["title"])
 			}
 		}
 		return gast.WalkContinue, nil
 	})
-	lastIdx := -1
 	documents := make([]string, 0)
 	for i, idx := range pageIdx {
-		if i == 0 {
-			lastIdx = 0
+		if i + 1 >= len(pageIdx) {
+			documents = append(documents, mdString[idx.to:])
+		} else {
+			documents = append(documents, mdString[idx.to:pageIdx[i+1].from])
 		}
-		documents = append(documents, mdString[lastIdx:idx])
-		lastIdx = idx
 	}
-	return documents
+	return documents, titles
+}
+
+func RenderPage(content string) string {
+	w := bytes.NewBufferString("")
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Convert([]byte(content), w)
+	return w.String()
 }

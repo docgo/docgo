@@ -5,8 +5,6 @@ import (
 	oldFmt "fmt"
 	"errors"
 	"bytes"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
 	mdAst "github.com/yuin/goldmark/ast"
 	"strings"
 	"path/filepath"
@@ -16,7 +14,6 @@ import (
 	templateHtml "html/template"
 	"encoding/json"
 	"github.com/docgo/docgo/customMarkdown"
-	"github.com/yuin/goldmark/text"
 )
 
 type IDGen struct{
@@ -51,7 +48,6 @@ func GenerateHTML(doc *ModuleDoc) {
 	os.RemoveAll(Cli.Out)
 
 	var headingTitles []string
-	var subHeadingTitles []string
 
 	markdownOutputBuffer := bytes.Buffer{}
 	githubRepo := ""
@@ -117,8 +113,12 @@ func GenerateHTML(doc *ModuleDoc) {
 	}
 
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
-	//pages := customMarkdown.SplitPages(markdownOutputBytes)
-	var cleanPages = customMarkdown.CleanPage(markdownOutputBytes)
+	pages := []string{}
+	pages, headingTitles = customMarkdown.SplitPages(markdownOutputBytes)
+	var cleanPages = []string{}
+	for _, page := range pages {
+		cleanPages = append(cleanPages, customMarkdown.CleanPage(page))
+	}
 
 	type Page struct {
 		Title       string
@@ -129,41 +129,13 @@ func GenerateHTML(doc *ModuleDoc) {
 		SiteInfo  map[string]string
 	}
 
-	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM, customMarkdown.DocgoExtension)).Parser().Parse(text.NewReader(markdownOutputBytes))
-	mdAst.Walk(markdownAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
-		if n.Kind() == mdAst.KindHeading {
-			nHeading := n.(*mdAst.Heading)
-			if !entering {
-				t := oldFmt.Sprintf("%s", n.Text(markdownOutputBytes))
-
-				if nHeading.Level == 1 {
-					headingTitles = append(headingTitles, t)
-					n.RemoveChildren(n)
-				}
-				if nHeading.Level == 2 {
-					subHeadingTitles = append(subHeadingTitles, t)
-				}
-			}
-		}
-		return mdAst.WalkContinue, nil
-	})
-
-	htmlBuffer := bytes.Buffer{}
-	err = goldmark.New(goldmark.WithExtensions(extension.GFM, customMarkdown.DocgoExtension)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
-	if err != nil {
-		fmt.Red("Error rendering markdown to HTML", err)
-		os.Exit(1)
-	}
-
 	var pageLinks = map[int]string{}
 	var pageLinksInverted = map[string]int{}
 	var pageNameToSearchableContent = map[string]string {}
 
 	realIndex := 0
-	for counter, s := range strings.Split(htmlBuffer.String(), "<h1></h1>") {
-		if counter == 0 {
-			continue
-		}
+	for counter, page := range pages {
+		s := customMarkdown.RenderPage(page)
 		pageName := ""
 		if realIndex == 0 {
 			pageName = "index"

@@ -140,7 +140,7 @@ func (r *GcRenderer) renderGC(w util.BufWriter, source []byte, node gast.Node, e
 		return gast.WalkContinue, nil
 	}
 	n := node.(*DocGoNode)
-	w.WriteString(`<h3>docgo options</h3><pre>` + fmt.Sprintln(*n) + `</pre>`)
+	_ = n
 	return gast.WalkContinue, nil
 }
 
@@ -159,22 +159,18 @@ func (e *gcExtender) Extend(m goldmark.Markdown) {
 	))
 }
 
-func CleanPage(markdownOutputBytes []byte) []string{
-	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
+func CleanPage(page string) string{
+	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader([]byte(page)))
 	gast.Walk(cleanAST, func(n gast.Node, entering bool) (gast.WalkStatus, error) {
 		if !entering {
 			if n.Kind() == gast.KindCodeBlock || n.Kind() == gast.KindFencedCodeBlock || n.Kind() == gast.KindCodeSpan {
 				//n.RemoveChildren(n)
 				n.PreviousSibling().SetNextSibling(n.NextSibling())
 			}
-			if n.Kind() == gast.KindHeading && n.(*gast.Heading).Level == 1 {
-				n.RemoveChildren(n)
-			}
 		}
 		return gast.WalkContinue, nil
 	})
 	cleanBuf := bytes.NewBufferString("")
-	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(cleanBuf, markdownOutputBytes, cleanAST)
-	cleanPages := strings.Split(cleanBuf.String(), "<h1></h1>")
-	return cleanPages
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(cleanBuf, []byte(page), cleanAST)
+	return cleanBuf.String()
 }

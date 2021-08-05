@@ -1,5 +1,4 @@
-[docgo: name = "intro" ]
-# Intro
+[docgo: title = "intro" ]
 
 Welcome to the documentation.
 
@@ -10,8 +9,7 @@ Welcome to the documentation.
 }}
 
 {{ range .Packages }}
-[docgo: name = "{{ .Name }}" ]
-# {{ .Name }}
+[docgo: title = "{{ .Name }}" ]
 {{ .Doc }}
 
 {{ template "snippet.md" .Functions }}
