@@ -8,11 +8,10 @@
 ```
 
 {{ if .Methods }}
-### Methods for {{.Name}}
 
-----
+***Methods for {{.Name}}***
+
 {{ range $idx, $p := .Methods }}
-### {{ .Name }}
 
 {{ TransformDoc .Doc }}
 

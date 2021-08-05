@@ -21,7 +21,7 @@ func setTemplateFs() {
 }
 func LoadMarkdownTemplates(funcMap template.FuncMap) *template.Template {
 	setTemplateFs()
-	t, err := template.New("").Funcs(funcMap).ParseFS(staticFS, "static/*.md")
+	t, err := template.New("").Funcs(funcMap).ParseFS(templateFs, "static/*.md")
 	if err != nil {
 		fmt.Red("Error loading templates", err)
 	}

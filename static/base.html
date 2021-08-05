@@ -149,17 +149,20 @@
         .pkg li {
             list-style: none;
             box-sizing: border-box;
-            padding: 5px 10px 10px;
             margin: 10px 0;
             position: relative;
             left: 0.4em;
             background: rgba(255 255 255 / 0.1);
+            padding: 0 10px;
         }
 
         .pkg li a {
             color: #fff;
             text-decoration: none;
             font-weight: 400;
+            display: block;
+            padding: 5px 0px 10px;
+            width: 100%;
         }
 
         .pkg li.active {
@@ -169,6 +172,7 @@
 
         article {
             padding: 2em 0;
+            line-height: 1.5;
         }
 
         .header-split-sides {
@@ -242,6 +246,10 @@
         .search-form input::placeholder {
             color: #aaa;
         }
+        hr {
+            border-color: #5e72b9;
+        }
+        article h3 { margin-top: 2em; }
     </style>
 </head>
 <body>

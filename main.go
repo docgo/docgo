@@ -21,7 +21,7 @@ import (
 var Cli struct {
 	Out        string `default:"dist/" short:"o" help:"Where to put documentation/assets."`
 	ModulePath string `arg help:"Path to module/package for documentation generation."`
-	ServerPort int    `default:8080 short:"p" help:"Port for hot-reload server. 0 to disable server."`
+	ServerPort int    `default:8080 short:"p" help:"Port for hot-reload server."`
 }
 
 func cliParse() {
@@ -52,7 +52,7 @@ func cliParse() {
 		}
 	}
 
-	fmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
+	fmt.Yellow("Generating docs into\n" + Cli.Out + " as HTML assets.")
 
 	absModPath, err := filepath.Abs(Cli.ModulePath)
 	mInfo, err := os.Stat(absModPath)
@@ -70,6 +70,24 @@ func cliParse() {
 
 var _modDoc *ModuleDoc = nil
 
+func runIndexer(ctx context.Context, corpus *godoc.Corpus) {
+	corpus.IndexFullText = false
+	corpus.IndexThrottle = 0.5
+	go func() {
+		corpus.RunIndexer()
+	}()
+	for {
+		<- time.NewTimer(time.Millisecond * 500).C
+		corpus.UpdateIndex()
+		if i, _ := corpus.CurrentIndex(); i != nil {
+			break
+		}
+		if ctx.Err() != nil {
+			break
+		}
+	}
+}
+
 func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	parsedModuleDoc = new(ModuleDoc)
 	parsedModuleDoc.Packages = []*PackageDoc{}
@@ -77,19 +95,20 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 	fmt.Debug("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
-
+	c.IndexFullText = false
+	c.IndexThrottle = 0.5
 	err := c.Init()
 	if err != nil {
 		fmt.Red(err)
+		os.Exit(1)
 	}
-	go func() {
-		c.RunIndexer()
-	}()
-	<-time.NewTicker(time.Millisecond * 200).C
+	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
+	runIndexer(ctx, c)
 
 	idx, _ := c.CurrentIndex()
 
 	goModBuffer, err := os.ReadFile(filepath.Join(modFilePath, "go.mod"))
+
 	modImportPath := modfile.ModulePath(goModBuffer)
 
 	parsedModuleDoc.AbsolutePath = modFilePath
@@ -120,6 +139,9 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		name := filepath.Base(pkgPath)
 		if hasMain {
 			name = "main"
+			if pkgPath != "/" {
+				name = strings.TrimLeft(pkgPath, "/") + "-" + "main"
+			}
 		}
 		pkgList[pkgPath] = name
 	}
@@ -276,7 +298,7 @@ func main() {
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 
-	if Cli.ServerPort != 0 {
+	if Cli.ServerPort == 0{
 		ctx, cancel := context.WithTimeout(context.Background(), 200 * time.Millisecond)
 		go func() {
 			<- ctx.Done()

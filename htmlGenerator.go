@@ -204,6 +204,10 @@ func GenerateHTML(doc *ModuleDoc) {
 		}(realIndex, s, siteInfo)
 		realIndex += 1
 	}
-	GenerateSearch(htmlTemplates.Lookup("search.html"), pageNameToSearchableContent)
-	color.Green("Generated docs ✔")
+	if FirstRun {
+		color.Green("Generated docs ✔")
+		FirstRun = false
+	}
 }
+
+var FirstRun = true
