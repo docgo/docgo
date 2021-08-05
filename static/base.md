@@ -1,15 +1,17 @@
+[docgo: name = "intro" ]
 # Intro
 
 Welcome to the documentation.
 
 {{ SetSiteInfo
- "github" "gGodoc/gGodoc"
- "projectName" "gGodoc" }}
+ "github" "https://github.com/docgo/docgo"
+ "gopkg" "https://pkg.go.dev/github.com/docgo/docgo"
+ "projectName" "docgo"
+}}
 
 {{ range .Packages }}
-
+[docgo: name = "{{ .Name }}" ]
 # {{ .Name }}
-
 {{ .Doc }}
 
 {{ template "snippet.md" .Functions }}

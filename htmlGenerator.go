@@ -8,7 +8,6 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	mdAst "github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/text"
 	"strings"
 	"path/filepath"
 	"math/rand"
@@ -16,7 +15,20 @@ import (
 	"text/template"
 	templateHtml "html/template"
 	"encoding/json"
+	"github.com/docgo/docgo/customMarkdown"
+	"github.com/yuin/goldmark/text"
 )
+
+type IDGen struct{
+}
+
+func (I IDGen) Generate(value []byte, kind mdAst.NodeKind) []byte {
+	fmt.Green(value)
+	return []byte("TEST")
+}
+
+func (I IDGen) Put(value []byte) {
+}
 
 func CreateDist(file string) *os.File {
 	ferr := os.Mkdir(Cli.Out, 0755)
@@ -105,6 +117,8 @@ func GenerateHTML(doc *ModuleDoc) {
 	}
 
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
+	//pages := customMarkdown.SplitPages(markdownOutputBytes)
+	var cleanPages = customMarkdown.CleanPage(markdownOutputBytes)
 
 	type Page struct {
 		Title       string
@@ -115,25 +129,7 @@ func GenerateHTML(doc *ModuleDoc) {
 		SiteInfo  map[string]string
 	}
 
-	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
-	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
-	mdAst.Walk(cleanAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
-		if !entering {
-			if n.Kind() == mdAst.KindCodeBlock || n.Kind() == mdAst.KindFencedCodeBlock || n.Kind() == mdAst.KindCodeSpan {
-				//n.RemoveChildren(n)
-				n.PreviousSibling().SetNextSibling(n.NextSibling())
-			}
-			if n.Kind() == mdAst.KindHeading && n.(*mdAst.Heading).Level == 1 {
-				n.RemoveChildren(n)
-			}
-		}
-		return mdAst.WalkContinue, nil
-	})
-	cleanBuf := bytes.NewBufferString("")
-	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(cleanBuf, markdownOutputBytes, cleanAST)
-	cleanPages := strings.Split(cleanBuf.String(), "<h1></h1>")
-
-
+	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM, customMarkdown.DocgoExtension)).Parser().Parse(text.NewReader(markdownOutputBytes))
 	mdAst.Walk(markdownAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
 		if n.Kind() == mdAst.KindHeading {
 			nHeading := n.(*mdAst.Heading)
@@ -151,8 +147,9 @@ func GenerateHTML(doc *ModuleDoc) {
 		}
 		return mdAst.WalkContinue, nil
 	})
+
 	htmlBuffer := bytes.Buffer{}
-	err = goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
+	err = goldmark.New(goldmark.WithExtensions(extension.GFM, customMarkdown.DocgoExtension)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
 	if err != nil {
 		fmt.Red("Error rendering markdown to HTML", err)
 		os.Exit(1)

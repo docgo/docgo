@@ -19,9 +19,9 @@ import (
 )
 
 var Cli struct {
-	Out        string `default:"dist/" short:"o" help:"Where to put documentation/assets."`
-	ModulePath string `arg help:"Path to module/package for documentation generation."`
-	ServerPort int    `default:8080 short:"p" help:"Port for hot-reload server."`
+	Out        string `default:"dist/" short:"o" help:"Where to put HTML assets."`
+	ModulePath string `arg type:"path" name:"path" help:"Path to module/package for documentation generation."`
+	ServerPort int    `default:8080 short:"l" name:"listen-port" help:"Port for serving docs after docgen. Set to '0' to skip."`
 }
 
 func cliParse() {
@@ -117,7 +117,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	for pkgName, exportMap := range idx.Exports() {
 		_ = pkgName
 		for symbolName, val := range exportMap {
-			fmt.Debug(symbolName, val)
+			_, _ = symbolName, val//fmt.Debug(symbolName, val)
 		}
 	}
 
@@ -205,16 +205,12 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, varVal := range info.PDoc.Vars {
 			for _, varName := range varVal.Names {
-				fmt.Debug(varName)
+				_ = varName
 			}
-			fmt.Debug("specs", varVal.Decl.Specs)
 			_ = varVal
 		}
 
 		for _, constVal := range info.PDoc.Consts {
-			for _, constName := range constVal.Names {
-				fmt.Debug(constName)
-			}
 			constDef := ConstDef{}
 			constDef.Name = strings.Join(constVal.Names, ", ")
 			constDef.Doc = constVal.Doc
@@ -223,9 +219,6 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 
 		for _, constVal := range info.PDoc.Vars {
-			for _, constName := range constVal.Names {
-				fmt.Debug(constName)
-			}
 			constDef := VarDef{}
 			constDef.Name = strings.Join(constVal.Names, ", ")
 			constDef.Doc = constVal.Doc
@@ -235,7 +228,8 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		//fmt.Println(info.CallGraphIndex)
 		for file, decls := range parsedPackage.FileDecls {
-			fmt.Debug(file, decls)
+			fmt.Debug(file)
+			_ = decls
 		}
 	}
 
@@ -298,7 +292,7 @@ func main() {
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 
-	if Cli.ServerPort == 0{
+	if Cli.ServerPort != 0{
 		ctx, cancel := context.WithTimeout(context.Background(), 200 * time.Millisecond)
 		go func() {
 			<- ctx.Done()
