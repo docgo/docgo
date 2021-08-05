@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>pkg2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link rel="stylesheet" href="//ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
+    <style>
+        body {
+            font-size: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Liberation Sans", sans-serif;
+            margin: 0;
+            background: #202229;
+            color: #DFE1E3;
+        }
+
+        a, a:visited {
+            color: #D29BFF;
+        }
+
+        .material-icons {
+            vertical-align: middle;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 2em;
+        }
+
+        h1, h2 {
+            font-weight: 300;
+        }
+
+        h3 {
+            font-weight: 500;
+        }
+
+        header {
+            width: 100%;
+            border-bottom: 1px solid #333744;
+            background: #333640;
+        }
+
+        header h1, header h2 {
+            font-weight: 400;
+        }
+
+        header a, header a:visited {
+            text-decoration: none;
+        }
+
+        main {
+            flex-grow: 1;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        nav.menu-left .project-name {
+            font-weight: 500;
+        }
+
+        nav.menu-left .project-name-box {
+            display: flex;
+        }
+
+        nav.menu-left .project-name {
+            flex-grow: 1;
+        }
+
+        nav.menu-left .project-name-box > .toggle-menu-labels {
+            width: 20px;
+        }
+
+        nav.menu-left {
+            position: fixed;
+            box-sizing: border-box;
+            overflow-y: hidden;
+            background: #1B1D23;
+            width: 300px;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        .part-right {
+            margin-left: 300px;
+        }
+
+        .toggle-menu-labels {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .toggle-menu-labels {
+                display: inline-block;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            nav.menu-left {
+                visibility: hidden;
+                width: 100%;
+                left: -100%;
+            }
+
+            .part-right {
+                margin-left: 0;
+            }
+
+            input[name="header-check"]:checked + nav.menu-left {
+                visibility: visible;
+                left: 0;
+            }
+
+            input[name="header-check"]:checked ~ .part-right {
+                display: none;
+            }
+        }
+
+        .page-center {
+            max-width: 860px;
+            margin: 0 auto;
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        article .page-center {
+            padding: 2em 0;
+        }
+
+        nav.menu-left ul {
+            padding: 0;
+        }
+
+        nav.menu-left .pkg ul {
+            padding-left: 10px;
+        }
+
+        .pkg li {
+            list-style: none;
+            box-sizing: border-box;
+            margin: 10px 0;
+            position: relative;
+            left: 0.4em;
+            background: rgba(255 255 255 / 0.1);
+            padding: 0 10px;
+        }
+
+        .pkg li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 400;
+            display: block;
+            padding: 5px 0px 10px;
+            width: 100%;
+        }
+
+        .pkg li.active {
+            border-left: 5px solid #7800DB;
+            font-weight: 500;
+        }
+
+        article {
+            padding: 2em 0;
+            line-height: 1.5;
+        }
+
+        .header-split-sides {
+            display: flex;
+            align-content: center;
+            justify-content: space-between;
+            vertical-align: middle;
+            padding: 15px 0 10px;
+        }
+
+        section.header-right {
+            vertical-align: middle;
+            display: flex;
+            align-items: center;
+            height: 30px;
+        }
+
+        .header-right > * {
+            margin: 0 10px;
+        }
+
+        article small {
+            display: block;
+            padding: 5px 0px 25px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        code[class*="language-"], pre[class*="language-"] {
+            font-size: 1em !important;
+        }
+
+        pre[class*="language-go"] {
+            border: 1px solid #393E4A;
+            background: #1F1F21;
+            min-width: 250px;
+            max-width: 100%;
+            overflow: auto !important;
+        }
+
+        .header-split-sides {
+            align-items: center;
+        }
+
+        .search-form {
+            height: 35px;
+            margin: 0;
+            padding: 0;
+            flex-grow: 1;
+            min-width: 160px;
+        }
+
+        .search-form input {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 5px;
+            padding-left: 25px;
+            box-sizing: border-box;
+            background: #202225;
+            color: #eee;
+            border: 1px solid #3D404B;
+            border-radius: 10px;
+        }
+
+        .search-form input:focus, .search-form input:active {
+            outline: 0;
+            box-shadow: -2px -2px 4px #7800DB, 2px 2px 4px #7800DB;
+        }
+
+        .search-form input::placeholder {
+            color: #aaa;
+        }
+        hr {
+            border-color: #5e72b9;
+        }
+        article h3 { margin-top: 2em; }
+    </style>
+</head>
+<body>
+<input type="checkbox" style="display: none" id="headerCheckbox" name="header-check"/>
+<nav class="menu-left">
+    <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.5em;">
+        <section class="project-name-box">
+            <h2 class="project-name">
+                <span class="material-icons" style="font-size: 2em; vertical-align: middle;">view_in_ar</span>
+                <a href="index.html">docgo</a>
+            </h2>
+            <label for="headerCheckbox" class="toggle-menu-labels"><span class="material-icons">close</span></label>
+        </section>
+
+        <ul>
+            <li class="pkg">
+                <h3> Intro </h3>
+                <ul>
+                    
+                    
+                    <li
+                    
+                    ><a href="index.html">intro</a></li>
+                    
+                    <li
+                    
+                    ><a href="main.html">main</a></li>
+                    
+                    <li
+                    
+                    ><a href="customMarkdown.html">customMarkdown</a></li>
+                    
+                    <li
+                     class="active" 
+                    ><a href="pkg2.html">pkg2</a></li>
+                    
+                    <li
+                    
+                    ><a href="demomod-main.html">demomod-main</a></li>
+                    
+                    <li
+                    
+                    ><a href="pkg1.html">pkg1</a></li>
+                    
+                </ul>
+
+            </li>
+        </ul>
+    </div>
+</nav>
+<section class="part-right">
+    <header>
+        <div class="page-center">
+            <div class="header-split-sides">
+                <form class="search-form" style="position: relative"  id="searchForm" method="GET" action="godoc_search.html">
+                    <span class="material-icons"
+                          style="position:absolute; left: 4px; top: 6px; color: #7800DB; font-size: 20px">search</span>
+                    <input type="text" autocomplete="off" placeholder="Search" id="searchField" name="_query"/>
+                    <div id="autocomplete"></div>
+                </form>
+                <section class="header-right">
+                    <a href="https://pkg.go.dev/github.com/docgo/docgo">
+                        <img src="https://pkg.go.dev/static/shared/logo/go-white.svg" height="20" width="52"/>
+                    </a>
+                    <a href="https://github.com/docgo/docgo">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='octicon octicon-mark-github v-align-middle' height='25' viewBox='0 0 16 16' version='1.1' width='32' aria-hidden='true'%3E%3Cpath fill='%23FFF' fill-rule='evenodd' d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'%3E%3C/path%3E%3C/svg%3E">
+                    </a>
+                    <label for="headerCheckbox" class="toggle-menu-labels"><span
+                            class="material-icons">menu</span></label>
+                </section>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <article class="page-center">
+            <div>
+                <small>github.com/docgo/docgo > pkg2</small>
+                <h1>pkg2</h1><br/>
+                <p>This is the second package in the
+module and it contains even more code.</p>
+<h3>MulTwo</h3>
+<p>Multiply a number by two</p>
+<pre><code class="language-go">func MulTwo(x Num) int
+</code></pre>
+<h3>Num</h3>
+<pre><code class="language-go">type Num struct {
+	int
+}
+</code></pre>
+
+            </div>
+        </article>
+    </main>
+</section>
+<script>
+    headerCheckbox.checked = false;
+    [...document.querySelectorAll('a')].map(x => x.addEventListener('click', () => { headerCheckbox.checked = false; }))
+
+    
+</script>
+<style>
+    ::-webkit-scrollbar {
+        width: 9px;
+        height: 9px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #7800DB;
+        border-radius: 15px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #8A3037;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #16181D;
+        border-radius: 0px;
+        box-shadow: inset 0px 0px 0px 0px #F0F0F0;
+    }
+</style>
+    <style>
+#searchForm { position: relative; }
+#autocomplete { position: absolute; left: 0; right: 0; top: 40px; background: #fff; color: #61677C; border-radius: 10px; padding: 0 10px;}
+#autocomplete label:first-child { margin-top: 10px; }
+#autocomplete label:last-child { margin-bottom: 10px; }
+#autocomplete label { display: block; padding: 6px 10px; }
+#autocomplete label:hover { background: #eee; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
+<script src="https://unpkg.com/uhtml"></script>
+<script>
+    const goIndex = {"customMarkdown":"\u003ch3\u003eCleanPage\u003c/h3\u003e\n\u003ch3\u003eNewGCParser\u003c/h3\u003e\n\u003ch3\u003eNewGCRenderer\u003c/h3\u003e\n\u003cp\u003eNewTaskCheckBoxHTMLRenderer returns a new TaskCheckBoxHTMLRenderer.\u003c/p\u003e\n\u003ch3\u003eRenderPage\u003c/h3\u003e\n\u003ch3\u003eSplitPages\u003c/h3\u003e\n\u003ch3\u003eDocGoNode\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for DocGoNode\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003eDump implements Node.Dump.\u003c/p\u003e\n\u003cp\u003eKind implements Node.Kind.\u003c/p\u003e\n\u003chr\u003e\n\u003ch3\u003eGcRenderer\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for GcRenderer\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003eRegisterFuncs implements renderer.NodeRenderer.RegisterFuncs.\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003efunc (r *GcRenderer) renderGC(w util.BufWriter, source []byte, node gast.Node, entering bool) (gast.WalkStatus, error)\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003chr\u003e\n\u003ch3\u003egcExtender\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for gcExtender\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003chr\u003e\n\u003ch3\u003egcParser\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for gcParser\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003efunc (s *gcParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003chr\u003e\n\u003ch3\u003epair\u003c/h3\u003e\n\u003ch3\u003egcWriter\u003c/h3\u003e\n\u003ch3\u003eDocGoKind\u003c/h3\u003e\n\u003cp\u003eKindTaskCheckBox is a NodeKind of the TaskCheckBox node.\u003c/p\u003e\n\u003ch3\u003eDocgoExtension\u003c/h3\u003e\n\u003cp\u003eTaskList is an extension that allow you to use GFM task lists.\u003c/p\u003e\n\u003ch3\u003egcParserInstance\u003c/h3\u003e\n","demomod-main":"\u003cp\u003eThis is a comment/doc for the main package\nThis package features some interesting syntax\nand type demos for testing out the project.\u003c/p\u003e\n\u003ch3\u003eMainGetSlice\u003c/h3\u003e\n\u003ch3\u003emain\u003c/h3\u003e\n\u003ch3\u003eMainA, MainB\u003c/h3\u003e\n\u003ch3\u003eMainArrayExample\u003c/h3\u003e\n\u003ch3\u003eMainNilVariable\u003c/h3\u003e\n\u003ch3\u003eMainX, MainY, MainZ\u003c/h3\u003e\n\u003cp\u003eCoordinates of the main camera\u003c/p\u003e\n\u003ch3\u003eSomeByte\u003c/h3\u003e\n\u003cp\u003eByte is a uint8 used for blobs\u003c/p\u003e\n\u003ch3\u003eSomeCh\u003c/h3\u003e\n\u003cp\u003eRune is a int32 used for characters\u003c/p\u003e\n\u003ch3\u003eMAIN_IMAGINARY_NO\u003c/h3\u003e\n\u003cp\u003eForce multiplier\u003c/p\u003e\n","index":"\u003cp\u003eWelcome to the documentation.\u003c/p\u003e\n","main":"\u003ch3\u003eCreateDist\u003c/h3\u003e\n\u003ch3\u003eGenerateHTML\u003c/h3\u003e\n\u003ch3\u003eGenerateSearch\u003c/h3\u003e\n\u003ch3\u003eGetDeclFile\u003c/h3\u003e\n\u003ch3\u003eLoadHTMLTemplates\u003c/h3\u003e\n\u003ch3\u003eLoadMarkdownTemplates\u003c/h3\u003e\n\u003ch3\u003eParseFunc\u003c/h3\u003e\n\u003ch3\u003eParseTypeDecl\u003c/h3\u003e\n\u003ch3\u003ecliParse\u003c/h3\u003e\n\u003ch3\u003emain\u003c/h3\u003e\n\u003ch3\u003erunIndexer\u003c/h3\u003e\n\u003ch3\u003esetTemplateFs\u003c/h3\u003e\n\u003ch3\u003eBaseDef\u003c/h3\u003e\n\u003ch3\u003eCodeDef\u003c/h3\u003e\n\u003ch3\u003eConstDef\u003c/h3\u003e\n\u003ch3\u003eFunctionDef\u003c/h3\u003e\n\u003ch3\u003eIDGen\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for IDGen\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003efunc (I IDGen) Put(value []byte)\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003chr\u003e\n\u003ch3\u003eInterfaceDef\u003c/h3\u003e\n\u003ch3\u003eMethodDef\u003c/h3\u003e\n\u003ch3\u003eModuleDoc\u003c/h3\u003e\n\u003ch3\u003ePackageDoc\u003c/h3\u003e\n\u003ch3\u003ePackageFileDoc\u003c/h3\u003e\n\u003ch3\u003eScopedIdentifier\u003c/h3\u003e\n\u003ch3\u003eSnippet\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for Snippet\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003chr\u003e\n\u003ch3\u003eStructDef\u003c/h3\u003e\n\u003ch3\u003eTypedef\u003c/h3\u003e\n\u003ch3\u003eVarDef\u003c/h3\u003e\n\u003ch3\u003emyCliFormatter\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for myCliFormatter\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003ePretty-prints a data structure for debugging purposes\nAt the moment, ran only inside JetBrains\u003c/p\u003e\n\u003chr\u003e\n\u003ch3\u003eCli\u003c/h3\u003e\n\u003ch3\u003eFirstRun\u003c/h3\u003e\n\u003ch3\u003eModulePath\u003c/h3\u003e\n\u003ch3\u003efmt\u003c/h3\u003e\n\u003ch3\u003estaticFS\u003c/h3\u003e\n\u003ch3\u003etemplateFs\u003c/h3\u003e\n","pkg1":"\u003cp\u003eThis is some text I wrote for the package numbered one\nin the original file docstring. It follows the standard\nGo practice for documenting the purpose of a package.\u003c/p\u003e\n\u003ch3\u003eExampleFn\u003c/h3\u003e\n\u003cp\u003eConverts MyType into an int. Example:\u003c/p\u003e\n\u003cp\u003eThis text goes after the code.\u003c/p\u003e\n\u003ch3\u003eIntDumper\u003c/h3\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003eMethods for IntDumper\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003efunc (i IntDumper) Load(data ...interface{})\r\n\u003c/code\u003e\u003c/pre\u003e\n\u003chr\u003e\n\u003ch3\u003eMyType\u003c/h3\u003e\n\u003ch3\u003eDumper\u003c/h3\u003e\n\u003ch3\u003eLdate, Ltime, Lmicroseconds, Llongfile, Lshortfile\u003c/h3\u003e\n\u003cp\u003eThese flags define which text to prefix to each log entry generated by the Logger.\nBits are or'ed together to control what's printed.\nWith the exception of the Lmsgprefix flag, there is no\ncontrol over the order they appear (the order listed here)\nor the format they present (as described in the comments).\nThe prefix is followed by a colon only when Llongfile or Lshortfile\nis specified.\nFor example, flags Ldate | Ltime (or LstdFlags) produce,\u003c/p\u003e\n\u003cp\u003ewhile flags Ldate | Ltime | Lmicroseconds | Llongfile produce,\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-go\"\u003econst (\n\tLdate         = 1 \u0026lt;\u0026lt; iota     // the date in the local time zone: 2009/01/23\n\tLtime                         // the time in the local time zone: 01:23:23\n\tLmicroseconds                 // microsecond resolution: 01:23:23.123123.  assumes Ltime.\n\tLlongfile                     // full file name and line number: /a/b/c/d.go:23\n\tLshortfile\n)\r\n\u003c/code\u003e\u003c/pre\u003e\n","pkg2":"\u003cp\u003eThis is the second package in the\nmodule and it contains even more code.\u003c/p\u003e\n\u003ch3\u003eMulTwo\u003c/h3\u003e\n\u003cp\u003eMultiply a number by two\u003c/p\u003e\n\u003ch3\u003eNum\u003c/h3\u003e\n"};
+
+    var objList = Object.entries(goIndex).map(x => ({key: x[0], text: x[1].replace(/(<([^>]+)>)/gi, "") }))
+    const fuseOpts = {
+        includeScore: true,
+        keys: ['text'],
+        includeMatches: true,
+        threshold: 0.3,
+        ignoreLocation: true
+    }
+    const fuse = new Fuse(objList, fuseOpts)
+    const { render, html } = uhtml;
+    searchField.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase();
+        const outList = fuse.search(e.target.value).map(result => {
+            let words = result.item.text.split(/\s+/)
+            var match = new Fuse(words, {threshold:0.5}).search(e.target.value);
+            match = match[0].item;
+            var idx = words.indexOf(match);
+            var clamp = (n, low, high) => n > high ? high : n < low ? low : n;
+            var fromIdx = clamp(idx - 8, 0, idx - 1);
+            var toIdx = clamp(idx + 8, idx + 1, words.length);
+            var outw = [];
+            for(var i = fromIdx; i < toIdx; i++) {
+                if(i == idx && query.length > 2 || (query.length <= 2 && words[i].toLocaleLowerCase().startsWith(query)))
+                    outw.push(html`<strong>${words[i]} </strong>`)
+                else
+                outw.push(html`<span>${words[i]} </span>`)
+            }
+            return html`<label>${outw}</label>`
+        })
+        render(autocomplete, html` ${outList}`);
+    })
+</script>
+</body>
+</html>
