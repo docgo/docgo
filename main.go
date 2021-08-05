@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/browser"
 	"context"
 	"errors"
+	"go/doc"
 )
 
 var Cli struct {
@@ -101,16 +102,33 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 	}
 
+	/*
 	for i := 0; idx.Snippet(i) != nil; i++{
 		fmt.Debug(idx.Snippet(i))
-	}
+	}*/
 
 	pkgList := map[string]string{}
-	pkgList["/"] = "main"
+	for pkgPath, symMap := range idx.Exports() {
+		hasMain := false
+		for sym, _ := range symMap {
+			if sym == "main" {
+				hasMain = true
+				break
+			}
+		}
+
+		name := filepath.Base(pkgPath)
+		if hasMain {
+			name = "main"
+		}
+		pkgList[pkgPath] = name
+	}
+
 	for kind, symbols := range idx.Idents() {
 		if kind.Name() == "Packages" {
 			for _, sym := range symbols {
-				pkgList[sym[0].Path] = sym[0].Name
+				// pkgList[sym[0].Path] = sym[0].Name
+				_ = sym
 			}
 		} else {
 			for name, symTable := range symbols {
@@ -149,7 +167,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
-				ParseTypeDecl(spec, parsedPackage)
+				ParseTypeDecl(spec, parsedPackage, tp.Methods)
 			}
 		}
 
@@ -175,8 +193,22 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			for _, constName := range constVal.Names {
 				fmt.Debug(constName)
 			}
-			vSPec := constVal.Decl.Specs[0].(*ast.ValueSpec)
-			_ = vSPec
+			constDef := ConstDef{}
+			constDef.Name = strings.Join(constVal.Names, ", ")
+			constDef.Doc = constVal.Doc
+			parsedPackage.Constants = append(parsedPackage.Constants, &constDef)
+			constDef.Snippet = CreateSnippet(constVal.Decl, parsedPackage, "")
+		}
+
+		for _, constVal := range info.PDoc.Vars {
+			for _, constName := range constVal.Names {
+				fmt.Debug(constName)
+			}
+			constDef := VarDef{}
+			constDef.Name = strings.Join(constVal.Names, ", ")
+			constDef.Doc = constVal.Doc
+			parsedPackage.Variables = append(parsedPackage.Variables, &constDef)
+			constDef.Snippet = CreateSnippet(constVal.Decl, parsedPackage, "")
 		}
 
 		//fmt.Println(info.CallGraphIndex)
@@ -188,7 +220,16 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	return
 }
 
-func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
+func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc, methods []*doc.Func) {
+	methodDefs := make([]*MethodDef, 0)
+	for _, method := range methods {
+		methodDef := MethodDef{}
+		methodDef.Name = method.Name
+		methodDef.Doc = method.Doc
+		methodDef.Snippet = CreateSnippet(method.Decl, docPackage)
+		methodDefs = append(methodDefs, &methodDef)
+	}
+
 	t := s.(*ast.TypeSpec)
 	declName := t.Name.Name
 	st, ok := t.Type.(*ast.StructType)
@@ -198,6 +239,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		sDef.Name = declName
 		sDef.Type = st
 		sDef.FoundInFile = GetDeclFile(st, sDef.BaseDef, docPackage)
+		sDef.Methods = methodDefs
 
 		for _, field := range st.Fields.List {
 			_ = field

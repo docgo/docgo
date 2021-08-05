@@ -2,8 +2,6 @@ package main
 
 import (
 	"os"
-	"github.com/markbates/pkger"
-	"io"
 	oldFmt "fmt"
 	"errors"
 	"bytes"
@@ -29,52 +27,6 @@ func CreateDist(file string) *os.File {
 	}
 	f, _ := os.Create(filepath.Join(Cli.Out, file))
 	return f
-}
-func ReadTemplates(funcMap template.FuncMap) *template.Template {
-	t := template.New("main")
-	if funcMap != nil {
-		t.Funcs(funcMap)
-	}
-	var TEMPLATES = map[string]string{"baseMarkdown": "/html/base.md", "snippet": "/html/snippet.md"}
-	for templateName, templatePath := range TEMPLATES {
-		file, err := pkger.Open(templatePath)
-		if err != nil {
-			fmt.Red("Error opening", templatePath, err)
-			os.Exit(1)
-		}
-		templateRawBytes, err := io.ReadAll(file)
-		if err != nil {
-			fmt.Red("Error reading", templatePath, err)
-			os.Exit(1)
-		}
-
-		_, err = t.New(templateName).Parse(string(templateRawBytes))
-		if err != nil {
-			fmt.Red("Error in template", templateName, err)
-			os.Exit(1)
-		}
-	}
-	return t
-}
-func ReadBaseHTMLTemplate(funcMap templateHtml.FuncMap) *templateHtml.Template{
-	file, err := pkger.Open("/html/base.html")
-	if err != nil {
-		fmt.Red("Error opening base.html", err)
-		os.Exit(1)
-	}
-	templateRawBytes, err := io.ReadAll(file)
-	if err != nil {
-		fmt.Red("Error reading base.html", err)
-		os.Exit(1)
-	}
-
-	t, err := templateHtml.New("baseHtml").Funcs(funcMap).Parse(string(templateRawBytes))
-	if err != nil {
-		fmt.Red("Error in base.html", err)
-		os.Exit(1)
-	}
-
-	return t
 }
 
 type PkgConfig string
@@ -109,7 +61,7 @@ func GenerateHTML(doc *ModuleDoc) {
 				}
 				out := strings.TrimLeft(line, " ")
 				if indentLevel > lastLevel {
-					out = "\n```go\n" + out
+					out = "\n```\n" + out
 				}
 				if indentLevel < lastLevel {
 					out = "```\n" + out
