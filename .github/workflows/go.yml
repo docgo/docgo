@@ -1,12 +1,15 @@
 name: Build page
 on:
+  push:
+    branches: [ "master" ]
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
+      with:
+       repository: ggodoc/ggodoc
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -16,8 +19,13 @@ jobs:
     - name: Build and install
       run: go install .
     - name: dist
-      run: docgo -p 0 .
+      run: ggodoc -p 0 -o dist .
+    - name: add robots.txt
+      run: "printf 'User-agent: *\nDisallow: /\n' > ./dist/robots.txt"
+    - name: Deploy to GitHub Pages
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    
