@@ -1,6 +1,12 @@
-[docgo: title = "intro" ]
+@docgo [ title = "intro", 
+ page = true ]
 
-Welcome to the documentation.
+Welcome to the documentation. It's written
+in ***Markdown*** (i.e. \*markdown\*). The page
+was created with a md annotation:
+```
+@docgo[ page = true, title = "intro" ]
+```
 
 {{ SetSiteInfo
  "github" "https://github.com/docgo/docgo"
@@ -9,9 +15,8 @@ Welcome to the documentation.
 }}
 
 {{ range .Packages }}
-[docgo: title = "{{ .Name }}" additional = 0 ]
+@docgo[ title = "{{ .Name }}", page = true ]
 {{ .Doc }}
-
 {{ template "snippet.md" .Functions }}
 {{ template "snippet.md" .Structs }}
 {{ template "snippet.md" .Interfaces }}

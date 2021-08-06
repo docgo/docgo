@@ -25,7 +25,7 @@ This is a text block.
 
 func TestAST(t *testing.T) {
 	var sourceCode = []byte(`# H1
-[docgo: key1="str1" key2="str2"]
+[docgo: key1="str1", key2="str2"]
 `)
 	ast := goldmark.New(goldmark.WithExtensions(DocgoExtension)).Parser().Parse(text.NewReader(sourceCode))
 	firstChild := ast.FirstChild()

@@ -71,6 +71,7 @@ type PkgConfig string
 func (c PkgConfig) Group(x ...string) {
 	fmt.Debug(x)
 }
+
 func GenerateHTML(doc *ModuleDoc) {
 	os.RemoveAll(Cli.Out)
 

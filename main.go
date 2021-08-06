@@ -52,7 +52,7 @@ func cliParse() {
 		}
 	}
 
-	fmt.Yellow("Generating docs into\n" + Cli.Out + " as HTML assets.")
+	fmt.Yellow("Generating docs into:\n'" + Cli.Out + "' [as HTML assets]")
 
 	absModPath, err := filepath.Abs(Cli.ModulePath)
 	mInfo, err := os.Stat(absModPath)
@@ -106,7 +106,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	runIndexer(ctx, c)
 
 	idx, _ := c.CurrentIndex()
-
+	
 	goModBuffer, err := os.ReadFile(filepath.Join(modFilePath, "go.mod"))
 
 	modImportPath := modfile.ModulePath(goModBuffer)
