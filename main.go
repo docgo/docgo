@@ -52,7 +52,7 @@ func cliParse() {
 		}
 	}
 
-	fmt.Yellow("Generating docs into\n" + Cli.Out + " as HTML assets.")
+	fmt.Yellow("Generating docs into:\n'" + Cli.Out + "' [as HTML assets]")
 
 	absModPath, err := filepath.Abs(Cli.ModulePath)
 	mInfo, err := os.Stat(absModPath)

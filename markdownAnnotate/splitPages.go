@@ -21,8 +21,10 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 		if !entering {
 			if n.Kind() == DocGoKind {
 				dg := n.(*DocGoNode)
-				pageIdx = append(pageIdx, pair{dg.LineStart, dg.LineEnd})
-				titles = append(titles, dg.StringVars["title"])
+				if dg.BoolVars["page"] {
+					pageIdx = append(pageIdx, pair{dg.LineStart, dg.LineEnd})
+					titles = append(titles, dg.StringVars["title"])
+				}
 			}
 		}
 		return gast.WalkContinue, nil
@@ -32,7 +34,7 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 		if i + 1 >= len(pageIdx) {
 			documents = append(documents, mdString[idx.to:])
 		} else {
-			documents = append(documents, mdString[idx.to:pageIdx[i+1].from])
+			documents = append(documents, mdString[idx.to:pageIdx[i + 1].from])
 		}
 	}
 	return documents, titles
@@ -42,6 +44,6 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 // into HTML
 func RenderPage(markdownString string) string {
 	w := bytes.NewBufferString("")
-	goldmark.New(goldmark.WithExtensions(extension.GFM)).Convert([]byte(markdownString), w)
+	goldmark.New(goldmark.WithExtensions(extension.GFM, DocgoExtension)).Convert([]byte(markdownString), w)
 	return w.String()
 }

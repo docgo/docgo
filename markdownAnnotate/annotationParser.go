@@ -18,7 +18,7 @@ import (
 	"errors"
 )
 
-var prefix = []byte("[docgo:")
+var prefix = []byte("@docgo")
 const unicodeIdentifier = `[\p{L}][\p{L}_0-9]*`
 
 type docGoAnnotationParser struct{}
@@ -28,7 +28,7 @@ func NewDocgoParser() parser.InlineParser {
 }
 
 func (s *docGoAnnotationParser) Trigger() []byte {
-	return []byte{'['}
+	return []byte{'@'}
 }
 
 func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {
@@ -40,6 +40,8 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	line, _ := block.PeekLine()
 	stringVars := make(map[string]string)
 	boolVars, intVars := make(map[string]bool), make(map[string]int)
+	lineStart := seg.Start
+	lineEnd := seg.Stop
 
 	if !bytes.HasPrefix(line, prefix) {
 		return nil
@@ -48,7 +50,6 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	failedDecode := ""
 
 	decoder := bytes.NewReader(line)
-	oldLen := decoder.Len()
 	decoderAdvance := func (i int) {
 		for x := 0; x < i; x++ {
 			_, err := decoder.ReadByte()
@@ -57,11 +58,37 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 			}
 		}
 		line = line[i:]
+		block.Advance(i)
 	}
 	decoderAdvance(len(prefix))
 
-	r := regexp.MustCompile(`\s*(` + unicodeIdentifier + `)\s*=\s*`)
+	r := regexp.MustCompile(`^\s*(` + unicodeIdentifier + `)\s*=\s*`)
+	rComma := regexp.MustCompile(`^\s*,`)
+	rBegin := regexp.MustCompile(`^\s*\[`)
+	parsedCounter := 0
 	for {
+		if parsedCounter == 0 {
+			start := rBegin.Find(line)
+			if start == nil {
+				failedDecode = "no [ after annotation"
+				break
+			}
+			decoderAdvance(len(start))
+		}
+		if parsedCounter > 0 {
+			comma := rComma.Find(line)
+			if comma == nil {
+				break
+			}
+			decoderAdvance(len(comma))
+			if len(strings.TrimSpace(string(line))) == 0 {
+				block.AdvanceLine()
+				line, _ = block.PeekLine()
+				decoder = bytes.NewReader(line)
+				_, seg := block.Position()
+				lineEnd = seg.Stop
+			}
+		}
 		matches := r.FindSubmatch(line)
 		if len(matches) != 2 {
 			break
@@ -92,17 +119,19 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 			failedDecode = "not a string"
 		}
 		decoderAdvance(int(jDecoder.InputOffset()))
+		parsedCounter++
 	}
-	block.Advance(oldLen - decoder.Len())
-	block.Advance(1)
-
+	end := regexp.MustCompile(`^\s*\]`).Find(line)
+	if end != nil {
+		decoderAdvance(len(end))
+	}
 	out := &DocGoNode{}
 	out.StringVars = stringVars
 	out.BoolVars = boolVars
 	out.IntVars = intVars
 	out.DecodeStatus = failedDecode
-	out.LineStart = seg.Start
-	out.LineEnd = seg.Stop
+	out.LineStart = lineStart
+	out.LineEnd = lineEnd
 	return out
 }
 
@@ -166,6 +195,7 @@ func (r *GcRenderer) renderGC(w util.BufWriter, source []byte, node gast.Node, e
 		return gast.WalkContinue, nil
 	}
 	n := node.(*DocGoNode)
+	fmt.Println(n)
 	if n.DecodeStatus != "" {
 		//fmt.Println("Note: Malformed [docgo:] block")
 	}
@@ -189,15 +219,22 @@ func (e *gcExtender) Extend(m goldmark.Markdown) {
 
 func CleanPage(page string) string{
 	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader([]byte(page)))
+	pageBytes := []byte(page)
+	out := []byte("")
 	gast.Walk(cleanAST, func(n gast.Node, entering bool) (gast.WalkStatus, error) {
 		if !entering {
 			if n.Kind() == gast.KindCodeBlock || n.Kind() == gast.KindFencedCodeBlock || n.Kind() == gast.KindCodeSpan {
 				//n.RemoveChildren(n)
 				n.PreviousSibling().SetNextSibling(n.NextSibling())
 			}
+			if n.Kind() == gast.KindText{
+				out = append(out, n.Text(pageBytes)...)
+				out = append(out, ' ')
+			}
 		}
 		return gast.WalkContinue, nil
 	})
+	return string(out)
 	cleanBuf := bytes.NewBufferString("")
 	goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(cleanBuf, []byte(page), cleanAST)
 	return cleanBuf.String()
