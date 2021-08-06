@@ -15,7 +15,7 @@ jobs:
     - name: Install deps
       run: go mod download
     - name: Build and install
-      run: go build -o main
+      run: go build -o main .
     - name: dist
       run: ./main -l 0 -o dist .
     - name: add robots.txt

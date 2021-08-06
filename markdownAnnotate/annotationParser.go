@@ -1,4 +1,4 @@
-package customMarkdown
+package markdownAnnotate
 
 import (
 	"github.com/yuin/goldmark"
@@ -14,93 +14,119 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"io"
 	"encoding/json"
+	"regexp"
 	"errors"
 )
 
-type gcParser struct {
+var prefix = []byte("[docgo:")
+const unicodeIdentifier = `[\p{L}][\p{L}_0-9]*`
+
+type docGoAnnotationParser struct{}
+
+func NewDocgoParser() parser.InlineParser {
+	return &docGoAnnotationParser{}
 }
 
-var gcParserInstance = &gcParser{}
-
-func NewGCParser() parser.InlineParser {
-	return gcParserInstance
-}
-
-func (s *gcParser) Trigger() []byte {
+func (s *docGoAnnotationParser) Trigger() []byte {
 	return []byte{'['}
 }
 
-func (s *gcParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {
-	// Given AST structure must be like
-	// - List
-	//   - ListItem         : parent.Parent
-	//     - TextBlock      : parent
-	//       (current line)
+func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {
+	// Parses:
+	// [prefix id=val id2=val2 ...]
+	// into: {intVars: (id, val), boolVars: (id2, val), ...}
+
 	_, seg := block.Position()
 	line, _ := block.PeekLine()
-	sline := string(line)
-	vars := make(map[string]string)
-	if !strings.HasPrefix(sline, "[docgo:") {
+	stringVars := make(map[string]string)
+	boolVars, intVars := make(map[string]bool), make(map[string]int)
+
+	if !bytes.HasPrefix(line, prefix) {
 		return nil
 	}
-	block.Advance(len("[docgo:"))
-	sline = sline[len("[docgo:"):]
 
-	dec := strings.NewReader(sline)
-	lenBefore := dec.Len()
-	for {
-		name := ""
-		finish := false
-		for {
-			b, err := dec.ReadByte()
-			if b == ']' {
-				finish = true
-				break
-			}
-			if b == '=' {
-				break
-			}
+	failedDecode := ""
+
+	decoder := bytes.NewReader(line)
+	oldLen := decoder.Len()
+	decoderAdvance := func (i int) {
+		for x := 0; x < i; x++ {
+			_, err := decoder.ReadByte()
 			if err != nil {
-				if errors.Is(err, io.EOF) {
-					finish = true
-					break
-				}
-				panic("FAILED" +  err.Error())
+				break
 			}
-			name += string(b)
 		}
-		if finish {
+		line = line[i:]
+	}
+	decoderAdvance(len(prefix))
+
+	r := regexp.MustCompile(`\s*(` + unicodeIdentifier + `)\s*=\s*`)
+	for {
+		matches := r.FindSubmatch(line)
+		if len(matches) != 2 {
 			break
 		}
-		jString := ""
-		err := json.NewDecoder(dec).Decode(&jString)
+		varName := string(matches[1])
+		decoderAdvance(len(matches[0]))
+
+		jDecoder := json.NewDecoder(bytes.NewReader(line))
+		jDecoder.UseNumber()
+		t, err := jDecoder.Token()
 		if err != nil {
-			panic("FAILED" + err.Error())
+			if errors.Is(err, io.EOF) {
+				failedDecode = "reached EOF without parsing a value."
+				break
+			}
+			failedDecode = "malformed data: " + err.Error()
 		}
-		vars[strings.TrimSpace(name)] = jString
+		switch parsedVal := t.(type) {
+		case string:
+			stringVars[varName] = parsedVal
+		case json.Number:
+			if strings.Contains(parsedVal.String(), ".") { continue }
+			pInt, _ := parsedVal.Int64()
+			intVars[varName] = int(pInt)
+		case bool:
+			boolVars[varName] = parsedVal
+		default:
+			failedDecode = "not a string"
+		}
+		decoderAdvance(int(jDecoder.InputOffset()))
 	}
-	block.Advance(lenBefore - dec.Len())
+	block.Advance(oldLen - decoder.Len())
+	block.Advance(1)
 
 	out := &DocGoNode{}
-	out.Vars = vars
+	out.StringVars = stringVars
+	out.BoolVars = boolVars
+	out.IntVars = intVars
+	out.DecodeStatus = failedDecode
 	out.LineStart = seg.Start
 	out.LineEnd = seg.Stop
 	return out
 }
+
 type DocGoNode struct{
 	gast.BaseInline
-	Code string
-	Vars map[string]string
-	LineStart int
-	LineEnd int
+	Code         string
+	StringVars   map[string]string
+	IntVars      map[string]int
+	BoolVars     map[string]bool
+	LineStart    int
+	LineEnd      int
+	DecodeStatus string
 }
 
 // Dump implements Node.Dump.
 func (n *DocGoNode) Dump(source []byte, level int) {
 	m := map[string]string{
-		"Checked": fmt.Sprintf("%v", n.Code),
+		"AnnotateData": fmt.Sprintln(n.StringVars, n.IntVars),
 	}
 	gast.DumpHelper(n, source, level, m, nil)
+}
+
+func (n *DocGoNode) String() string {
+	return fmt.Sprint("DocGoNode data =", n.StringVars, n.IntVars, n.BoolVars)
 }
 
 // KindTaskCheckBox is a NodeKind of the TaskCheckBox node.
@@ -111,7 +137,7 @@ func (n *DocGoNode) Kind() gast.NodeKind {
 	return DocGoKind
 }
 
-func (s *gcParser) CloseBlock(parent gast.Node, pc parser.Context) {
+func (s *docGoAnnotationParser) CloseBlock(parent gast.Node, pc parser.Context) {
 	// nothing to do
 }
 
@@ -140,7 +166,9 @@ func (r *GcRenderer) renderGC(w util.BufWriter, source []byte, node gast.Node, e
 		return gast.WalkContinue, nil
 	}
 	n := node.(*DocGoNode)
-	_ = n
+	if n.DecodeStatus != "" {
+		//fmt.Println("Note: Malformed [docgo:] block")
+	}
 	return gast.WalkContinue, nil
 }
 
@@ -152,7 +180,7 @@ var DocgoExtension = &gcExtender{}
 
 func (e *gcExtender) Extend(m goldmark.Markdown) {
 	m.Parser().AddOptions(parser.WithInlineParsers(
-		util.Prioritized(NewGCParser(), 0),
+		util.Prioritized(NewDocgoParser(), 0),
 	))
 	m.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(NewGCRenderer(), 500),

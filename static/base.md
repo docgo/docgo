@@ -9,7 +9,7 @@ Welcome to the documentation.
 }}
 
 {{ range .Packages }}
-[docgo: title = "{{ .Name }}" ]
+[docgo: title = "{{ .Name }}" additional = 0 ]
 {{ .Doc }}
 
 {{ template "snippet.md" .Functions }}

@@ -1,4 +1,4 @@
-package customMarkdown
+package markdownAnnotate
 
 import (
 	"github.com/yuin/goldmark"
@@ -8,6 +8,10 @@ import (
 	"bytes"
 )
 type pair struct { from, to int }
+
+// Splits a single Markdown source string into
+// N strings that represent Markdown sections.
+// The sections are defined using Markdown annotations.
 func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 	pageIdx := []pair{}
 	titles := make([]string, 0)
@@ -18,7 +22,7 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 			if n.Kind() == DocGoKind {
 				dg := n.(*DocGoNode)
 				pageIdx = append(pageIdx, pair{dg.LineStart, dg.LineEnd})
-				titles = append(titles, dg.Vars["title"])
+				titles = append(titles, dg.StringVars["title"])
 			}
 		}
 		return gast.WalkContinue, nil
@@ -34,8 +38,10 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 	return documents, titles
 }
 
-func RenderPage(content string) string {
+// Renders a markdown source with GitHub flavor
+// into HTML
+func RenderPage(markdownString string) string {
 	w := bytes.NewBufferString("")
-	goldmark.New(goldmark.WithExtensions(extension.GFM)).Convert([]byte(content), w)
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Convert([]byte(markdownString), w)
 	return w.String()
 }

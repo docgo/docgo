@@ -5,7 +5,6 @@ import (
 	oldFmt "fmt"
 	"errors"
 	"bytes"
-	mdAst "github.com/yuin/goldmark/ast"
 	"strings"
 	"path/filepath"
 	"math/rand"
@@ -13,18 +12,46 @@ import (
 	"text/template"
 	templateHtml "html/template"
 	"encoding/json"
-	"github.com/docgo/docgo/customMarkdown"
+	"github.com/docgo/docgo/markdownAnnotate"
 )
 
-type IDGen struct{
-}
+func transformGodocToMarkdown(godocString string) string {
+	const TABWIDTH = "    "
+	const MARKDOWN_CODEFENCE = "```"
 
-func (I IDGen) Generate(value []byte, kind mdAst.NodeKind) []byte {
-	fmt.Green(value)
-	return []byte("TEST")
-}
+	// Remove all CR
+	godocString = strings.ReplaceAll(godocString, "\r", "")
+	// Keep track of indentation
+	lastIndentationLevel := -1
+	finalOut := ""
 
-func (I IDGen) Put(value []byte) {
+	// Increased indentation in a godoc comment always
+	// means that the line begins a code/quote block.
+	// Example:
+	// commentBegin123
+	//    code1
+	//    code2
+	// commentEnd123
+
+	for _, line := range strings.Split(godocString, "\n") {
+		line = strings.ReplaceAll(line, "\t", TABWIDTH)
+		normalLen := len(line)
+		trimmedLen := len(strings.TrimLeft(line, " "))
+		indentLevel := normalLen - trimmedLen
+		if lastIndentationLevel == -1 {
+			lastIndentationLevel = indentLevel
+		}
+		out := strings.TrimLeft(line, " ")
+		if indentLevel > lastIndentationLevel {
+			out = "\n" + MARKDOWN_CODEFENCE + "\n" + out
+		}
+		if indentLevel < lastIndentationLevel {
+			out = MARKDOWN_CODEFENCE + "\n" + out
+		}
+		lastIndentationLevel = indentLevel
+		finalOut += out + "\n"
+	}
+	return finalOut
 }
 
 func CreateDist(file string) *os.File {
@@ -70,28 +97,7 @@ func GenerateHTML(doc *ModuleDoc) {
 			return ""
 		},
 		"TransformDoc": func(source string) string {
-			source = strings.ReplaceAll(source, "\r", "")
-			lastLevel := -1
-			finalOut := ""
-			for _, line := range strings.Split(source, "\n") {
-				line = strings.ReplaceAll(line, "\t", "    ")
-				normalLen := len(line)
-				trimmedLen := len(strings.TrimLeft(line, " "))
-				indentLevel := normalLen - trimmedLen
-				if lastLevel == -1 {
-					lastLevel = indentLevel
-				}
-				out := strings.TrimLeft(line, " ")
-				if indentLevel > lastLevel {
-					out = "\n```\n" + out
-				}
-				if indentLevel < lastLevel {
-					out = "```\n" + out
-				}
-				lastLevel = indentLevel
-				finalOut += out + "\n"
-			}
-			return finalOut
+			return transformGodocToMarkdown(source)
 		},
 		"PackageConfig": func(pkgName string) PkgConfig {
 			return PkgConfig(pkgName)
@@ -114,10 +120,10 @@ func GenerateHTML(doc *ModuleDoc) {
 
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
 	pages := []string{}
-	pages, headingTitles = customMarkdown.SplitPages(markdownOutputBytes)
+	pages, headingTitles = markdownAnnotate.SplitPages(markdownOutputBytes)
 	var cleanPages = []string{}
 	for _, page := range pages {
-		cleanPages = append(cleanPages, customMarkdown.CleanPage(page))
+		cleanPages = append(cleanPages, markdownAnnotate.CleanPage(page))
 	}
 
 	type Page struct {
@@ -135,7 +141,7 @@ func GenerateHTML(doc *ModuleDoc) {
 
 	realIndex := 0
 	for counter, page := range pages {
-		s := customMarkdown.RenderPage(page)
+		s := markdownAnnotate.RenderPage(page)
 		pageName := ""
 		if realIndex == 0 {
 			pageName = "index"
