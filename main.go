@@ -135,13 +135,9 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 				break
 			}
 		}
-
-		name := filepath.Base(pkgPath)
+		name := strings.ReplaceAll(filepath.Join(strings.TrimLeft(pkgPath, "/")), string(os.PathSeparator), ".")
 		if hasMain {
-			name = "main"
-			if pkgPath != "/" {
-				name = strings.TrimLeft(pkgPath, "/") + "-" + "main"
-			}
+			name += ".main"
 		}
 		pkgList[pkgPath] = name
 	}
