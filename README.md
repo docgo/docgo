@@ -1,5 +1,5 @@
 <h3 align="center">docgo: <br><small>a <i>different</i> static docs generator for Go</small><br>
-<img src="https://raw.githubusercontent.com/fikisipi/newgodoc/main/html/readme-image.png" width="60%">
+<img src="https://raw.githubusercontent.com/docgo/docgo/main/static/readme-image.png" width="60%">
 </h3>
 <hr />
 

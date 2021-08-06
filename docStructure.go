@@ -57,28 +57,35 @@ func GetDeclFile(node ast.Node, ourDecl BaseDef, pkg *PackageDoc) string {
 
 type BaseDef struct {
 	Snippet
-	Name  string
+	Name        string
 	FoundInFile string
+	Doc string
+	Methods    []*MethodDef
+}
+
+type ConstDef struct {
+	BaseDef
+}
+
+type VarDef struct {
+	BaseDef
 }
 
 type FunctionDef struct {
 	BaseDef
-	Doc  string
 }
 
 type StructDef struct {
 	BaseDef
-	Doc  string
 	Type *ast.StructType
 }
 
 type InterfaceDef struct {
 	BaseDef
-	Doc  string
 	Type *ast.InterfaceType
 }
 
-type Method struct {
+type MethodDef struct {
 	BaseDef
 }
 type Typedef struct {
@@ -97,11 +104,12 @@ type PackageDoc struct {
 }
 
 type CodeDef struct {
-	Functions  []FunctionDef
-	Methods    []Method
-	Typedefs   []Typedef
-	Structs    []StructDef
-	Interfaces []InterfaceDef
+	Functions  []*FunctionDef
+	Typedefs   []*Typedef
+	Structs    []*StructDef
+	Interfaces []*InterfaceDef
+	Constants  []*ConstDef
+	Variables []*VarDef
 }
 
 type PackageFileDoc struct {

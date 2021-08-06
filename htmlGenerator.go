@@ -2,21 +2,57 @@ package main
 
 import (
 	"os"
-	"github.com/markbates/pkger"
-	"io"
 	oldFmt "fmt"
 	"errors"
-	"html/template"
 	"bytes"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
-	mdAst "github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/text"
 	"strings"
 	"path/filepath"
 	"math/rand"
 	"github.com/fatih/color"
+	"text/template"
+	templateHtml "html/template"
+	"encoding/json"
+	"github.com/docgo/docgo/markdownAnnotate"
 )
+
+func transformGodocToMarkdown(godocString string) string {
+	const TABWIDTH = "    "
+	const MARKDOWN_CODEFENCE = "```"
+
+	// Remove all CR
+	godocString = strings.ReplaceAll(godocString, "\r", "")
+	// Keep track of indentation
+	lastIndentationLevel := -1
+	finalOut := ""
+
+	// Increased indentation in a godoc comment always
+	// means that the line begins a code/quote block.
+	// Example:
+	// commentBegin123
+	//    code1
+	//    code2
+	// commentEnd123
+
+	for _, line := range strings.Split(godocString, "\n") {
+		line = strings.ReplaceAll(line, "\t", TABWIDTH)
+		normalLen := len(line)
+		trimmedLen := len(strings.TrimLeft(line, " "))
+		indentLevel := normalLen - trimmedLen
+		if lastIndentationLevel == -1 {
+			lastIndentationLevel = indentLevel
+		}
+		out := strings.TrimLeft(line, " ")
+		if indentLevel > lastIndentationLevel {
+			out = "\n" + MARKDOWN_CODEFENCE + "\n" + out
+		}
+		if indentLevel < lastIndentationLevel {
+			out = MARKDOWN_CODEFENCE + "\n" + out
+		}
+		lastIndentationLevel = indentLevel
+		finalOut += out + "\n"
+	}
+	return finalOut
+}
 
 func CreateDist(file string) *os.File {
 	ferr := os.Mkdir(Cli.Out, 0755)
@@ -29,32 +65,6 @@ func CreateDist(file string) *os.File {
 	f, _ := os.Create(filepath.Join(Cli.Out, file))
 	return f
 }
-func ReadTemplates(funcMap template.FuncMap) *template.Template {
-	t := template.New("main")
-	if funcMap != nil {
-		t.Funcs(funcMap)
-	}
-	var TEMPLATES = map[string]string{"baseHTML": "/html/base.html", "baseMarkdown": "/html/base.md", "snippet": "/html/snippet.md"}
-	for templateName, templatePath := range TEMPLATES {
-		file, err := pkger.Open(templatePath)
-		if err != nil {
-			fmt.Red("Error opening", templatePath, err)
-			os.Exit(1)
-		}
-		templateRawBytes, err := io.ReadAll(file)
-		if err != nil {
-			fmt.Red("Error reading", templatePath, err)
-			os.Exit(1)
-		}
-
-		_, err = t.New(templateName).Parse(string(templateRawBytes))
-		if err != nil {
-			fmt.Red("Error in template", templateName, err)
-			os.Exit(1)
-		}
-	}
-	return t
-}
 
 type PkgConfig string
 
@@ -66,83 +76,64 @@ func GenerateHTML(doc *ModuleDoc) {
 	os.RemoveAll(Cli.Out)
 
 	var headingTitles []string
-	var subHeadingTitles []string
 
 	markdownOutputBuffer := bytes.Buffer{}
+	githubRepo := ""
+	_ = githubRepo
+	siteInfo := make(map[string]string )
 	templateFunctions := template.FuncMap{
-		"GetPageTitle": func(idx int) string {
-			return headingTitles[idx]
+		"GitHubRepo": func(repo string) string {
+			githubRepo = repo
+			return strings.Repeat(repo, 0)
+		},
+		"SetSiteInfo": func(keyValues ...string) string {
+			if len(keyValues) == 0 || (len(keyValues) % 2) == 1 {
+				fmt.Red("Invalid SetSiteInfo arguments. Must be even 'arg1' 'key1' ...")
+				return ""
+			}
+			for i := 0; i < len(keyValues); i++ {
+				if i % 2 == 1 { continue }
+				siteInfo[keyValues[i]] = keyValues[i + 1]
+			}
+			return ""
 		},
 		"TransformDoc": func(source string) string {
-			source = strings.ReplaceAll(source, "\r", "")
-			lastLevel := -1
-			finalOut := ""
-			for _, line := range strings.Split(source, "\n") {
-				line = strings.ReplaceAll(line, "\t", "    ")
-				normalLen := len(line)
-				trimmedLen := len(strings.TrimLeft(line, " "))
-				indentLevel := normalLen - trimmedLen
-				if lastLevel == -1 {
-					lastLevel = indentLevel
-				}
-				out := strings.TrimLeft(line, " ")
-				if indentLevel > lastLevel {
-					out = "\n```go\n" + out
-				}
-				if indentLevel < lastLevel {
-					out = "```\n" + out
-				}
-				lastLevel = indentLevel
-				finalOut += out + "\n"
-			}
-			return finalOut
+			return transformGodocToMarkdown(source)
 		},
 		"PackageConfig": func(pkgName string) PkgConfig {
 			return PkgConfig(pkgName)
 		},
 	}
-	templates := ReadTemplates(templateFunctions)
+	//templates := ReadTemplates(templateFunctions)
+	templates := LoadMarkdownTemplates(templateFunctions)
+	htmlTemplates := LoadHTMLTemplates(templateHtml.FuncMap{
+		"GetPageTitle": func(idx int) string {
+			return headingTitles[idx]
+		},
+	})
+	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 
-	err := templates.Lookup("baseMarkdown").Execute(&markdownOutputBuffer, doc)
+	err := templates.Lookup("base.md").Execute(&markdownOutputBuffer, doc)
 	if err != nil {
 		fmt.Red("Error parsing markdown", err)
 		os.Exit(1)
 	}
 
 	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
+	pages := []string{}
+	pages, headingTitles = markdownAnnotate.SplitPages(markdownOutputBytes)
+	var cleanPages = []string{}
+	for _, page := range pages {
+		cleanPages = append(cleanPages, markdownAnnotate.CleanPage(page))
+	}
 
 	type Page struct {
 		Title       string
-		Body        template.HTML
+		Body        templateHtml.HTML
 		PageLinks   map[int]string
 		CurrentPage int
 		ModuleDoc   *ModuleDoc
-	}
-
-	markdownAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(markdownOutputBytes))
-
-	mdAst.Walk(markdownAST, func(n mdAst.Node, entering bool) (mdAst.WalkStatus, error) {
-		if n.Kind() == mdAst.KindHeading {
-			nHeading := n.(*mdAst.Heading)
-			if !entering {
-				t := oldFmt.Sprintf("%s", n.Text(markdownOutputBytes))
-
-				if nHeading.Level == 1 {
-					headingTitles = append(headingTitles, t)
-					n.RemoveChildren(n)
-				}
-				if nHeading.Level == 2 {
-					subHeadingTitles = append(subHeadingTitles, t)
-				}
-			}
-		}
-		return mdAst.WalkContinue, nil
-	})
-	htmlBuffer := bytes.Buffer{}
-	err = goldmark.New(goldmark.WithExtensions(extension.GFM)).Renderer().Render(&htmlBuffer, markdownOutputBytes, markdownAST)
-	if err != nil {
-		fmt.Red("Error rendering markdown to HTML", err)
-		os.Exit(1)
+		SiteInfo  map[string]string
 	}
 
 	var pageLinks = map[int]string{}
@@ -150,10 +141,8 @@ func GenerateHTML(doc *ModuleDoc) {
 	var pageNameToSearchableContent = map[string]string {}
 
 	realIndex := 0
-	for counter, s := range strings.Split(htmlBuffer.String(), "<h1></h1>") {
-		if counter == 0 {
-			continue
-		}
+	for counter, page := range pages {
+		s := markdownAnnotate.RenderPage(page)
 		pageName := ""
 		if realIndex == 0 {
 			pageName = "index"
@@ -168,24 +157,33 @@ func GenerateHTML(doc *ModuleDoc) {
 			pageLinks[realIndex] = dumbLink + ".html"
 			pageLinksInverted[dumbLink] = realIndex
 		}
-		pageNameToSearchableContent[pageName] = s
-		defer func(realIndex int, s string) {
+		pageNameToSearchableContent[pageName] = cleanPages[counter]
+		defer func(realIndex int, s string, siteInfo map[string]string) {
 			distFile := CreateDist(pageLinks[realIndex])
-			thisPage := Page{
-				Title:       headingTitles[realIndex],
-				Body:        template.HTML(s),
-				PageLinks:   pageLinks,
-				CurrentPage: realIndex,
-				ModuleDoc:   doc,
+			jsonIndex, _ := json.Marshal(pageNameToSearchableContent)
+			thisPage := struct{
+				Title       string
+				Body        templateHtml.HTML
+				PageLinks   map[int]string
+				CurrentPage int
+				ModuleDoc   *ModuleDoc
+				SiteInfo  map[string]string
+				SearchIndex templateHtml.JS
+			}{
+				headingTitles[realIndex], templateHtml.HTML(s),  pageLinks, realIndex, doc, siteInfo, templateHtml.JS(jsonIndex),
 			}
-			err := templates.Lookup("baseHTML").Execute(distFile, thisPage)
+			err := baseHtmlTemplate.Execute(distFile, thisPage)
 			if err != nil {
 				fmt.Red(err)
 				return
 			}
-		}(realIndex, s)
+		}(realIndex, s, siteInfo)
 		realIndex += 1
 	}
-	GenerateSearch(pageNameToSearchableContent)
-	color.Green("Generated docs ✔")
+	if FirstRun {
+		color.Green("Generated docs ✔")
+		FirstRun = false
+	}
 }
+
+var FirstRun = true

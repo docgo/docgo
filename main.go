@@ -1,7 +1,5 @@
 package main
 
-// This comment is under.
-
 import (
 	"go/ast"
 	"os"
@@ -17,12 +15,13 @@ import (
 	"github.com/pkg/browser"
 	"context"
 	"errors"
+	"go/doc"
 )
 
 var Cli struct {
-	Out        string `default:"dist/" short:"o" help:"Where to put documentation/assets."`
-	ModulePath string `arg help:"Path to module/package for documentation generation."`
-	ServerPort int    `short:"p" default="8080" help:"Port for hot-reload server. 0 to disable server."`
+	Out        string `default:"dist/" short:"o" help:"Where to put HTML assets."`
+	ModulePath string `arg type:"path" name:"path" help:"Path to module/package for documentation generation."`
+	ServerPort int    `default:8080 short:"l" name:"listen-port" help:"Port for serving docs after docgen. Set to '0' to skip."`
 }
 
 func cliParse() {
@@ -53,7 +52,7 @@ func cliParse() {
 		}
 	}
 
-	fmt.Yellow("Using \"" + Cli.Out + "\" as an output directory...")
+	fmt.Yellow("Generating docs into\n" + Cli.Out + " as HTML assets.")
 
 	absModPath, err := filepath.Abs(Cli.ModulePath)
 	mInfo, err := os.Stat(absModPath)
@@ -71,6 +70,24 @@ func cliParse() {
 
 var _modDoc *ModuleDoc = nil
 
+func runIndexer(ctx context.Context, corpus *godoc.Corpus) {
+	corpus.IndexFullText = false
+	corpus.IndexThrottle = 0.5
+	go func() {
+		corpus.RunIndexer()
+	}()
+	for {
+		<- time.NewTimer(time.Millisecond * 500).C
+		corpus.UpdateIndex()
+		if i, _ := corpus.CurrentIndex(); i != nil {
+			break
+		}
+		if ctx.Err() != nil {
+			break
+		}
+	}
+}
+
 func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	parsedModuleDoc = new(ModuleDoc)
 	parsedModuleDoc.Packages = []*PackageDoc{}
@@ -78,30 +95,62 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 	fmt.Debug("modFilePath", modFilePath)
 	c := godoc.NewCorpus(vfs.OS(modFilePath))
-	c.IndexEnabled = true
-
+	c.IndexFullText = false
+	c.IndexThrottle = 0.5
 	err := c.Init()
 	if err != nil {
 		fmt.Red(err)
+		os.Exit(1)
 	}
-	go func() {
-		c.RunIndexer()
-	}()
-	<-time.NewTicker(time.Millisecond * 200).C
+	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
+	runIndexer(ctx, c)
 
 	idx, _ := c.CurrentIndex()
 	
 	goModBuffer, err := os.ReadFile(filepath.Join(modFilePath, "go.mod"))
+
 	modImportPath := modfile.ModulePath(goModBuffer)
 
 	parsedModuleDoc.AbsolutePath = modFilePath
 	parsedModuleDoc.ImportPath = modImportPath
 
+	for pkgName, exportMap := range idx.Exports() {
+		_ = pkgName
+		for symbolName, val := range exportMap {
+			_, _ = symbolName, val//fmt.Debug(symbolName, val)
+		}
+	}
+
+	/*
+	for i := 0; idx.Snippet(i) != nil; i++{
+		fmt.Debug(idx.Snippet(i))
+	}*/
+
 	pkgList := map[string]string{}
+	for pkgPath, symMap := range idx.Exports() {
+		hasMain := false
+		for sym, _ := range symMap {
+			if sym == "main" {
+				hasMain = true
+				break
+			}
+		}
+
+		name := filepath.Base(pkgPath)
+		if hasMain {
+			name = "main"
+			if pkgPath != "/" {
+				name = strings.TrimLeft(pkgPath, "/") + "-" + "main"
+			}
+		}
+		pkgList[pkgPath] = name
+	}
+
 	for kind, symbols := range idx.Idents() {
 		if kind.Name() == "Packages" {
 			for _, sym := range symbols {
-				pkgList[sym[0].Path] = sym[0].Name
+				// pkgList[sym[0].Path] = sym[0].Name
+				_ = sym
 			}
 		} else {
 			for name, symTable := range symbols {
@@ -140,7 +189,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
-				ParseTypeDecl(spec, parsedPackage)
+				ParseTypeDecl(spec, parsedPackage, tp.Methods)
 			}
 		}
 
@@ -150,7 +199,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			parsedFn.Snippet = CreateSnippet(fn.Decl, parsedPackage)
 			parsedFn.Name = fn.Name
 			parsedFn.Doc = fn.Doc
-			parsedPackage.Functions = append(parsedPackage.Functions, parsedFn)
+			parsedPackage.Functions = append(parsedPackage.Functions, &parsedFn)
 			parsedFn.FoundInFile = GetDeclFile(fn.Decl, parsedFn.BaseDef, parsedPackage)
 		}
 
@@ -158,25 +207,45 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			for _, varName := range varVal.Names {
 				_ = varName
 			}
-			fmt.Debug("specs", varVal.Decl.Specs)
 			_ = varVal
 		}
 
 		for _, constVal := range info.PDoc.Consts {
-			for _, constName := range constVal.Names {
-				_ = constName
-			}
-			fmt.Debug(constVal.Decl)
-			_ = constVal
+			constDef := ConstDef{}
+			constDef.Name = strings.Join(constVal.Names, ", ")
+			constDef.Doc = constVal.Doc
+			parsedPackage.Constants = append(parsedPackage.Constants, &constDef)
+			constDef.Snippet = CreateSnippet(constVal.Decl, parsedPackage, "")
+		}
+
+		for _, constVal := range info.PDoc.Vars {
+			constDef := VarDef{}
+			constDef.Name = strings.Join(constVal.Names, ", ")
+			constDef.Doc = constVal.Doc
+			parsedPackage.Variables = append(parsedPackage.Variables, &constDef)
+			constDef.Snippet = CreateSnippet(constVal.Decl, parsedPackage, "")
 		}
 
 		//fmt.Println(info.CallGraphIndex)
+		for file, decls := range parsedPackage.FileDecls {
+			fmt.Debug(file)
+			_ = decls
+		}
 	}
 
 	return
 }
 
-func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
+func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc, methods []*doc.Func) {
+	methodDefs := make([]*MethodDef, 0)
+	for _, method := range methods {
+		methodDef := MethodDef{}
+		methodDef.Name = method.Name
+		methodDef.Doc = method.Doc
+		methodDef.Snippet = CreateSnippet(method.Decl, docPackage)
+		methodDefs = append(methodDefs, &methodDef)
+	}
+
 	t := s.(*ast.TypeSpec)
 	declName := t.Name.Name
 	st, ok := t.Type.(*ast.StructType)
@@ -186,11 +255,12 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		sDef.Name = declName
 		sDef.Type = st
 		sDef.FoundInFile = GetDeclFile(st, sDef.BaseDef, docPackage)
+		sDef.Methods = methodDefs
 
 		for _, field := range st.Fields.List {
 			_ = field
 		}
-		docPackage.Structs = append(docPackage.Structs, sDef)
+		docPackage.Structs = append(docPackage.Structs, &sDef)
 	} else {
 		it, ok := t.Type.(*ast.InterfaceType)
 		if !ok {
@@ -201,7 +271,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc) {
 		interDef.Name = declName
 		interDef.Type = it
 		interDef.Snippet = CreateSnippet(it, docPackage, "type ", declName, " ")
-		docPackage.Interfaces = append(docPackage.Interfaces, interDef)
+		docPackage.Interfaces = append(docPackage.Interfaces, &interDef)
 
 		for _, meth := range it.Methods.List {
 			_ = meth
@@ -219,11 +289,10 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		GenerateHTML(_modDoc)
-
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 
-	if Cli.ServerPort == 0 {
+	if Cli.ServerPort != 0{
 		ctx, cancel := context.WithTimeout(context.Background(), 200 * time.Millisecond)
 		go func() {
 			<- ctx.Done()
