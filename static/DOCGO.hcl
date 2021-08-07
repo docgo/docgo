@@ -35,6 +35,7 @@ function "getSections" {
   params = [cdef]
   result = [cdef.Constants, cdef.Functions, cdef.Structs, cdef.Variables, cdef.Interfaces]
 }
+
 function "getSectionText" {
   params = [section]
   result = join(" ", [for item in section : "${item.BaseDef.Name} ${item.BaseDef.Doc}"])
@@ -44,7 +45,7 @@ function "typeSection" {
   params = [sectionTitle, obj]
   result = length(obj) == 0 ? "" : <<-MULTILINE
   ## ${sectionTitle}
-----
+  ----
   ${ join("\n", [for item in obj : snippet(item.BaseDef) ])}
   MULTILINE
 }
@@ -53,9 +54,14 @@ function "structSection" {
   params = [title, structs]
   result = <<-MULTILINE
   ## Structs
-----
-  ${ join("\n", [for item in structs : "${snippet(item.BaseDef)}${renderMethods(item.BaseDef.Name, item.MethodList)}" if length(item.MethodList) != 0 ])}
-  ${ join("\n", [for item in structs : snippet(item.BaseDef) if length(item.MethodList) == 0 ])}
+  ----
+  %{ for item in structs }
+  ${snippet(item.BaseDef)}
+  %{ if length(item.MethodList) != 0 }
+  ### ⤷ *Methods on ${item.BaseDef.Name}*
+  ${join("\n", [for method in item.MethodList : snippet(method.BaseDef, "❯ ") ])}
+  %{ endif }
+  %{ endfor }
   MULTILINE
 }
 
@@ -71,12 +77,4 @@ function "snippet" {
   ${def.Snippet}
   ```
   MULTILINE
-}
-
-function "renderMethods" {
-  params = [name, methods]
-  result = <<EOT
-  ### ⤷ *Methods on ${name}*
-  ${join("\n", [for method in methods : snippet(method.BaseDef, "❯ ") ])}
-  EOT
 }
