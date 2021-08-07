@@ -14,7 +14,7 @@ var staticFS embed.FS
 var templateFs fs.FS
 
 func setTemplateFs() {
-	if os.Getenv("TERMINAL_EMULATOR") == "JetBrains-JediTerm" {
+	if os.Getenv("TERMINAL_EMULATOR") == "JetBrains-JediTerm" || os.Getenv("APPDEBUG") == "1" {
 		templateFs = os.DirFS("./")
 	} else {
 		templateFs = staticFS

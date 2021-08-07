@@ -17,7 +17,7 @@
         keys: ['text'],
         includeMatches: true,
         threshold: 0.3,
-        ignoreLocation: true
+        ignoreLocation: true,
     }
     const fuse = new Fuse(objList, fuseOpts)
     const { render, html } = uhtml;
@@ -26,10 +26,19 @@
     })
     searchField.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase();
+        const queryWords = query.split(/\s+/)
         const outList = fuse.search(e.target.value).map(result => {
             let words = result.item.text.split(/\s+/)
-            var match = new Fuse(words, {threshold:0.5}).search(e.target.value);
-            var idx = words.indexOf(match[0].item);
+            var idx = -1
+            queryWords.map(w => {
+              if(words.findIndex(x => x.toLowerCase() === w.toLowerCase()) != -1) {
+                  idx = words.findIndex(w)
+              }
+            })
+            if(idx == -1) {
+                var match = new Fuse(words, {threshold: 0.5}).search(e.target.value);
+                idx = words.indexOf(match[0].item);
+            }
             var clamp = (n, low, high) => n > high ? high : n < low ? low : n;
             var fromIdx = clamp(idx - 8, 0, idx - 1);
             var toIdx = clamp(idx + 8, idx + 1, words.length);

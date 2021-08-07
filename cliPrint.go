@@ -22,7 +22,7 @@ var fmt = myCliFormatter{nil, myCliColor(color.FgRed), myCliColor(color.FgGreen)
 // Pretty-prints a data structure for debugging purposes
 // At the moment, ran only inside JetBrains
 func (m myCliFormatter) Debug(args ...interface{}) {
-	if os.Getenv("TERMINAL_EMULATOR") == "JetBrains-fJediTerm" {
+	if os.Getenv("TERMINAL_EMULATOR") != "JetBrains-JediTerm" || os.Getenv("APPDEBUG") != "1" {
 		return
 	}
 	spew.Config.DisableCapacities = true

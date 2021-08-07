@@ -81,9 +81,10 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 				break
 			}
 		}
-		name := strings.ReplaceAll(filepath.Join(strings.TrimLeft(pkgPath, "/")), string(os.PathSeparator), ".")
+		name := strings.ReplaceAll(filepath.Join(strings.TrimLeft(pkgPath, "/")), string(os.PathSeparator), "/")
 		if hasMain {
-			name += ".main"
+			continue
+			name += "/main"
 		}
 		pkgList[pkgPath] = name
 	}
@@ -114,7 +115,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	godocPresentation := godoc.NewPresentation(c)
 	for path, pkgName := range pkgList {
 		parsedPackage := new(PackageDoc)
-		info := godocPresentation.GetPkgPageInfo(path, pkgName, godoc.NoFiltering)
+		info := godocPresentation.GetPkgPageInfo(path, pkgName, godoc.PageInfoMode(0))
 		if info == nil {
 			continue
 		}
