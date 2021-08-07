@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"html/template"
 	"github.com/docgo/docgo/markdownAnnotate"
+	"github.com/hashicorp/hcl/v2/ext/userfunc"
 )
 
 type Page struct {
@@ -57,10 +58,10 @@ type Pkg struct {
 Name         string `cty:"Name"`
 Doc          string `cty:"Doc"`
 Functions    []*FunctionDef `cty:"Functions"`
-	Structs    []*SerialType `cty:"Structs"`
-	Interfaces []*SerialType `cty:"Interfaces"`
-	Constants  []*SerialType `cty:"Constants"`
-	Variables []*SerialType `cty:"Variables"`
+Structs    []*SerialType `cty:"Structs"`
+Interfaces []*SerialType `cty:"Interfaces"`
+Constants  []*SerialType `cty:"Constants"`
+Variables []*SerialType `cty:"Variables"`
 }
 func Render(doc *ModuleDoc) cty.Value{
 	pkgs := []cty.Value{}
@@ -190,7 +191,13 @@ func Decode(filename string, src []byte, ctx *hcl.EvalContext, target interface{
 		return transform.BodyWithDiagnostics(remain, diags)
 	})
 
-
+	fn, b, _ := userfunc.DecodeUserFunctions(file.Body, "function", func() *hcl.EvalContext {
+		return ctx
+	})
+	for x, y := range fn {
+		ctx.Functions[x] = y
+	}
+	file.Body = b
 	file.Body = x(dynblock.Expand(file.Body, ctx))
 	diags = gohcl.DecodeBody(file.Body, ctx, target)
 	if diags.HasErrors() {
@@ -211,9 +218,7 @@ func TemplateFn(e hcl.Expression, ctx *hcl.EvalContext) function.Function{
 		Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 			ctx2 := ctx.NewChild()
 			ctx2.Variables = map[string]cty.Value{}
-			for name, val := range args[0].AsValueMap() {
-				ctx2.Variables[name] = val
-			}
+			ctx2.Variables["args"] = args[0]
 			v, _ := e.Value(ctx2)
 			return v, nil
 		},

@@ -1,25 +1,44 @@
 page {
-  title = "A"
+  title = "Intro page"
   markdown = <<EOF
   # This is the intro page
   Containing awesome **Markdown**
   EOF
 }
+
 dynamic "page" {
   for_each = Packages
   iterator = it
   content {
     title = it.value.Name
-    markdown = <<-MD
+    markdown = <<EOF
 ${it.value.Doc}
-${snippet({type="Functions", obj=it.value.Functions }) }
-${snippet({type="Structs", obj=it.value.Structs }) }
-    MD
+
+${snippet("Functions", it.value.Functions) }
+${snippet("Structs", it.value.Structs) }
+${snippet("Interfaces", it.value.Interfaces) }
+    EOF
   }
 }
-template "snippet" {
-  markdown = <<-MD
-### ${type}
-${ join("\n", [for item in obj : "${item.BaseDef.Name}\n```go\n${item.BaseDef.Snippet}\n```" ])}
-  MD
+function "snippet" {
+  params = [snippetType, obj]
+  result = length(obj) == 0 ? "" : <<EOF
+
+### ${snippetType}
+${ join("\n", [for item in obj : baseDef(item.BaseDef) ])}
+
+  EOF
+}
+
+function "baseDef" {
+  params = [def]
+  result = <<EOF
+*${def.Name}*
+
+${def.Doc}
+
+```go
+${def.Snippet}
+```
+  EOF
 }

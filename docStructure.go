@@ -51,7 +51,7 @@ type BaseDef struct {
 	Snippet   string`cty:"Snippet"`
 	Name        string `cty:"Name"`
 	FoundInFile string
-	Doc string
+	Doc string `cty:"Doc"`
 	Methods    []*MethodDef
 }
 
