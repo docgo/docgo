@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sort"
 )
 
 type Page struct {
@@ -47,6 +48,18 @@ func ctyValModuleDoc(doc *ModuleDoc) cty.Value {
 	return v
 }
 
+type Sortable []Page
+func (s Sortable) Less(i, j int) bool {
+	return strings.Count(s[i].Title, "/") < strings.Count(s[j].Title, "/")
+}
+
+func (s Sortable) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s Sortable) Len() int {
+	return len(s)
+}
+
 func ParsePage(doc *ModuleDoc) {
 	var document Document
 	ctx := hcl.EvalContext{}
@@ -66,6 +79,7 @@ func ParsePage(doc *ModuleDoc) {
 	links := map[int]string{}
 	searchIndex := map[string]string{}
 
+	sort.Sort(Sortable(document.Pages))
 	for i := 0; i < len(document.Pages); i++ {
 		if i == 0 {
 			links[0] = "index.html"

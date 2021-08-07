@@ -149,6 +149,8 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	return out
 }
 
+// DocGoNode represents an AST node in the Markdown hierarchy.
+// It contains annotations (that have attributes and begin/end marks) used later for rendering purposes.
 type DocGoNode struct {
 	gast.BaseInline
 	Code         string
@@ -161,7 +163,7 @@ type DocGoNode struct {
 	DecodeStatus string
 }
 
-// Dump implements Node.Dump.
+// Dump makes the DocGoNode conform to AST interface
 func (n *DocGoNode) Dump(source []byte, level int) {
 	m := map[string]string{
 		"AnnotateData": fmt.Sprintln(n.StringVars, n.IntVars),
@@ -173,10 +175,11 @@ func (n *DocGoNode) String() string {
 	return fmt.Sprint("DocGoNode data =", n.StringVars, n.IntVars, n.BoolVars)
 }
 
-// KindTaskCheckBox is a NodeKind of the TaskCheckBox node.
+// DocGoKind is a `NodeKind` that needs to be registered to the goldmark parser, so that
+// it can be properly marked and each AST walker can know the type of this node.
 var DocGoKind = gast.NewNodeKind("gc")
 
-// Kind implements Node.Kind.
+// Kind makes sure DocGoNode reports its correct ID/Kind to other AST processors
 func (n *DocGoNode) Kind() gast.NodeKind {
 	return DocGoKind
 }
@@ -185,19 +188,20 @@ func (s *docGoAnnotationParser) CloseBlock(parent gast.Node, pc parser.Context) 
 	// nothing to do
 }
 
-// TaskCheckBoxHTMLRenderer is a renderer.NodeRenderer implementation that
-// renders checkboxes in list items.
-type GcRenderer struct {
+// `DocgoRenderer` is an inline renderer that fetches the AST nodes containing docgo annotation
+// and converts them to the appropriate HTML.
+type DocgoRenderer struct {
 	html.Config
 }
 
-// NewTaskCheckBoxHTMLRenderer returns a new TaskCheckBoxHTMLRenderer.
-func NewGCRenderer(opts ...html.Option) renderer.NodeRenderer {
-	return &GcRenderer{}
+// NewDocgoRenderer returns a `NodeRenderer` instance capable of rendering Markdown
+// for code documentation pages, containing annotations.
+func NewDocgoRenderer(opts ...html.Option) renderer.NodeRenderer {
+	return &DocgoRenderer{}
 }
 
 // RegisterFuncs implements renderer.NodeRenderer.RegisterFuncs.
-func (r *GcRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+func (r *DocgoRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(DocGoKind, r.renderGC)
 }
 
@@ -205,7 +209,7 @@ type gcWriter interface {
 	io.Writer
 }
 
-func (r *GcRenderer) renderGC(w util.BufWriter, source []byte, node gast.Node, entering bool) (gast.WalkStatus, error) {
+func (r *DocgoRenderer) renderGC(w util.BufWriter, source []byte, node gast.Node, entering bool) (gast.WalkStatus, error) {
 	if !entering {
 		return gast.WalkContinue, nil
 	}
@@ -228,10 +232,12 @@ func (e *gcExtender) Extend(m goldmark.Markdown) {
 		util.Prioritized(NewDocgoParser(), 0),
 	))
 	m.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(NewGCRenderer(), 500),
+		util.Prioritized(NewDocgoRenderer(), 500),
 	))
 }
 
+// CleanPage takes a Markdown source as an input and deletes AST nodes that wouldn't be useful for searching/metadata
+// purposes.
 func CleanPage(page string) string {
 	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader([]byte(page)))
 	pageBytes := []byte(page)

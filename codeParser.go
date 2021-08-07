@@ -151,7 +151,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
-				ParseTypeDecl(spec, parsedPackage, tp.Methods)
+				ParseTypeDecl(spec, parsedPackage, tp.Methods, tp.Doc)
 			}
 		}
 
@@ -198,7 +198,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	return
 }
 
-func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc, methods []*doc.Func) {
+func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc, methods []*doc.Func, Doc string) {
 	methodDefs := make([]*MethodDef, 0)
 	for _, method := range methods {
 		methodDef := MethodDef{}
@@ -213,7 +213,9 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc, methods []*doc.Func) {
 	st, ok := t.Type.(*ast.StructType)
 	if ok {
 		sDef := StructDef{}
+		sDef.MethodList = methodDefs
 		sDef.Snippet = CreateSnippet(st, docPackage, "type ", declName, " ")
+		sDef.Doc = Doc
 		sDef.Name = declName
 		sDef.Type = st
 		sDef.FoundInFile = GetDeclFile(st, sDef.BaseDef, docPackage)
@@ -229,6 +231,7 @@ func ParseTypeDecl(s ast.Spec, docPackage *PackageDoc, methods []*doc.Func) {
 			return
 		}
 		interDef := InterfaceDef{}
+		interDef.Doc = Doc
 		interDef.FoundInFile = GetDeclFile(it, interDef.BaseDef, docPackage)
 		interDef.Name = declName
 		interDef.Type = it

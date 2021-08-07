@@ -5,6 +5,8 @@ type Dumper interface {
 	Dump() string
 }
 
+// IntDumper is a Dumper that stores integers in memory
+// and can serialize them into a string buffer.
 type IntDumper struct {
 	mem []int
 }

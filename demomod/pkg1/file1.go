@@ -8,6 +8,7 @@ import (
 	"example.com/demomod/pkg1/pkg2"
 )
 
+// Example struct that wraps a single number
 type MyType struct {
 	num float64
 }
@@ -19,12 +20,14 @@ func ExampleFn(t MyType) (x int, err error) {
 	return int(t.num), nil
 }
 
+// Loads all arguments into memory
 func (i IntDumper) Load(data ...interface{}) {
 	for _, entry := range data {
 		i.mem = append(i.mem, entry.(int))
 	}
 }
 
+// Dumps all stored numbers as a concatenated string
 func (i IntDumper) Dump() string {
 	out := ""
 	for _, number := range i.mem {

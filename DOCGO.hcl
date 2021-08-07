@@ -21,7 +21,7 @@ dynamic "page" {
       "\n",
       typeSection("Constants", it.value.CodeDef.Constants),
       typeSection("Functions", it.value.CodeDef.Functions),
-      typeSection("Structs", it.value.CodeDef.Structs),
+      structSection("Structs", it.value.CodeDef.Structs),
       typeSection("Variables", it.value.CodeDef.Variables),
       typeSection("Interfaces", it.value.CodeDef.Interfaces),
     ])
@@ -41,15 +41,27 @@ function "getSectionText" {
 function "typeSection" {
   params = [sectionTitle, obj]
   result = length(obj) == 0 ? "" : <<-MULTILINE
-  ### ${sectionTitle}
+  ## ${sectionTitle}
+----
   ${ join("\n", [for item in obj : snippet(item.BaseDef) ])}
+  MULTILINE
+}
+
+function "structSection" {
+  params = [title, structs]
+  result = <<-MULTILINE
+  ## Structs
+----
+  ${ join("\n", [for item in structs : "${snippet(item.BaseDef)}${renderMethods(item.BaseDef.Name, item.MethodList)}" if length(item.MethodList) != 0 ])}
+  ${ join("\n", [for item in structs : snippet(item.BaseDef) if length(item.MethodList) == 0 ])}
   MULTILINE
 }
 
 function "snippet" {
   params = [def]
+  variadic_param = extra
   result = <<-MULTILINE
-  *${def.Name}*
+  ### ${join(" ", extra)}${def.Name}
 
   ${def.Doc}
 
@@ -57,4 +69,12 @@ function "snippet" {
   ${def.Snippet}
   ```
   MULTILINE
+}
+
+function "renderMethods" {
+  params = [name, methods]
+  result = <<EOT
+  ### ↳ Methods on ${name}
+  ${join("\n", [for method in methods : snippet(method.BaseDef, "❯ ") ])}
+  EOT
 }

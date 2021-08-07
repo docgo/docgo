@@ -69,6 +69,7 @@ type FunctionDef struct {
 
 type StructDef struct {
 	BaseDef `cty:"BaseDef"`
+	MethodList []*MethodDef `cty:"MethodList"`
 	Type    *ast.StructType `cty:""`
 }
 
