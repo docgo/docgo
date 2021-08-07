@@ -74,7 +74,9 @@ func ParsePage(doc *ModuleDoc) {
 	settings := document.SiteSettings
 	htmlTemplates := LoadHTMLTemplates(template.FuncMap{"GetPageTitle": func(i int) string {
 		return document.Pages[i].Title
-	}})
+	},
+	"GetCssString": GetStaticCss,
+	})
 	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 	links := map[int]string{}
 	searchIndex := map[string]string{}

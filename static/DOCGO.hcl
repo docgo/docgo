@@ -74,7 +74,7 @@ function "snippet" {
 function "renderMethods" {
   params = [name, methods]
   result = <<EOT
-  ### ↳ Methods on ${name}
+  ### ⤷ *Methods on ${name}*
   ${join("\n", [for method in methods : snippet(method.BaseDef, "❯ ") ])}
   EOT
 }

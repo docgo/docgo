@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"text/template"
+	"strings"
 )
 
 //go:embed static
@@ -48,4 +49,11 @@ func LoadHTMLTemplates(funcMap templateHtml.FuncMap) *templateHtml.Template {
 		fmt.Red("Error loading templates", err)
 	}
 	return tpl
+}
+
+func GetStaticCss() templateHtml.HTML{
+	style := string(ReadStaticFile("static/style.css"))
+	style = strings.ReplaceAll(style, "\n", "")
+	style = strings.ReplaceAll(style, "\r", "")
+	return templateHtml.HTML("<style>" + style + "</style>")
 }
