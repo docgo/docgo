@@ -54,6 +54,9 @@ nav.menu-left .project-name {
 nav.menu-left .project-name>a{
     color: #fff;
 }
+nav.menu-left .project-name img {
+    width: 100px;
+}
 
 nav.menu-left .project-name-box {
     display: flex;

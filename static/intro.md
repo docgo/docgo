@@ -6,7 +6,7 @@ based on context and type analysis.
 * 🔧 uses the HCl configuration language, perfect for tuning params or extending it for guides/tutorials/blogs
 
 
-![](https://veef.menoric.com/docgo1.png)
+![](https://veef.menoric.com/docgo.png)
 
 ## HCL syntax
 
