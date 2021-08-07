@@ -255,3 +255,10 @@ hr {
     border-color: #5e72b9;
 }
 article h3 { margin-top: 2em; }
+
+.toc{
+    position: fixed; right: 25px; top: 80px; color: #fff; width: 150px; font-size: 0.9em;
+}
+@media (max-width: 1500px) {
+    .toc{display: none;}
+}

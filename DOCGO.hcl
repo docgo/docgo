@@ -9,6 +9,7 @@ page {
   title = "Intro page"
   markdown = readfile("static/intro.md")
   fulltext = "This is the intro page containing awesome markdown"
+  table_contents = ["docgo", "HCL syntax"]
 }
 
 dynamic "page" {
@@ -26,6 +27,7 @@ dynamic "page" {
       typeSection("Interfaces", it.value.CodeDef.Interfaces),
     ])
     fulltext = join(" ", [for item in getSections(it.value.CodeDef) : getSectionText(item)])
+    table_contents = flatten([for section in getSections(it.value.CodeDef) : [for item in section : item.BaseDef.Name]])
   }
 }
 

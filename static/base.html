@@ -12,6 +12,14 @@
     {{ GetCssString }}
 </head>
 <body>
+<div class="toc">
+    <h2>Table of contents</h2>
+    <ol>
+        {{ range $i, $el := .TableContents }}
+        <li>{{ $el }}</li>
+        {{ end }}
+    </ol>
+</div>
 <input type="checkbox" style="display: none" id="headerCheckbox" name="header-check"/>
 <nav class="menu-left">
     <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.5em;">

@@ -27,6 +27,7 @@ type Page struct {
 	Title    string `hcl:"title"`
 	Markdown string `hcl:"markdown"`
 	FullText string `hcl:"fulltext"`
+	TableOfContents []string `hcl:"table_contents"`
 }
 type Document struct {
 	Pages        []Page       `hcl:"page,block"`
@@ -102,8 +103,9 @@ func ParsePage(doc *ModuleDoc) {
 			ModuleDoc   *ModuleDoc
 			SiteInfo    SiteSettings
 			SearchIndex template.JS
+			TableContents []string
 		}{
-			item.Title, template.HTML(templateHTML), links, i, doc, settings, template.JS(string(searchIndexBytes)),
+			item.Title, template.HTML(templateHTML), links, i, doc, settings, template.JS(string(searchIndexBytes)), item.TableOfContents,
 		}
 		baseHtmlTemplate.Execute(distFile, thisPage)
 	}

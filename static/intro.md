@@ -19,17 +19,11 @@ functions:
 
 - **and:** And returns true if and only if both of the given boolean values are true.
 
-- **byteslen:**
-
-- **bytesslice:**
+- **byteslen**, **bytesslice**
 
 - **bytesval:** BytesVal creates a new Bytes value from the given buffer, which must be non-nil or this function will panic.
 
-Once a byte slice has been wrapped in a Bytes capsule, its underlying array must be considered immutable.
-
--   **csvdecode:** CSVDecode parses the given CSV (RFC 4180) string and, if it is valid, returns a list of objects representing the rows.
-
-The result is always a list of some object type. The first row of the input is used to determine the object attributes, and subsequent rows determine the values of those attributes.
+-   **csvdecode:** CSVDecode parses the given CSV (RFC 4180) string and, if it is valid, returns a list of objects representing the rows.  The result is always a list of some object type. The first row of the input is used to determine the object attributes, and subsequent rows determine the values of those attributes.
 
 -   **ceil:** Ceil returns the closest whole number greater than or equal to the given value.
 
@@ -43,9 +37,7 @@ The result is always a list of some object type. The first row of the input is u
 
 -   **compact:** Compact takes a list of strings and returns a new list with any empty string elements removed.
 
--   **concat:** Concat takes one or more sequences (lists or tuples) and returns the single sequence that results from concatenating them together in order.
-
-If all of the given sequences are lists of the same element type then the result is a list of that type. Otherwise, the result is a of a tuple type constructed from the given sequence types.
+-   **concat:** Concat takes one or more sequences (lists or tuples) and returns the single sequence that results from concatenating them together in order. If all of the given sequences are lists of the same element type then the result is a list of that type. Otherwise, the result is a of a tuple type constructed from the given sequence types.
 
 -   **contains:** Contains determines whether a given list contains a given single value as one of its elements.
 
@@ -63,7 +55,6 @@ If all of the given sequences are lists of the same element type then the result
 
 -   **format:** Format produces a string representation of zero or more values using a format string similar to the "printf" function in C.
 
-It supports the following "verbs":
 
 ```
 %%      Literal percent sign, consuming no value
@@ -134,11 +125,11 @@ By default, % sequences consume successive arguments starting with the first. In
 
 An error is produced if the format string calls for an impossible conversion or accesses more values than are given. An error is produced also for an unsupported format verb.
 
--   **formatdate:** FormatDate reformats a timestamp given in RFC3339 syntax into another time syntax defined by a given format string.
+- **formatdate:** FormatDate reformats a timestamp given in RFC3339 syntax into another time syntax defined by a given format string.
 
-The format string uses letter mnemonics to represent portions of the timestamp, with repetition signifying length variants of each portion. Single quote characters ' can be used to quote sequences of literal letters that should not be interpreted as formatting mnemonics.
+  - The format string uses letter mnemonics to represent portions of the timestamp, with repetition signifying length variants of each portion. Single quote characters ' can be used to quote sequences of literal letters that should not be interpreted as formatting mnemonics.
 
-The full set of supported mnemonic sequences is listed below:
+  - The full set of supported mnemonic sequences is listed below:
 
 ```
 YY       Year modulo 100 zero-padded to two digits, like "06".
@@ -172,81 +163,80 @@ The format syntax is optimized mainly for generating machine-oriented timestamps
 
 The format syntax is not compatible with that of any other language, but is optimized so that patterns for common standard date formats can be recognized quickly even by a reader unfamiliar with the format syntax.
 
--   **formatlist:** FormatList applies the same formatting behavior as Format, but accepts a mixture of list and non-list values as arguments. Any list arguments passed must have the same length, which dictates the length of the resulting list.
+- **formatlist:** FormatList applies the same formatting behavior as Format, but accepts a mixture of list and non-list values as arguments. Any list arguments passed must have the same length, which dictates the length of the resulting list.
 
-Any non-list arguments are used repeatedly for each iteration over the list arguments. The list arguments are iterated in order by key, so corresponding items are formatted together.
+  - Any non-list arguments are used repeatedly for each iteration over the list arguments. The list arguments are iterated in order by key, so corresponding items are formatted together.
 
--   **greaterthan:** GreaterThan returns true if a is less than b.
+- **greaterthan:** GreaterThan returns true if a is less than b.
 
--   **greaterthanorequalto:** GreaterThanOrEqualTo returns true if a is less than b.
+- **greaterthanorequalto:** GreaterThanOrEqualTo returns true if a is less than b.
 
--   **hasindex:** HasIndex determines whether the given collection can be indexed with the given key.
+- **hasindex:** HasIndex determines whether the given collection can be indexed with the given key.
 
--   **indent:** Indent adds a given number of spaces to the beginnings of all but the first line in a given multi-line string.
+- **indent:** Indent adds a given number of spaces to the beginnings of all but the first line in a given multi-line string.
 
--   **index:** Index returns an element from the given collection using the given key, or returns an error if there is no element for the given key.
+- **index:** Index returns an element from the given collection using the given key, or returns an error if there is no element for the given key.
 
--   **int:** Int removes the fractional component of the given number returning an integer representing the whole number component, rounding towards zero. For example, -1.5 becomes -1.
+- **int:** Int removes the fractional component of the given number returning an integer representing the whole number component, rounding towards zero. For example, -1.5 becomes -1.
 
-If an infinity is passed to Int, an error is returned.
+  - If an infinity is passed to Int, an error is returned.
 
--   **jsondecode:** JSONDecode parses the given JSON string and, if it is valid, returns the value it represents.
+- **jsondecode:** JSONDecode parses the given JSON string and, if it is valid, returns the value it represents.
 
-Note that applying JSONDecode to the result of JSONEncode may not produce an identically-typed result, since JSON encoding is lossy for cty Types. The resulting value will consist only of primitive types, object types, and tuple types.
+  - Note that applying JSONDecode to the result of JSONEncode may not produce an identically-typed result, since JSON encoding is lossy for cty Types. The resulting value will consist only of primitive types, object types, and tuple types.
 
--   **jsonencode:** JSONEncode returns a JSON serialization of the given value.
+- **jsonencode:** JSONEncode returns a JSON serialization of the given value.
 
--   **join:** Join concatenates together the string elements of one or more lists with a given separator.
+- **join:** Join concatenates together the string elements of one or more lists with a given separator.
 
--   **keys:** Keys takes a map and returns a sorted list of the map keys.
+- **keys:** Keys takes a map and returns a sorted list of the map keys.
 
--   **length:** Length returns the number of elements in the given collection.
+- **length:** Length returns the number of elements in the given collection.
 
--   **lessthan:** LessThan returns true if a is less than b.
+- **lessthan:** LessThan returns true if a is less than b.
 
--   **lessthanorequalto:** LessThanOrEqualTo returns true if a is less than b.
+- **lessthanorequalto:** LessThanOrEqualTo returns true if a is less than b.
 
--   **log:** Log returns returns the logarithm of a given number in a given base.
+- **log:** Log returns returns the logarithm of a given number in a given base.
 
--   **lookup:** Lookup performs a dynamic lookup into a map. There are two required arguments, map and key, plus an optional default, which is a value to return if no key is found in map.
+- **lookup:** Lookup performs a dynamic lookup into a map. There are two required arguments, map and key, plus an optional default, which is a value to return if no key is found in map.
 
--   **lower:** Lower is a Function that converts a given string to lowercase.
+- **lower:** Lower is a Function that converts a given string to lowercase.
 
--   **maketofunc:** MakeToFunc constructs a "to..." function, like "tostring", which converts its argument to a specific type or type kind.
+- **maketofunc:** MakeToFunc constructs a "to..." function, like "tostring", which converts its argument to a specific type or type kind.
+  - The given type wantTy can be any type constraint that cty's "convert" package would accept. In particular, this means that you can pass cty.List(cty.DynamicPseudoType) to mean "list of any single type", which will then cause cty to attempt to unify all of the element types when given a tuple.
 
-The given type wantTy can be any type constraint that cty's "convert" package would accept. In particular, this means that you can pass cty.List(cty.DynamicPseudoType) to mean "list of any single type", which will then cause cty to attempt to unify all of the element types when given a tuple.
+- **max:** Max returns the maximum number from the given numbers.
 
--   **max:** Max returns the maximum number from the given numbers.
+- **merge:** Merge takes an arbitrary number of maps and returns a single map that contains a merged set of elements from all of the maps.
 
--   **merge:** Merge takes an arbitrary number of maps and returns a single map that contains a merged set of elements from all of the maps.
+  - If more than one given map defines the same key then the one that is later in the argument sequence takes precedence.
 
-If more than one given map defines the same key then the one that is later in the argument sequence takes precedence.
+- **min:** Min returns the minimum number from the given numbers.
 
--   **min:** Min returns the minimum number from the given numbers.
+- **modulo:** Modulo returns the remainder of a divided by b under integer division, where both a and b are numbers.
 
--   **modulo:** Modulo returns the remainder of a divided by b under integer division, where both a and b are numbers.
+- **multiply:** Multiply returns the product of the two given numbers.
 
--   **multiply:** Multiply returns the product of the two given numbers.
+- **negate:** Negate returns the given number multipled by -1.
 
--   **negate:** Negate returns the given number multipled by -1.
+- **not:** Not returns the logical complement of the given boolean value.
 
--   **not:** Not returns the logical complement of the given boolean value.
+- **notequal:** NotEqual is the opposite of Equal.
 
--   **notequal:** NotEqual is the opposite of Equal.
+- **or:** Or returns true if either of the given boolean values are true.
 
--   **or:** Or returns true if either of the given boolean values are true.
+- **parseint:** ParseInt parses a string argument and returns an integer of the specified base.
 
--   **parseint:** ParseInt parses a string argument and returns an integer of the specified base.
+- **pow:** Pow returns the logarithm of a given number in a given base.
 
--   **pow:** Pow returns the logarithm of a given number in a given base.
+- **range:** Range creates a list of numbers by starting from the given starting value, then adding the given step value until the result is greater than or equal to the given stopping value. Each intermediate result becomes an element in the resulting list.
 
--   **range:** Range creates a list of numbers by starting from the given starting value, then adding the given step value until the result is greater than or equal to the given stopping value. Each intermediate result becomes an element in the resulting list.
+  - When all three parameters are set, the order is (start, end, step). If only two parameters are set, they are the start and end respectively and step defaults to 1. If only one argument is set, it gives the end value with start defaulting to 0 and step defaulting to 1.
 
-When all three parameters are set, the order is (start, end, step). If only two parameters are set, they are the start and end respectively and step defaults to 1. If only one argument is set, it gives the end value with start defaulting to 0 and step defaulting to 1.
+  - Because the resulting list must be fully buffered in memory, there is an artificial cap of 1024 elements, after which this function will return an error to avoid consuming unbounded amounts of memory. The Range function is primarily intended for creating small lists of indices to iterate over, so there should be no reason to generate huge lists with it.
 
-Because the resulting list must be fully buffered in memory, there is an artificial cap of 1024 elements, after which this function will return an error to avoid consuming unbounded amounts of memory. The Range function is primarily intended for creating small lists of indices to iterate over, so there should be no reason to generate huge lists with it.
-
--   **regex:** Regex is a function that extracts one or more substrings from a given string by applying a regular expression pattern, describing the first match.
+- **regex:** Regex is a function that extracts one or more substrings from a given string by applying a regular expression pattern, describing the first match.
 
 The return type depends on the composition of the capture groups (if any) in the pattern:
 
@@ -257,55 +247,55 @@ The return type depends on the composition of the capture groups (if any) in the
 
 If the pattern doesn't match, this function returns an error. To test for a match, call RegexAll and check if the length of the result is greater than zero.
 
--   **regexall:** RegexAll is similar to Regex but it finds all of the non-overlapping matches in the given string and returns a list of them.
+- **regexall:** RegexAll is similar to Regex but it finds all of the non-overlapping matches in the given string and returns a list of them.
 
-The result type is always a list, whose element type is deduced from the pattern in the same way as the return type for Regex is decided.
+  - The result type is always a list, whose element type is deduced from the pattern in the same way as the return type for Regex is decided.
 
-If the pattern doesn't match at all, this function returns an empty list.
+  - If the pattern doesn't match at all, this function returns an empty list.
 
--   **regexreplace:**
+- **regexreplace:**
 
--   **replace:** Replace searches a given string for another given substring, and replaces all occurrences with a given replacement string.
+- **replace:** Replace searches a given string for another given substring, and replaces all occurrences with a given replacement string.
 
--   **reverse:** Reverse is a Function that reverses the order of the characters in the given string.
+- **reverse:** Reverse is a Function that reverses the order of the characters in the given string.
 
-As usual, "character" for the sake of this function is a grapheme cluster, so combining diacritics (for example) will be considered together as a single character.
+  - As usual, "character" for the sake of this function is a grapheme cluster, so combining diacritics (for example) will be considered together as a single character.
 
--   **reverselist:** ReverseList takes a sequence and produces a new sequence of the same length with all of the same elements as the given sequence but in reverse order.
+- **reverselist:** ReverseList takes a sequence and produces a new sequence of the same length with all of the same elements as the given sequence but in reverse order.
 
--   **sethaselement:** SetHasElement determines whether the given set contains the given value as an element.
+- **sethaselement:** SetHasElement determines whether the given set contains the given value as an element.
 
--   **setintersection:** Intersection returns a new set containing the elements that exist in all of the given sets, which must have element types that can all be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
+- **setintersection:** Intersection returns a new set containing the elements that exist in all of the given sets, which must have element types that can all be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
 
-The intersection operation is performed after type conversion, which may result in some previously-distinct values being conflated.
+  - The intersection operation is performed after type conversion, which may result in some previously-distinct values being conflated.
 
-At least one set must be provided.
+  - At least one set must be provided.
 
--   **setproduct:** SetProduct computes the Cartesian product of sets or sequences.
+- **setproduct:** SetProduct computes the Cartesian product of sets or sequences.
 
--   **setsubtract:** SetSubtract returns a new set containing the elements from the first set that are not present in the second set. The sets must have element types that can both be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
+- **setsubtract:** SetSubtract returns a new set containing the elements from the first set that are not present in the second set. The sets must have element types that can both be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
 
-The subtract operation is performed after type conversion, which may result in some previously-distinct values being conflated.
+  - The subtract operation is performed after type conversion, which may result in some previously-distinct values being conflated.
 
--   **setsymmetricdifference:** SetSymmetricDifference returns a new set containing elements that appear in any of the given sets but not multiple. The sets must have element types that can all be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
+- **setsymmetricdifference:** 
+  - setSymmetricDifference returns a new set containing elements that appear in any of the given sets but not multiple. The sets must have element types that can all be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
+  - The difference operation is performed after type conversion, which may result in some previously-distinct values being conflated.
 
-The difference operation is performed after type conversion, which may result in some previously-distinct values being conflated.
+- **setunion:** SetUnion returns a new set containing all of the elements from the given sets, which must have element types that can all be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
 
--   **setunion:** SetUnion returns a new set containing all of the elements from the given sets, which must have element types that can all be converted to some common type using the standard type unification rules. If conversion is not possible, an error is returned.
+  - The union operation is performed after type conversion, which may result in some previously-distinct values being conflated.
 
-The union operation is performed after type conversion, which may result in some previously-distinct values being conflated.
+  - At least one set must be provided.
 
-At least one set must be provided.
+- **signum:** Signum determines the sign of a number, returning a number between -1 and 1 to represent the sign.
 
--   **signum:** Signum determines the sign of a number, returning a number between -1 and 1 to represent the sign.
+- **slice:** Slice extracts some consecutive elements from within a list.
 
--   **slice:** Slice extracts some consecutive elements from within a list.
+- **sort:** Sort re-orders the elements of a given list of strings so that they are in ascending lexicographical order.
 
--   **sort:** Sort re-orders the elements of a given list of strings so that they are in ascending lexicographical order.
+- **split:** Split divides a given string by a given separator, returning a list of strings containing the characters between the separator sequences.
 
--   **split:** Split divides a given string by a given separator, returning a list of strings containing the characters between the separator sequences.
-
--   **strlen:** Strlen is a Function that returns the length of the given string in characters.
+- **strlen:** Strlen is a Function that returns the length of the given string in characters.
 
 As usual, "character" for the sake of this function is a grapheme cluster, so combining diacritics (for example) will be considered together as a single character.
 
