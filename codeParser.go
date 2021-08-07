@@ -84,9 +84,20 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		name := strings.ReplaceAll(filepath.Join(strings.TrimLeft(pkgPath, "/")), string(os.PathSeparator), "/")
 		if hasMain {
 			continue
-			name += "/main"
 		}
 		if name == "" {
+			/*
+			  [!] [!] [!]
+			  WARNING: This is a horrible idea.   [BUGFIX] [TODO]
+			  [!] [!] [!]
+
+			 An arbitrary comment in the file beginning can
+			 contain a valid package statement as a substring, i.e.
+			  // package X
+			     package Y
+			 and it would fool this idea. Use a proper AST parser here.
+			 Keep in mind this case (empty name) shouldn't happen anyway.
+			 */
 			entries, _ := os.ReadDir(modFilePath)
 			for _, item := range entries {
 				if !item.IsDir() && filepath.Ext(item.Name()) == ".go" {
