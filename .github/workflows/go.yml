@@ -17,7 +17,7 @@ jobs:
     - name: Build and install
       run: go build -o main .
     - name: dist
-      run: ./main -l 0 -o dist .
+      run: ./main -p 0 -o dist .
     - name: add robots.txt
       run: "printf 'User-agent: *\nDisallow: /\n' > ./dist/robots.txt"
     - name: Deploy to GitHub Pages

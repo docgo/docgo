@@ -1,6 +1,6 @@
 *.exe
 *.bin
 pkged.go
+/docgo-dist
 /dist
-/dist2
 /.idea

@@ -2,10 +2,10 @@ root = "."
 tmp_dir = "dist2"
 
 [build]
-  bin = "dist2\\main.exe . && true"
-  cmd = "go build -o ./dist2/main.exe ."
+  bin = "dist\\main.exe . && true"
+  cmd = "go build -o ./dist/main.exe ."
   delay = 1000
-  exclude_dir = ["static", "dist", "dist2", "vendor", "dist"]
+  exclude_dir = ["static", "dist", "docgo-dist", "vendor"]
   exclude_file = []
   exclude_regex = [".+~$"]
   exclude_unchanged = false

@@ -6,6 +6,7 @@ import (
 	templateHtml "html/template"
 	"io/fs"
 	"os"
+	"io"
 )
 
 //go:embed static
@@ -18,6 +19,18 @@ func setTemplateFs() {
 	} else {
 		templateFs = staticFS
 	}
+}
+func ReadStaticFile(name string) []byte {
+	setTemplateFs()
+	f, err := templateFs.Open(name)
+	if err != nil {
+		panic(err)
+	}
+	out, err := io.ReadAll(f)
+	if err != nil {
+		panic(err)
+	}
+	return out
 }
 func LoadMarkdownTemplates(funcMap template.FuncMap) *template.Template {
 	setTemplateFs()

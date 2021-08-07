@@ -19,6 +19,7 @@ import (
 )
 
 var prefix = []byte("@docgo")
+
 const unicodeIdentifier = `[\p{L}][\p{L}_0-9]*`
 
 type docGoAnnotationParser struct{}
@@ -40,6 +41,7 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	line, _ := block.PeekLine()
 	stringVars := make(map[string]string)
 	boolVars, intVars := make(map[string]bool), make(map[string]int)
+	attributes := make(map[string]bool)
 	lineStart := seg.Start
 	lineEnd := seg.Stop
 
@@ -50,7 +52,7 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	failedDecode := ""
 
 	decoder := bytes.NewReader(line)
-	decoderAdvance := func (i int) {
+	decoderAdvance := func(i int) {
 		for x := 0; x < i; x++ {
 			_, err := decoder.ReadByte()
 			if err != nil {
@@ -62,9 +64,10 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	}
 	decoderAdvance(len(prefix))
 
-	r := regexp.MustCompile(`^\s*(` + unicodeIdentifier + `)\s*=\s*`)
+	rIdentifier := regexp.MustCompile(`^\s*(` + unicodeIdentifier + `)`)
 	rComma := regexp.MustCompile(`^\s*,`)
 	rBegin := regexp.MustCompile(`^\s*\[`)
+	rEquals := regexp.MustCompile(`^\s*=`)
 	parsedCounter := 0
 	for {
 		if parsedCounter == 0 {
@@ -89,12 +92,20 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 				lineEnd = seg.Stop
 			}
 		}
-		matches := r.FindSubmatch(line)
+		matches := rIdentifier.FindSubmatch(line)
 		if len(matches) != 2 {
 			break
 		}
 		varName := string(matches[1])
 		decoderAdvance(len(matches[0]))
+
+		equals := rEquals.Find(line)
+		if equals == nil {
+			attributes[varName] = true
+			parsedCounter++
+			continue
+		}
+		decoderAdvance(len(equals))
 
 		jDecoder := json.NewDecoder(bytes.NewReader(line))
 		jDecoder.UseNumber()
@@ -110,7 +121,9 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 		case string:
 			stringVars[varName] = parsedVal
 		case json.Number:
-			if strings.Contains(parsedVal.String(), ".") { continue }
+			if strings.Contains(parsedVal.String(), ".") {
+				continue
+			}
 			pInt, _ := parsedVal.Int64()
 			intVars[varName] = int(pInt)
 		case bool:
@@ -126,6 +139,7 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 		decoderAdvance(len(end))
 	}
 	out := &DocGoNode{}
+	out.Attrs = attributes
 	out.StringVars = stringVars
 	out.BoolVars = boolVars
 	out.IntVars = intVars
@@ -135,9 +149,10 @@ func (s *docGoAnnotationParser) Parse(parent gast.Node, block text.Reader, pc pa
 	return out
 }
 
-type DocGoNode struct{
+type DocGoNode struct {
 	gast.BaseInline
 	Code         string
+	Attrs        map[string]bool
 	StringVars   map[string]string
 	IntVars      map[string]int
 	BoolVars     map[string]bool
@@ -217,7 +232,7 @@ func (e *gcExtender) Extend(m goldmark.Markdown) {
 	))
 }
 
-func CleanPage(page string) string{
+func CleanPage(page string) string {
 	cleanAST := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader([]byte(page)))
 	pageBytes := []byte(page)
 	out := []byte("")
@@ -225,9 +240,9 @@ func CleanPage(page string) string{
 		if !entering {
 			if n.Kind() == gast.KindCodeBlock || n.Kind() == gast.KindFencedCodeBlock || n.Kind() == gast.KindCodeSpan {
 				//n.RemoveChildren(n)
-				n.PreviousSibling().SetNextSibling(n.NextSibling())
+				//n.PreviousSibling().SetNextSibling(n.NextSibling())
 			}
-			if n.Kind() == gast.KindText{
+			if n.Kind() == gast.KindText {
 				out = append(out, n.Text(pageBytes)...)
 				out = append(out, ' ')
 			}

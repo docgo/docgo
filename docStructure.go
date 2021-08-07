@@ -26,15 +26,7 @@ type ScopedIdentifier struct {
 type ExportType string
 type SimpleExportsByType map[string][]ScopedIdentifier
 
-type Snippet struct {
-	SnippetText string
-}
-
-func (s Snippet) String() string {
-	return s.SnippetText
-}
-
-func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) Snippet {
+func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) string {
 	snipFile := pkg.FileSet.File(node.Pos())
 	baseName := filepath.Base(snipFile.Name())
 	q, _ := os.ReadFile(filepath.Join(pkg.AbsolutePath, baseName))
@@ -43,7 +35,7 @@ func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) Snippet {
 		os.Exit(1)
 	}
 	snipStr := string(q)[snipFile.Offset(node.Pos()):snipFile.Offset(node.End())]
-	return Snippet{strings.Join(prefix, "") + snipStr}
+	return strings.Join(prefix, "") + snipStr
 }
 
 func GetDeclFile(node ast.Node, ourDecl BaseDef, pkg *PackageDoc) string {
@@ -56,40 +48,40 @@ func GetDeclFile(node ast.Node, ourDecl BaseDef, pkg *PackageDoc) string {
 }
 
 type BaseDef struct {
-	Snippet
-	Name        string
+	Snippet   string`cty:"Snippet"`
+	Name        string `cty:"Name"`
 	FoundInFile string
 	Doc string
 	Methods    []*MethodDef
 }
 
 type ConstDef struct {
-	BaseDef
+	BaseDef `cty:"BaseDef"`
 }
 
 type VarDef struct {
-	BaseDef
+	BaseDef `cty:"BaseDef"`
 }
 
 type FunctionDef struct {
-	BaseDef
+	BaseDef `cty:"BaseDef"`
 }
 
 type StructDef struct {
-	BaseDef
-	Type *ast.StructType
+	BaseDef `cty:"BaseDef"`
+	Type    *ast.StructType
 }
 
 type InterfaceDef struct {
-	BaseDef
-	Type *ast.InterfaceType
+	BaseDef `cty:"BaseDef"`
+	Type    *ast.InterfaceType
 }
 
 type MethodDef struct {
-	BaseDef
+	BaseDef `cty:"BaseDef"`
 }
 type Typedef struct {
-	BaseDef
+	BaseDef `cty:"BaseDef"`
 }
 
 type PackageDoc struct {

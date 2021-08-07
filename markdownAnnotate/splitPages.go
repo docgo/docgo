@@ -6,6 +6,8 @@ import (
 	"github.com/yuin/goldmark/text"
 	gast "github.com/yuin/goldmark/ast"
 	"bytes"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/util"
 )
 type pair struct { from, to int }
 
@@ -21,7 +23,7 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 		if !entering {
 			if n.Kind() == DocGoKind {
 				dg := n.(*DocGoNode)
-				if dg.BoolVars["page"] {
+				if dg.Attrs["page"] {
 					pageIdx = append(pageIdx, pair{dg.LineStart, dg.LineEnd})
 					titles = append(titles, dg.StringVars["title"])
 				}
@@ -44,6 +46,20 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 // into HTML
 func RenderPage(markdownString string) string {
 	w := bytes.NewBufferString("")
-	goldmark.New(goldmark.WithExtensions(extension.GFM, DocgoExtension)).Convert([]byte(markdownString), w)
+	k := parser.WithASTTransformers(util.Prioritized(annotationTransformer{}, 0))
+	goldmark.New(goldmark.WithExtensions(extension.GFM, DocgoExtension), goldmark.WithParserOptions(k)).Convert([]byte(markdownString), w)
 	return w.String()
+}
+
+type annotationTransformer struct{}
+
+func (annotationTransformer) Transform(node *gast.Document, reader text.Reader, pc parser.Context) {
+	gast.Walk(node, func(n gast.Node, entering bool) (gast.WalkStatus, error) {
+		if n.PreviousSibling() == nil || n.PreviousSibling().Kind() != DocGoKind {
+			return gast.WalkContinue, nil
+		}
+		d := n.PreviousSibling().(*DocGoNode)
+		_ = d.StringVars
+		return gast.WalkContinue, nil
+	})
 }
