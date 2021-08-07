@@ -1,3 +1,9 @@
+site_settings {
+  github = "https://github.com/docgo/docgo"
+  gopkg = "https://pkg.go.dev/"
+  site_name = "docgo"
+}
+
 page {
   title = "Intro page"
   markdown = <<EOF
@@ -13,24 +19,25 @@ dynamic "page" {
     title = it.value.Name
     markdown = <<EOF
 ${it.value.Doc}
-
-${snippet("Functions", it.value.Functions) }
-${snippet("Structs", it.value.Structs) }
-${snippet("Interfaces", it.value.Interfaces) }
+${typeSection("Constants", it.value.CodeDef.Constants) }
+${typeSection("Functions", it.value.CodeDef.Functions) }
+${typeSection("Structs", it.value.CodeDef.Structs) }
+${typeSection("Variables", it.value.CodeDef.Variables) }
+${typeSection("Interfaces", it.value.CodeDef.Interfaces) }
     EOF
   }
 }
-function "snippet" {
+function "typeSection" {
   params = [snippetType, obj]
   result = length(obj) == 0 ? "" : <<EOF
 
 ### ${snippetType}
-${ join("\n", [for item in obj : baseDef(item.BaseDef) ])}
+${ join("\n", [for item in obj : snippet(item.BaseDef) ])}
 
   EOF
 }
 
-function "baseDef" {
+function "snippet" {
   params = [def]
   result = <<EOF
 *${def.Name}*

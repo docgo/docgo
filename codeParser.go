@@ -129,6 +129,12 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 
 		parsedModuleDoc.Packages = append(parsedModuleDoc.Packages, parsedPackage)
 
+		parsedPackage.Structs = make([]*StructDef, 0)
+		parsedPackage.Interfaces = make([]*InterfaceDef, 0)
+		parsedPackage.Functions = make([]*FunctionDef, 0)
+		parsedPackage.Variables = make([]*VarDef, 0)
+		parsedPackage.Constants = make([]*ConstDef, 0)
+
 		for _, tp := range info.PDoc.Types {
 			for _, spec := range tp.Decl.Specs {
 				ParseTypeDecl(spec, parsedPackage, tp.Methods)

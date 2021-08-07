@@ -20,7 +20,6 @@ import (
 	oldFmt "fmt"
 	_ "github.com/zclconf/go-cty/cty/gocty"
 	"github.com/zclconf/go-cty/cty/gocty"
-	"reflect"
 	"html/template"
 	"github.com/docgo/docgo/markdownAnnotate"
 	"github.com/hashicorp/hcl/v2/ext/userfunc"
@@ -32,60 +31,17 @@ type Page struct {
 }
 type Document struct {
 	Pages []Page `hcl:"page,block"`
-	//Templates []Template `hcl:"template,block"`
+	SiteSettings SiteSettings `hcl:"site_settings,block"`
 }
-/*
-type Template struct {
-	Name string `hcl:"name,label"`
-	Markdown ExpressionClosureType `hcl:"markdown" cty:""`
-}*/
-
-type SerialType struct {
-	BaseDef `cty:"BaseDef"`
-}
-func ex(val interface{}) []*SerialType {
-	out := []*SerialType{}
-	for i := 0; i < reflect.ValueOf(val).Len(); i++ {
-		s := new(SerialType)
-		v := reflect.ValueOf(val).Index(i).Elem().FieldByName("BaseDef")
-		v.FieldByName("Methods").Set(reflect.ValueOf([]*MethodDef(nil)))
-		reflect.ValueOf(s).Elem().FieldByName("BaseDef").Set(v)
-		out = append(out, s)
-	}
-	return out
-}
-type Pkg struct {
-Name         string `cty:"Name"`
-Doc          string `cty:"Doc"`
-Functions    []*FunctionDef `cty:"Functions"`
-Structs    []*SerialType `cty:"Structs"`
-Interfaces []*SerialType `cty:"Interfaces"`
-Constants  []*SerialType `cty:"Constants"`
-Variables []*SerialType `cty:"Variables"`
+type SiteSettings struct {
+	GitHub string `hcl:"github,attr"`
+	GoPkg string `hcl:"gopkg,attr"`
+	SiteName string `hcl:"site_name,attr"`
 }
 func Render(doc *ModuleDoc) cty.Value{
-	pkgs := []cty.Value{}
-	pp := []Pkg{}
-	for _, item := range doc.Packages {
-		p := Pkg{item.Name, item.Doc, item.Functions, ex(item.Structs), ex(item.Interfaces), ex(item.Constants), ex(item.Variables), }
-		pp = append(pp, p)
-		obj := map[string]cty.Value{}
-		s := cty.StringVal
-		obj["Name"] = s(item.Name)
-		obj["Doc"] = s(item.Doc)
-		fns := []cty.Value{}
-		for _, item := range item.Functions {
-			o := cty.ObjectVal(map[string]cty.Value{"Name": s(item.Name), "Doc": s(item.Doc),})
-			fns = append(fns, o)
-		}
-		obj["Functions"] = cty.ListVal(fns)
-		pkgs = append(pkgs, cty.ObjectVal(obj))
-	}
-	t, _ := gocty.ImpliedType(pp)
-	v, _ := gocty.ToCtyValue(&pp, t)
-	//fmt.Debug(cty.CapsuleVal(t, &pp))
+	t, _ := gocty.ImpliedType(doc.Packages)
+	v, _ := gocty.ToCtyValue(&doc.Packages, t)
 	return v
-	return cty.ListVal(pkgs)
 }
 
 func ParsePage(doc *ModuleDoc) {
@@ -98,16 +54,14 @@ func ParsePage(doc *ModuleDoc) {
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %s", err)
 	}
+
+	settings := document.SiteSettings
 	htmlTemplates := LoadHTMLTemplates(template.FuncMap{"GetPageTitle": func(i int) string{
 		return document.Pages[i].Title
 	}})
 	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 	links := map[int]string{}
-	siteInfo := map[string]string{
-		"github": "https://github.com/docgo/docgo",
-		"gopkg": "https://pkg.go.dev/github.com/docgo/docgo",
-		"projectName": "docgo",
-	}
+
 	for i := 0; i < len(document.Pages); i++ {
 		if i == 0 {
 			links[0] = "index.html"
@@ -124,10 +78,10 @@ func ParsePage(doc *ModuleDoc) {
 			PageLinks   map[int]string
 			CurrentPage int
 			ModuleDoc   *ModuleDoc
-			SiteInfo  map[string]string
+			SiteInfo  SiteSettings
 			SearchIndex template.JS
 		}{
-			item.Title, template.HTML(templateHTML),  links, i, doc, siteInfo, template.JS("3"),
+			item.Title, template.HTML(templateHTML),  links, i, doc, settings, template.JS("3"),
 		}
 		baseHtmlTemplate.Execute(distFile, thisPage)
 	}
