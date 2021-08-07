@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
     {{ GetCssString }}
 </head>
-<body class="lightmode">
+<body class="lightmodes">
 <div class="toc">
     <h2>Table of contents</h2>
     <ol>
@@ -22,7 +22,7 @@
 </div>
 <input type="checkbox" style="display: none" id="headerCheckbox" name="header-check"/>
 <nav class="menu-left">
-    <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.5em;">
+    <div class="sidebar-wrap">
         <section class="project-name-box">
             <h2 class="project-name">
                 <a href="index.html">
@@ -48,6 +48,9 @@ auto_stories
 
             </li>
         </ul>
+        <div class="darkmode-wrap"><button onclick="toggleMode()"><span class="material-icons">
+light_mode
+</span></button></div>
     </div>
 </nav>
 <section class="part-right">
@@ -111,5 +114,9 @@ auto_stories
     }
 </style>
     {{ template "search.html" .SearchIndex }}
+<script>
+    var toggleMode = () => localStorage['lm'] = document.body.classList.toggle('lightmode') || "";
+    localStorage['lm'] ? toggleMode() : 0;
+</script>
 </body>
 </html>

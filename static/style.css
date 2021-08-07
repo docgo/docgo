@@ -16,10 +16,10 @@ body {
     --search-color: var(--p1);
 }
 body.lightmode {
-    --b1: #ECEDF0;
+    --b1: #fff;
     --b2: #D5DEE1;
     --b3: #292F36;
-    --head-border: #CDCDCD;
+    --head-border: transparent;
     --fg: #1B1D23;
     --search-color: var(--g1);
 }
@@ -54,6 +54,10 @@ header {
     width: 100%;
     border-bottom: 1px solid var(--head-border);
     background: var(--b2);
+}
+.lightmode header {
+    background: #fff;
+    box-shadow: 0px 3px 5px rgb(0 0 0 / 0.1);
 }
 
 header .search-icon {
@@ -98,12 +102,23 @@ nav.menu-left {
     box-sizing: border-box;
     overflow-y: hidden;
     background: #1B1D23;
+    --sidebar-color: #ccc;
+    color: var(--sidebar-color);
     width: 300px;
     top: 0;
     bottom: 0;
     left: 0;
     z-index: 100;
     transition: all 0.3s;
+}
+nav.menu-left .sidebar-wrap{
+    min-height: 101%; position: relative;  padding: 1em 0.5em;
+}
+
+.lightmode .menu-left{
+    background: #F9FAFA;
+    border-right: 1px solid #eaeaea;
+    --sidebar-color: #222;
 }
 
 .part-right {
@@ -169,13 +184,13 @@ nav.menu-left .pkg ul {
     box-sizing: border-box;
     margin: 10px 0;
     position: relative;
-    left: 0.4em;
+    left: 0.5em;
     padding: 0 10px;
     border-left: 5px solid transparent;
 }
 
 .pkg li a {
-    color: #ccc;
+    color: var(--sidebar-color);
     text-decoration: none;
     font-weight: 400;
     display: block;
@@ -186,10 +201,14 @@ nav.menu-left .pkg ul {
     color: #fff;
 }
 
+.lightmode .pkg li.active a{
+    color: #333;
+}
+
 .pkg li.active {
     border-left: 5px solid #7800DB;
     font-weight: 500;
-    background: rgba(255 255 255 / 0.1);
+    background: rgba(255 255 255 / 0.05);
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
@@ -298,4 +317,14 @@ article h3 { margin-top: 2em; }
 }
 @media (max-width: 1500px) {
     .toc{display: none;}
+}
+
+.darkmode-wrap {
+    position: absolute; bottom: 8vh; left: 10px
+}
+
+.darkmode-wrap button {
+    border: 0; background: none; outline: 0;
+    cursor: pointer;
+    color: var(--sidebar-color);
 }
