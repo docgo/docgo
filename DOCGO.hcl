@@ -4,12 +4,10 @@ site_settings {
   site_name = "docgo"
 }
 
+
 page {
   title = "Intro page"
-  markdown = join("\n", [
-    "# This is the intro page",
-    "Containing awesome **Markdown**"
-  ])
+  markdown = readfile("static/intro.md")
   fulltext = "This is the intro page containing awesome markdown"
 }
 

@@ -2,11 +2,11 @@ package main
 
 import (
 	"embed"
-	"text/template"
 	templateHtml "html/template"
+	"io"
 	"io/fs"
 	"os"
-	"io"
+	"text/template"
 )
 
 //go:embed static

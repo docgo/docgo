@@ -3,37 +3,37 @@ package main
 import (
 	"log"
 
+	oldJson "encoding/json"
+	oldFmt "fmt"
+	"github.com/docgo/docgo/markdownAnnotate"
 	"github.com/hashicorp/hcl/v2"
-	"github.com/zclconf/go-cty/cty"
-	"strings"
-	"path/filepath"
+	"github.com/hashicorp/hcl/v2/ext/dynblock"
+	"github.com/hashicorp/hcl/v2/ext/userfunc"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/hcl/v2/json"
-	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/hcl/v2/ext/dynblock"
+	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
+	_ "github.com/zclconf/go-cty/cty/gocty"
+	"html/template"
 	"io/ioutil"
 	"os"
-	oldFmt "fmt"
-	oldJson "encoding/json"
-	_ "github.com/zclconf/go-cty/cty/gocty"
-	"github.com/zclconf/go-cty/cty/gocty"
-	"html/template"
-	"github.com/docgo/docgo/markdownAnnotate"
-	"github.com/hashicorp/hcl/v2/ext/userfunc"
+	"path/filepath"
+	"strings"
 )
 
 type Page struct {
-	Title string `hcl:"title"`
+	Title    string `hcl:"title"`
 	Markdown string `hcl:"markdown"`
 	FullText string `hcl:"fulltext"`
 }
 type Document struct {
-	Pages []Page `hcl:"page,block"`
+	Pages        []Page       `hcl:"page,block"`
 	SiteSettings SiteSettings `hcl:"site_settings,block"`
 }
 type SiteSettings struct {
-	GitHub string `hcl:"github,attr"`
-	GoPkg string `hcl:"gopkg,attr"`
+	GitHub   string `hcl:"github,attr"`
+	GoPkg    string `hcl:"gopkg,attr"`
 	SiteName string `hcl:"site_name,attr"`
 }
 
@@ -41,7 +41,7 @@ func (p Page) Slug() string {
 	return strings.ReplaceAll(p.Title, "/", "-")
 }
 
-func ctyValModuleDoc(doc *ModuleDoc) cty.Value{
+func ctyValModuleDoc(doc *ModuleDoc) cty.Value {
 	t, _ := gocty.ImpliedType(doc.Packages)
 	v, _ := gocty.ToCtyValue(&doc.Packages, t)
 	return v
@@ -59,7 +59,7 @@ func ParsePage(doc *ModuleDoc) {
 	}
 
 	settings := document.SiteSettings
-	htmlTemplates := LoadHTMLTemplates(template.FuncMap{"GetPageTitle": func(i int) string{
+	htmlTemplates := LoadHTMLTemplates(template.FuncMap{"GetPageTitle": func(i int) string {
 		return document.Pages[i].Title
 	}})
 	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
@@ -78,21 +78,20 @@ func ParsePage(doc *ModuleDoc) {
 	for i, item := range document.Pages {
 		distFile := CreateDist(links[i])
 		templateHTML := markdownAnnotate.RenderPage(item.Markdown)
-		thisPage := struct{
+		thisPage := struct {
 			Title       string
 			Body        template.HTML
 			PageLinks   map[int]string
 			CurrentPage int
 			ModuleDoc   *ModuleDoc
-			SiteInfo  SiteSettings
+			SiteInfo    SiteSettings
 			SearchIndex template.JS
 		}{
-			item.Title, template.HTML(templateHTML),  links, i, doc, settings, template.JS(string(searchIndexBytes)),
+			item.Title, template.HTML(templateHTML), links, i, doc, settings, template.JS(string(searchIndexBytes)),
 		}
 		baseHtmlTemplate.Execute(distFile, thisPage)
 	}
 }
-
 
 func decodeHclIntoTarget(filename string, ctx *hcl.EvalContext, target interface{}) error {
 	src, err := ioutil.ReadFile(filename)

@@ -1,15 +1,15 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
-	"github.com/alecthomas/kong"
-	"net/http"
-	"time"
-	"io/fs"
-	"github.com/pkg/browser"
 	"context"
 	"errors"
+	"github.com/alecthomas/kong"
+	"github.com/pkg/browser"
+	"io/fs"
+	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 var Cli struct {
@@ -79,10 +79,10 @@ func main() {
 		http.FileServer(http.Dir(Cli.Out)).ServeHTTP(writer, request)
 	})
 
-	if Cli.ServerPort != 0{
-		ctx, cancel := context.WithTimeout(context.Background(), 200 * time.Millisecond)
+	if Cli.ServerPort != 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 		go func() {
-			<- ctx.Done()
+			<-ctx.Done()
 			if !errors.Is(ctx.Err(), context.Canceled) {
 				fmt.Green("Listening on :8080")
 				browser.OpenURL("http://localhost:8080")

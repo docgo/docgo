@@ -48,11 +48,11 @@ func GetDeclFile(node ast.Node, ourDecl BaseDef, pkg *PackageDoc) string {
 }
 
 type BaseDef struct {
-	Snippet   string`cty:"Snippet"`
-	Name        string `cty:"Name"`
-	FoundInFile string `cty:""`
-	Doc string `cty:"Doc"`
-	Methods    []*MethodDef `cty:""`
+	Snippet     string       `cty:"Snippet"`
+	Name        string       `cty:"Name"`
+	FoundInFile string       `cty:""`
+	Doc         string       `cty:"Doc"`
+	Methods     []*MethodDef `cty:""`
 }
 
 type ConstDef struct {
@@ -85,23 +85,23 @@ type Typedef struct {
 }
 
 type PackageDoc struct {
-	CodeDef `cty:"CodeDef"`
-	Name         string `cty:"Name"`
-	Doc          string `cty:"Doc"`
-	AbsolutePath string `cty:"AbsolutePath"`
-	RelativePath string `cty:"RelativePath"`
-	FileSet      *token.FileSet `cty:""`
-	ParentModule *ModuleDoc `cty:""`
+	CodeDef      `cty:"CodeDef"`
+	Name         string               `cty:"Name"`
+	Doc          string               `cty:"Doc"`
+	AbsolutePath string               `cty:"AbsolutePath"`
+	RelativePath string               `cty:"RelativePath"`
+	FileSet      *token.FileSet       `cty:""`
+	ParentModule *ModuleDoc           `cty:""`
 	FileDecls    map[string][]BaseDef `cty:""`
 }
 
 type CodeDef struct {
-	Functions  []*FunctionDef `cty:"Functions"`
-	Typedefs   []*Typedef `cty:"Typedefs"`
-	Structs    []*StructDef `cty:"Structs"`
+	Functions  []*FunctionDef  `cty:"Functions"`
+	Typedefs   []*Typedef      `cty:"Typedefs"`
+	Structs    []*StructDef    `cty:"Structs"`
 	Interfaces []*InterfaceDef `cty:"Interfaces"`
-	Constants  []*ConstDef `cty:"Constants"`
-	Variables []*VarDef `cty:"Variables"`
+	Constants  []*ConstDef     `cty:"Constants"`
+	Variables  []*VarDef       `cty:"Variables"`
 }
 
 type PackageFileDoc struct {

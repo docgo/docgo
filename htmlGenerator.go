@@ -1,18 +1,18 @@
 package main
 
 import (
-	"os"
-	oldFmt "fmt"
-	"errors"
 	"bytes"
-	"strings"
-	"path/filepath"
-	"math/rand"
-	"github.com/fatih/color"
-	"text/template"
-	templateHtml "html/template"
 	"encoding/json"
+	"errors"
+	oldFmt "fmt"
 	"github.com/docgo/docgo/markdownAnnotate"
+	"github.com/fatih/color"
+	templateHtml "html/template"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
+	"text/template"
 )
 
 func transformGodocToMarkdown(godocString string) string {
@@ -80,20 +80,22 @@ func GenerateHTML(doc *ModuleDoc) {
 	markdownOutputBuffer := bytes.Buffer{}
 	githubRepo := ""
 	_ = githubRepo
-	siteInfo := make(map[string]string )
+	siteInfo := make(map[string]string)
 	templateFunctions := template.FuncMap{
 		"GitHubRepo": func(repo string) string {
 			githubRepo = repo
 			return strings.Repeat(repo, 0)
 		},
 		"SetSiteInfo": func(keyValues ...string) string {
-			if len(keyValues) == 0 || (len(keyValues) % 2) == 1 {
+			if len(keyValues) == 0 || (len(keyValues)%2) == 1 {
 				fmt.Red("Invalid SetSiteInfo arguments. Must be even 'arg1' 'key1' ...")
 				return ""
 			}
 			for i := 0; i < len(keyValues); i++ {
-				if i % 2 == 1 { continue }
-				siteInfo[keyValues[i]] = keyValues[i + 1]
+				if i%2 == 1 {
+					continue
+				}
+				siteInfo[keyValues[i]] = keyValues[i+1]
 			}
 			return ""
 		},
@@ -133,12 +135,12 @@ func GenerateHTML(doc *ModuleDoc) {
 		PageLinks   map[int]string
 		CurrentPage int
 		ModuleDoc   *ModuleDoc
-		SiteInfo  map[string]string
+		SiteInfo    map[string]string
 	}
 
 	var pageLinks = map[int]string{}
 	var pageLinksInverted = map[string]int{}
-	var pageNameToSearchableContent = map[string]string {}
+	var pageNameToSearchableContent = map[string]string{}
 
 	realIndex := 0
 	for counter, page := range pages {
@@ -161,16 +163,16 @@ func GenerateHTML(doc *ModuleDoc) {
 		defer func(realIndex int, s string, siteInfo map[string]string) {
 			distFile := CreateDist(pageLinks[realIndex])
 			jsonIndex, _ := json.Marshal(pageNameToSearchableContent)
-			thisPage := struct{
+			thisPage := struct {
 				Title       string
 				Body        templateHtml.HTML
 				PageLinks   map[int]string
 				CurrentPage int
 				ModuleDoc   *ModuleDoc
-				SiteInfo  map[string]string
+				SiteInfo    map[string]string
 				SearchIndex templateHtml.JS
 			}{
-				headingTitles[realIndex], templateHtml.HTML(s),  pageLinks, realIndex, doc, siteInfo, templateHtml.JS(jsonIndex),
+				headingTitles[realIndex], templateHtml.HTML(s), pageLinks, realIndex, doc, siteInfo, templateHtml.JS(jsonIndex),
 			}
 			err := baseHtmlTemplate.Execute(distFile, thisPage)
 			if err != nil {

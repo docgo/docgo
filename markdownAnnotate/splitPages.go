@@ -47,7 +47,8 @@ func SplitPages(markdownOutputBytes []byte) ([]string, []string){
 func RenderPage(markdownString string) string {
 	w := bytes.NewBufferString("")
 	k := parser.WithASTTransformers(util.Prioritized(annotationTransformer{}, 0))
-	goldmark.New(goldmark.WithExtensions(extension.GFM, DocgoExtension), goldmark.WithParserOptions(k)).Convert([]byte(markdownString), w)
+	_ = k
+	goldmark.New(goldmark.WithExtensions(extension.GFM)).Convert([]byte(markdownString), w)
 	return w.String()
 }
 

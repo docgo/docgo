@@ -1,10 +1,10 @@
 package main
 
 import (
-	"encoding/json"
-	"os"
 	"bytes"
+	"encoding/json"
 	"html/template"
+	"os"
 )
 
 func GenerateSearch(searchTpl *template.Template, index map[string]string) {

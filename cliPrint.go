@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/fatih/color"
 	"log"
 	"os"
-	"github.com/davecgh/go-spew/spew"
 	"reflect"
 )
 

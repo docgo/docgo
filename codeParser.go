@@ -1,18 +1,18 @@
 package main
 
 import (
+	"context"
 	"go/ast"
+	"go/doc"
+	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/godoc"
 	"golang.org/x/tools/godoc/vfs"
 	"os"
-	"time"
 	"path/filepath"
-	"golang.org/x/mod/modfile"
+	"regexp"
 	"strings"
-	"go/doc"
-	"context"
+	"time"
 )
-
 
 var _modDoc *ModuleDoc = nil
 
@@ -23,7 +23,7 @@ func runIndexer(ctx context.Context, corpus *godoc.Corpus) {
 		corpus.RunIndexer()
 	}()
 	for {
-		<- time.NewTimer(time.Millisecond * 500).C
+		<-time.NewTimer(time.Millisecond * 500).C
 		corpus.UpdateIndex()
 		if i, _ := corpus.CurrentIndex(); i != nil {
 			break
@@ -48,7 +48,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		fmt.Red(err)
 		os.Exit(1)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	runIndexer(ctx, c)
 
 	idx, _ := c.CurrentIndex()
@@ -63,7 +63,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	for pkgName, exportMap := range idx.Exports() {
 		_ = pkgName
 		for symbolName, val := range exportMap {
-			_, _ = symbolName, val//fmt.Debug(symbolName, val)
+			_, _ = symbolName, val //fmt.Debug(symbolName, val)
 		}
 	}
 
@@ -85,6 +85,19 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		if hasMain {
 			continue
 			name += "/main"
+		}
+		if name == "" {
+			entries, _ := os.ReadDir(modFilePath)
+			for _, item := range entries {
+				if !item.IsDir() && filepath.Ext(item.Name()) == ".go" {
+					full := filepath.Join(modFilePath, item.Name())
+					content, _ := os.ReadFile(full)
+					matches := regexp.MustCompile(`(?s)package.*?([\p{L}_][\p{L}_0-9]*)`).FindStringSubmatch(string(content))
+					if len(matches) > 1 {
+						name = matches[1]
+					}
+				}
+			}
 		}
 		pkgList[pkgPath] = name
 	}
