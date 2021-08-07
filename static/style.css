@@ -55,7 +55,7 @@ nav.menu-left .project-name>a{
     color: #fff;
 }
 nav.menu-left .project-name img {
-    width: 100px;
+    width: 130px;
 }
 
 nav.menu-left .project-name-box {
@@ -258,6 +258,10 @@ article h3 { margin-top: 2em; }
 
 .toc{
     position: fixed; right: 25px; top: 80px; color: #fff; width: 150px; font-size: 0.9em;
+    opacity: 0.8;
+}
+.toc ol {
+    padding: 0 5px;
 }
 @media (max-width: 1500px) {
     .toc{display: none;}

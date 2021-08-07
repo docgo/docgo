@@ -77,6 +77,9 @@ func ParsePage(doc *ModuleDoc) {
 		return document.Pages[i].Title
 	},
 	"GetCssString": GetStaticCss,
+	"GetLogoURI": func() template.URL {
+		return GetLogoURI()
+	},
 	})
 	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 	links := map[int]string{}

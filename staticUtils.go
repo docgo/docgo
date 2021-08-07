@@ -8,6 +8,7 @@ import (
 	"os"
 	"text/template"
 	"strings"
+	"encoding/base64"
 )
 
 //go:embed static
@@ -52,8 +53,14 @@ func LoadHTMLTemplates(funcMap templateHtml.FuncMap) *templateHtml.Template {
 }
 
 func GetStaticCss() templateHtml.HTML{
+	setTemplateFs()
 	style := string(ReadStaticFile("static/style.css"))
 	style = strings.ReplaceAll(style, "\n", "")
 	style = strings.ReplaceAll(style, "\r", "")
 	return templateHtml.HTML("<style>" + style + "</style>")
+}
+
+func GetLogoURI() templateHtml.URL {
+	setTemplateFs()
+	return templateHtml.URL("data:image/svg+xml;base64," + base64.StdEncoding.EncodeToString(ReadStaticFile("static/docgo.svg")))
 }
