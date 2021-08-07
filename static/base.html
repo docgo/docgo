@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
     {{ GetCssString }}
 </head>
-<body>
+<body class="lightmode">
 <div class="toc">
     <h2>Table of contents</h2>
     <ol>
@@ -58,8 +58,7 @@ auto_stories
                     <label for="headerCheckbox" class="toggle-menu-labels"><span
                             class="material-icons">menu</span></label>
                 <form class="search-form" style="position: relative"  id="searchForm" method="GET" action="godoc_search.html">
-                    <span class="material-icons"
-                          style="position:absolute; left: 4px; top: 6px; color: #7800DB; font-size: 20px">search</span>
+                    <span class="search-icon material-icons">search</span>
                     <input type="text" autocomplete="off" placeholder="Search" id="searchField" name="_query"/>
                     <div id="autocomplete"></div>
                 </form>

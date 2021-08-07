@@ -2,8 +2,26 @@ body {
     font-size: 16px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Liberation Sans", sans-serif;
     margin: 0;
-    background: #202229;
-    color: #DFE1E3;
+    background: var(--b1);
+    color: var(--fg);
+}
+body {
+    --b1: #202229;
+    --b2: #333640;
+    --b3: #202225;
+    --g1: #03C4A1;
+    --p1: #7800DB;
+    --head-border: #333744;
+    --fg: #DFE1E3;
+    --search-color: var(--p1);
+}
+body.lightmode {
+    --b1: #ECEDF0;
+    --b2: #D5DEE1;
+    --b3: #292F36;
+    --head-border: #CDCDCD;
+    --fg: #1B1D23;
+    --search-color: var(--g1);
 }
 
 a, a:visited {
@@ -34,8 +52,12 @@ h3 {
 
 header {
     width: 100%;
-    border-bottom: 1px solid #333744;
-    background: #333640;
+    border-bottom: 1px solid var(--head-border);
+    background: var(--b2);
+}
+
+header .search-icon {
+    position:absolute; left: 4px; top: 6px; color: var(--search-color); font-size: 20px;
 }
 
 header h1, header h2 {
@@ -192,6 +214,10 @@ section.header-right {
     height: 30px;
 }
 
+.lightmode .header-right img{
+    filter: invert(0.7);
+}
+
 .header-right > * {
     margin: 0 5px;
 }
@@ -243,15 +269,15 @@ pre[class*="language-go"] {
     padding: 5px;
     padding-left: 25px;
     box-sizing: border-box;
-    background: #202225;
+    background: var(--b3);
     color: #eee;
-    border: 1px solid #3D404B;
+    border: 1px solid var(--b3);
     border-radius: 10px;
 }
 
 .search-form input:focus, .search-form input:active {
     outline: 0;
-    box-shadow: -2px -2px 4px #7800DB, 2px 2px 4px #7800DB;
+    box-shadow: -2px -2px 4px var(--search-color), 2px 2px 4px var(--search-color);
 }
 
 .search-form input::placeholder {
@@ -264,7 +290,7 @@ hr {
 article h3 { margin-top: 2em; }
 
 .toc{
-    position: fixed; right: 25px; top: 80px; color: #fff; width: 150px; font-size: 0.9em;
+    position: fixed; right: 25px; top: 80px; color: var(--fg); width: 150px; font-size: 0.9em;
     opacity: 0.8;
 }
 .toc ol {
