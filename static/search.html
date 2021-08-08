@@ -1,4 +1,5 @@
 <script>
     const goIndex = {{ . }};
+    {{ GetStaticJS "static/_js/bundle.js" }}
     app(goIndex, searchField, autocomplete);
 </script>

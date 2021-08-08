@@ -14,7 +14,7 @@ import (
 
 var Cli struct {
 	Out        string `default:"docgo-dist/" type:"path" short:"o" help:"Where to put HTML assets"`
-	ConfigFile string `default:"DOCGO.hcl" name:"conf" type:"path" short:"c" help:"A config file for extending docs"`
+	ConfigFile string `default:"docgo-dist/config.hcl" name:"conf" type:"path" short:"c" help:"A config file for extending docs"`
 	ModulePath string `arg:"" type:"path" name:"path" help:"Path to module/package for documentation generation"`
 	ServerPort int    `default:"8080" name:"port" short:"p" help:"Port for launching a server, set 0 for no server"`
 }
@@ -89,11 +89,14 @@ func main() {
 func EmptyOutDirectory(conf struct{Out string}) bool{
 	isFine := true
 	filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() && filepath.Ext(path) != ".html" {
-			fmt.Red("Out path not empty (contains non-assets):", Cli.Out)
-			os.Exit(1)
-			isFine = false
-			return filepath.SkipDir
+		if !d.IsDir() {
+			if filepath.Ext(path) != ".html" && filepath.Ext(path) != ".hcl" {
+				fmt.Red("Out path not empty (contains non-assets):", Cli.Out)
+				fmt.Red("contained: ", path)
+				os.Exit(1)
+				isFine = false
+				return filepath.SkipDir
+			}
 		}
 		return nil
 	})

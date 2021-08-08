@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sort"
+	"regexp"
 )
 
 type Page struct {
@@ -40,7 +41,7 @@ type SiteSettings struct {
 }
 
 func (p Page) Slug() string {
-	return strings.ReplaceAll(p.Title, "/", "-")
+	return regexp.MustCompile(`[^\p{L}0-9]`).ReplaceAllString(p.Title, "")
 }
 
 func ctyValModuleDoc(doc *ModuleDoc) cty.Value {
