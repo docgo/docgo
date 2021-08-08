@@ -24,9 +24,9 @@ import (
 )
 
 type Page struct {
-	Title    string `hcl:"title"`
-	Markdown string `hcl:"markdown"`
-	FullText string `hcl:"fulltext"`
+	Title           string   `hcl:"title"`
+	Markdown        string   `hcl:"markdown"`
+	FullText        string   `hcl:"fulltext"`
 	TableOfContents []string `hcl:"table_contents"`
 }
 type Document struct {
@@ -50,6 +50,7 @@ func ctyValModuleDoc(doc *ModuleDoc) cty.Value {
 }
 
 type Sortable []Page
+
 func (s Sortable) Less(i, j int) bool {
 	return strings.Count(s[i].Title, "/") < strings.Count(s[j].Title, "/")
 }
@@ -76,10 +77,10 @@ func ParsePage(doc *ModuleDoc) {
 	htmlTemplates := LoadHTMLTemplates(template.FuncMap{"GetPageTitle": func(i int) string {
 		return document.Pages[i].Title
 	},
-	"GetCssString": GetStaticCss,
-	"GetLogoURI": func() template.URL {
-		return GetLogoURI()
-	},
+		"GetCssString": GetStaticCss,
+		"GetLogoURI": func() template.URL {
+			return GetLogoURI()
+		},
 	})
 	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 	links := map[int]string{}
@@ -99,13 +100,13 @@ func ParsePage(doc *ModuleDoc) {
 		distFile := CreateDist(links[i])
 		templateHTML := markdownAnnotate.RenderPage(item.Markdown)
 		thisPage := struct {
-			Title       string
-			Body        template.HTML
-			PageLinks   map[int]string
-			CurrentPage int
-			ModuleDoc   *ModuleDoc
-			SiteInfo    SiteSettings
-			SearchIndex template.JS
+			Title         string
+			Body          template.HTML
+			PageLinks     map[int]string
+			CurrentPage   int
+			ModuleDoc     *ModuleDoc
+			SiteInfo      SiteSettings
+			SearchIndex   template.JS
 			TableContents []string
 		}{
 			item.Title, template.HTML(templateHTML), links, i, doc, settings, template.JS(string(searchIndexBytes)), item.TableOfContents,
