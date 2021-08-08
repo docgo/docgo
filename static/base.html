@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="https://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
     {{ GetCssString }}
 </head>
-<body class="lightmodes">
+<body>
+<script>var toggleDarkMode = () => localStorage['lm'] = document.body.classList.toggle('lightmode') || "";
+localStorage['darkmode'] ? toggleDarkMode() : 0; </script>
 <div class="toc">
     <h2>Table of contents</h2>
     <ol>
@@ -49,7 +51,7 @@ auto_stories
             </li>
         </ul>
         <div class="darkmode-wrap">
-            <button onclick="toggleMode()"><span class="material-icons">light_mode</span></button>
+            <button onclick="toggleDarkMode()"><span class="material-icons">light_mode</span></button>
         </div>
     </div>
 </nav>
@@ -114,9 +116,5 @@ auto_stories
     }
 </style>
     {{ template "search.html" .SearchIndex }}
-<script>
-    var toggleMode = () => localStorage['lm'] = document.body.classList.toggle('lightmode') || "";
-    localStorage['lm'] ? toggleMode() : 0;
-</script>
 </body>
 </html>

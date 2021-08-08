@@ -25,6 +25,7 @@ func setTemplateFs() {
 func ReadStaticFile(name string) []byte {
 	setTemplateFs()
 	f, err := templateFs.Open(name)
+	defer f.Close()
 	if err != nil {
 		panic(err)
 	}
