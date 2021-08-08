@@ -148,6 +148,7 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 			continue
 		}
 
+		parsedPackage.PageInfo = info
 		parsedPackage.FileDecls = make(map[string][]BaseDef)
 		parsedPackage.ParentModule = parsedModuleDoc
 		parsedPackage.AbsolutePath = filepath.Join(modFilePath, strings.TrimPrefix(path, "/"))

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"golang.org/x/tools/godoc"
+	oldFmt "fmt"
 )
 
 type ModuleDoc struct {
@@ -26,6 +28,22 @@ type ScopedIdentifier struct {
 type ExportType string
 type SimpleExportsByType map[string][]ScopedIdentifier
 
+type snippetWalker struct {
+	pkgDoc *PackageDoc
+	encountered map[string]ScopedIdentifier
+}
+
+func (w *snippetWalker) Visit(node ast.Node) (ast.Visitor) {
+	id, ok := node.(*ast.Ident)
+	if ok && id.IsExported(){
+		possible, inMap := w.pkgDoc.ParentModule.SimpleExports[id.Name]
+		if inMap && len(possible) == 1 {
+			w.encountered[id.Name] = possible[0]
+		}
+	}
+	return w
+}
+
 func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) string {
 	snipFile := pkg.FileSet.File(node.Pos())
 	baseName := filepath.Base(snipFile.Name())
@@ -34,8 +52,17 @@ func CreateSnippet(node ast.Node, pkg *PackageDoc, prefix ...string) string {
 		fmt.Red(pkg.AbsolutePath, baseName)
 		os.Exit(1)
 	}
+	walker := snippetWalker{
+		pkgDoc:      pkg,
+		encountered: make(map[string]ScopedIdentifier),
+	}
+	ast.Walk(&walker, node)
+	extra := "@[docgo-info-begin]"
+	for x, y := range walker.encountered {
+		extra += oldFmt.Sprintf("%s=%s.%s@[docgo-entry-end]", x, y.PackagePath, y.Name)
+	}
 	snipStr := string(q)[snipFile.Offset(node.Pos()):snipFile.Offset(node.End())]
-	return strings.Join(prefix, "") + snipStr
+	return strings.Join(prefix, "") + snipStr + extra
 }
 
 func GetDeclFile(node ast.Node, ourDecl BaseDef, pkg *PackageDoc) string {
@@ -94,6 +121,7 @@ type PackageDoc struct {
 	FileSet      *token.FileSet       `cty:""`
 	ParentModule *ModuleDoc           `cty:""`
 	FileDecls    map[string][]BaseDef `cty:""`
+	PageInfo     *godoc.PageInfo	`cty:""`
 }
 
 type CodeDef struct {
