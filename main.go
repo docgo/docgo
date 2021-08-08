@@ -32,18 +32,8 @@ func cliParse() {
 			fmt.Red("Output is not a directory, but a file.")
 			os.Exit(1)
 		}
-		isFine := true
-		filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
-			if !d.IsDir() && filepath.Ext(path) != ".html" {
-				fmt.Red("Out path not empty (contains non-assets):", Cli.Out)
-				os.Exit(1)
-				isFine = false
-				return filepath.SkipDir
-			}
-			return nil
-		})
-		if !isFine {
-			return
+		if !EmptyOutDirectory(struct{Out string}{Cli.Out}) {
+			os.Exit(1)
 		}
 	}
 	configAbsolute, _ := filepath.Abs(Cli.ConfigFile)
@@ -94,4 +84,18 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func EmptyOutDirectory(conf struct{Out string}) bool{
+	isFine := true
+	filepath.WalkDir(Cli.Out, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() && filepath.Ext(path) != ".html" {
+			fmt.Red("Out path not empty (contains non-assets):", Cli.Out)
+			os.Exit(1)
+			isFine = false
+			return filepath.SkipDir
+		}
+		return nil
+	})
+	return isFine
 }
