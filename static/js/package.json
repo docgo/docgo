@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "bootstrap": "^5.1.0",
+    "fuse.js": "^6.4.6",
+    "prismjs": "^1.24.1",
+    "rollup-plugin-sass": "^1.2.4",
+    "rollup-plugin-scss": "^3.0.0",
+    "sass": "^1.37.5",
+    "uhtml": "^2.7.6"
+  }
+}

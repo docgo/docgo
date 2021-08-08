@@ -75,14 +75,9 @@ func ParsePage(doc *ModuleDoc) {
 	}
 
 	settings := document.SiteSettings
-	htmlTemplates := LoadHTMLTemplates(template.FuncMap{"GetPageTitle": func(i int) string {
+	htmlTemplates := LoadHTMLTemplates(cookFuncmap("GetPageTitle", func(i int) string {
 		return document.Pages[i].Title
-	},
-		"GetCssString": GetStaticCss,
-		"GetLogoURI": func() template.URL {
-			return GetLogoURI()
-		},
-	})
+	}))
 	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
 	links := map[int]string{}
 	searchIndex := map[string]string{}

@@ -53,15 +53,53 @@ func LoadHTMLTemplates(funcMap templateHtml.FuncMap) *templateHtml.Template {
 	return tpl
 }
 
-func GetStaticCss() templateHtml.HTML{
+// Given a filename, GetStaticCSS will fetch the corresponding file
+// from staticFS memory and cast it to a template.CSS type so that
+// it can be embedded into a Golang template in a safe way.
+func GetStaticCSS(filename string) templateHtml.CSS {
 	setTemplateFs()
-	style := string(ReadStaticFile("static/style.css"))
+	style := string(ReadStaticFile(filename))
 	style = strings.ReplaceAll(style, "\n", "")
 	style = strings.ReplaceAll(style, "\r", "")
-	return templateHtml.HTML("<style>" + style + "</style>")
+	return templateHtml.CSS(style)
 }
 
-func GetLogoURI() templateHtml.URL {
+// Given a filename, GetStaticSVG will fetch the correponding file
+// and give you a template.URL representing the SVG using Data URI
+// scheme with base64 encoding.
+func GetStaticSVG(filename string) templateHtml.URL {
 	setTemplateFs()
-	return templateHtml.URL("data:image/svg+xml;base64," + base64.StdEncoding.EncodeToString(ReadStaticFile("static/docgo.svg")))
+	base64Content := base64.StdEncoding.EncodeToString(ReadStaticFile(filename))
+	return templateHtml.URL("data:image/svg+xml;base64," + base64Content)
+}
+
+// Returns a FuncMap containing UsualFuncMap + some
+// extra ones supplied as arguments. The arguments
+// should look like an unzipped list:
+//     name1, fn1, name2, fn2, ...
+func cookFuncmap(fnNamePair ...interface{}) templateHtml.FuncMap{
+	var funcMap = templateHtml.FuncMap{}
+
+	// Add the usual ingredients
+	for x, y := range UsualFuncMap {
+		funcMap[x] = y
+	}
+
+	// Mix new ones
+	for i, item := range fnNamePair {
+		if i % 2 == 0 { continue }
+		name, ok := fnNamePair[i - 1].(string)
+		if !ok {
+			return funcMap
+		}
+		funcMap[name] = item
+	}
+
+	// Stir and bake
+	return funcMap
+}
+
+var UsualFuncMap = templateHtml.FuncMap{
+	"GetStaticCSS": GetStaticCSS,
+	"GetStaticSVG": GetStaticSVG,
 }

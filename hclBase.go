@@ -8,6 +8,9 @@ import (
 	"github.com/zclconf/go-cty/cty/function/stdlib"
 )
 
+// Returns a standard library of functions that
+// perform simple data type conversions and algorithms
+// useful for HCL template/config files. Based off go-cty/function
 func hclBaseFunctions() map[string]function.Function {
 	var fnn = map[string]function.Function{
 		"readfile": hclReadFile(),
