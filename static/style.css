@@ -7,13 +7,13 @@ body {
 }
 
 body {
-    --body-background: #202229;
+    --body-background: #1B1D23;
     --body-foreground: #DFE1E3;
 
-    --header-bg: #333640;
-    --header-border: #333744;
+    --header-bg: #121316; /*#333640; */
+    --header-border: #383C49;
 
-    --search-background: #202225;
+    --search-background: #121418;
     --search-placeholder: #8E959D;
     --search-icon-color: var(--brand2);
     --search-border: 1px solid var(--search-background);
@@ -24,7 +24,9 @@ body {
     --brand2: #03C4A1;
     --brand1: #F2575F;
 
-    --sidebar-border: 1px solid #555;
+    --sidebar-bg: #212329;
+    --sidebar-border: 1px solid none;
+    --sidebar-box-shadow: 2px 0px 10px rgba(0,0,0,0.1);
 
     --menu-active-item-color: #fff;
     --menu-active-item-bg: rgba(255, 255, 255, 0.1);
@@ -49,6 +51,7 @@ body.lightmode {
     --sidebar-bg: #F9FAFA;
     --sidebar-border: 1px solid #eaeaea;
     --sidebar-fg: #222;
+    --sidebar-box-shadow: 0 0 0;
 
     --menu-active-item-color: #333;
     --menu-active-item-bg: rgba(255, 255, 255, 0.1);
@@ -136,6 +139,7 @@ nav.sidebar {
     overflow-y: hidden;
     background: var(--sidebar-bg, #1B1D23);
     border-right: var(--sidebar-border, none);
+    box-shadow: var(--sidebar-box-shadow);
     color: var(--sidebar-fg);
     width: 300px;
     top: 0;
@@ -288,12 +292,11 @@ article small {
 }
 
 .main-container pre[class*="language-go"] {
-    border: 1px solid #393E4A;
-    background: #1F1F21;
     min-width: 250px;
     max-width: 100%;
     max-height: none !important;
     overflow-x: auto !important;
+    box-sizing: border-box;
 }
 
 .header-split-sides {
@@ -327,6 +330,7 @@ article small {
     padding-left: 25px;
     box-sizing: border-box;
     background: var(--search-background);
+    border: 0;
     color: var(--search-foreground);
     border: var(--search-border);
     border-radius: 10px;

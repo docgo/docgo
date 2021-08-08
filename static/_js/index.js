@@ -1,4 +1,3 @@
-import 'bootstrap/scss/bootstrap.scss'
 import Fuse from 'fuse.js'
 import { render, html } from 'uhtml'
 
