@@ -95,6 +95,7 @@ func ParsePage(doc *ModuleDoc) {
 	searchIndexBytes, _ := oldJson.Marshal(searchIndex)
 	for i, item := range document.Pages {
 		distFile := CreateDist(links[i])
+		defer distFile.Close()
 		templateHTML := markdownAnnotate.RenderPage(item.Markdown)
 		thisPage := struct {
 			Title         string

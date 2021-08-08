@@ -37,18 +37,15 @@ func cliParse() {
 		}
 	}
 
-	if Cli.ConfigFile == "" {
-		distHcl := filepath.Join(Cli.Out, "config.hcl")
-		configBytes := ReadStaticFile("static/DOCGO.hcl")
-		err := os.WriteFile(distHcl, configBytes, fs.ModePerm)
-		if err != nil {
-			fmt.Red("Error while creating config.hcl: ", err)
-			os.Exit(1)
-		}
-		Cli.ConfigFile = distHcl
-	}
-
 	fmt.Yellow("Generating docs into:\n'" + Cli.Out + "' [as HTML assets]")
+
+	if Cli.ConfigFile == "" {
+		f := CreateDist("config.hcl")
+		defer f.Close()
+		configBytes := ReadStaticFile("static/DOCGO.hcl")
+		f.Write(configBytes)
+		Cli.ConfigFile = f.Name()
+	}
 
 	absModPath, err := filepath.Abs(Cli.ModulePath)
 	mInfo, err := os.Stat(absModPath)
