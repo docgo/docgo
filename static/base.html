@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <title>{{ .Title }}</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
-    <link rel="stylesheet" href="https://ahrengot.github.io/Monokai-theme-for-Prism.js/styles/syntax-highlighting.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
     <style>{{ GetStaticCSS "static/style.css" }}</style>
+    <style>{{ GetStaticCSS "static/highlight.css" }}</style>
+    <script> {{ GetStaticJS "static/_js/bundle.js" }} </script>
 </head>
 <body>
 <script>var toggleDarkMode = () => localStorage['isLight'] = document.body.classList.toggle('lightmode');

@@ -1,11 +1,9 @@
 import 'bootstrap/scss/bootstrap.scss'
-
-import 'prismjs';
-import {render, html} from 'uhtml'
 import Fuse from 'fuse.js'
+import { render, html } from 'uhtml'
 
-const Search = (searchField, autocompleteBox) => {
-     var objList = Object.entries(goIndex).map(x => ({key: x[0], text: x[1].replace(/(<([^>]+)>)/gi, "")}))
+const Search = (goIndex, searchField, autocompleteBox) => {
+    var objList = Object.entries(goIndex).map(x => ({key: x[0], text: x[1].replace(/(<([^>]+)>)/gi, "")}))
     const fuseOpts = {
         includeScore: true,
         keys: ['text'],
@@ -14,7 +12,6 @@ const Search = (searchField, autocompleteBox) => {
         ignoreLocation: true,
     }
     const fuse = new Fuse(objList, fuseOpts)
-    const {render, html} = uhtml;
     searchField.addEventListener("blur", () => {
         setTimeout(() => render(autocomplete, html``), 250)
     })
@@ -59,7 +56,6 @@ const Search = (searchField, autocompleteBox) => {
     };
     searchField.addEventListener("input", renderComplete);
     searchField.addEventListener("focus", renderComplete);
-	window.Prism = Prism;
 };
 
-export { Search };
+export default Search;

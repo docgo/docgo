@@ -73,6 +73,11 @@ func GetStaticSVG(filename string) templateHtml.URL {
 	return templateHtml.URL("data:image/svg+xml;base64," + base64Content)
 }
 
+// Like other GetStatic-* functions, except casting to safe JS.
+func GetStaticJS(filename string) templateHtml.JS {
+	return templateHtml.JS(ReadStaticFile(filename))
+}
+
 // Returns a FuncMap containing UsualFuncMap + some
 // extra ones supplied as arguments. The arguments
 // should look like an unzipped list:
@@ -102,4 +107,5 @@ func cookFuncmap(fnNamePair ...interface{}) templateHtml.FuncMap{
 var UsualFuncMap = templateHtml.FuncMap{
 	"GetStaticCSS": GetStaticCSS,
 	"GetStaticSVG": GetStaticSVG,
+	"GetStaticJS": GetStaticJS,
 }
