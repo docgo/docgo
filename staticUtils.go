@@ -11,7 +11,7 @@ import (
 	"encoding/base64"
 )
 
-//go:embed static
+//go:embed static static/_js/bundle.js
 var staticFS embed.FS
 var templateFs fs.FS
 
