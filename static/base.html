@@ -21,7 +21,7 @@
     </ol>
 </div>
 <input type="checkbox" style="display: none" id="headerCheckbox" name="header-check"/>
-<nav class="menu-left">
+<nav class="sidebar">
     <div class="sidebar-wrap">
         <section class="project-name-box">
             <h2 class="project-name">
@@ -32,10 +32,10 @@
             <label for="headerCheckbox" class="toggle-menu-labels"><span class="material-icons">close</span></label>
         </section>
 
-        <ul>
-            <li class="pkg">
+        <ul class="menu-lvl-0">
+            <li>
                 <h3> Intro </h3>
-                <ul>
+                <ul class="menu-lvl-1">
                     {{ $currentIdx := .CurrentPage }}
                     {{ range $i, $p := .PageLinks }}
                     <li
@@ -48,14 +48,14 @@ auto_stories
 
             </li>
         </ul>
-        <div class="darkmode-wrap"><button onclick="toggleMode()"><span class="material-icons">
-light_mode
-</span></button></div>
+        <div class="darkmode-wrap">
+            <button onclick="toggleMode()"><span class="material-icons">light_mode</span></button>
+        </div>
     </div>
 </nav>
-<section class="part-right">
+<section class="main-wrapper">
     <header>
-        <div class="page-center">
+        <div class="main-container">
             <div class="header-split-sides">
                 <div class="header-left">
                     <label for="headerCheckbox" class="toggle-menu-labels"><span
@@ -79,7 +79,7 @@ light_mode
     </header>
 
     <main>
-        <article class="page-center">
+        <article class="main-container">
             <div>
                 <small>{{ .ModuleDoc.ImportPath }} > {{ .Title }}</small>
                 <h1>{{ .Title }}</h1><br/>
