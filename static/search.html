@@ -3,8 +3,9 @@
 #autocomplete { position: absolute; left: 0; right: 0; top: 40px; background: #fff; color: #61677C; border-radius: 10px; padding: 0 10px;}
 #autocomplete label:first-child { margin-top: 10px; }
 #autocomplete label:last-child { margin-bottom: 10px; }
-#autocomplete label { display: block; padding: 6px 10px; }
+#autocomplete label { display: block; padding: 6px 10px; cursor: pointer; }
 #autocomplete label:hover { background: #eee; }
+:target { background: #F4802450; color: #fff; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
 <script>
@@ -27,6 +28,17 @@
     searchField.addEventListener("blur", () => {
         setTimeout(() => render(autocomplete, html``), 250)
     })
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    if(params.hil) {
+        console.log(params.hil)
+        var arr = JSON.parse(params.hil);
+        var doc = [];
+        [...document.querySelectorAll("p")].map(x => doc.push({node: x, value: x.innerText.split(/\s+/g).join(" ")}))
+        var nnode = new Fuse(doc, {keys: ['value']}).search(arr.join(" "))[0].item.node;
+        nnode.id = '_found';
+        window.location.hash = '#_found';
+    }
     searchField.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase();
         const queryWords = query.split(/\s+/)
@@ -38,13 +50,16 @@
             var fromIdx = clamp(idx - 8, 0, idx - 1);
             var toIdx = clamp(idx + 8, idx + 1, words.length);
             var outw = [];
+            var wordsRaw = [];
             for(var i = fromIdx; i < toIdx; i++) {
+                wordsRaw.push(words[i])
                 if(i == idx)
                     outw.push(html`<strong>${words[i]} </strong>`)
                 else
                 outw.push(html`<span>${words[i]} </span>`)
             }
-            return html`<label>${outw}</label>`
+            const cl = () => document.location = result.item.key + ".html?hil=" + encodeURIComponent(JSON.stringify(wordsRaw));
+            return html`<label @click=${cl}>${outw}</label>`
         })
         render(autocomplete, html` ${outList}`);
     })

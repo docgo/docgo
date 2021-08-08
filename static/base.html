@@ -12,6 +12,8 @@
     {{ GetCssString }}
 </head>
 <body>
+<script>var toggleDarkMode = () => localStorage['lm'] = document.body.classList.toggle('lightmode') || "";
+localStorage['darkmode'] ? toggleDarkMode() : 0; </script>
 <div class="toc">
     <h2>Table of contents</h2>
     <ol>
@@ -21,8 +23,8 @@
     </ol>
 </div>
 <input type="checkbox" style="display: none" id="headerCheckbox" name="header-check"/>
-<nav class="menu-left">
-    <div style="min-height: 101%; box-shadow: -10px 0px 10px rgba(0 0 0 / 0.2) inset; padding: 1em 0.5em;">
+<nav class="sidebar">
+    <div class="sidebar-wrap">
         <section class="project-name-box">
             <h2 class="project-name">
                 <a href="index.html">
@@ -32,10 +34,10 @@
             <label for="headerCheckbox" class="toggle-menu-labels"><span class="material-icons">close</span></label>
         </section>
 
-        <ul>
-            <li class="pkg">
+        <ul class="menu-lvl-0">
+            <li>
                 <h3> Intro </h3>
-                <ul>
+                <ul class="menu-lvl-1">
                     {{ $currentIdx := .CurrentPage }}
                     {{ range $i, $p := .PageLinks }}
                     <li
@@ -48,18 +50,20 @@ auto_stories
 
             </li>
         </ul>
+        <div class="darkmode-wrap">
+            <button onclick="toggleDarkMode()"><span class="material-icons">light_mode</span></button>
+        </div>
     </div>
 </nav>
-<section class="part-right">
+<section class="main-wrapper">
     <header>
-        <div class="page-center">
+        <div class="main-container">
             <div class="header-split-sides">
                 <div class="header-left">
                     <label for="headerCheckbox" class="toggle-menu-labels"><span
                             class="material-icons">menu</span></label>
                 <form class="search-form" style="position: relative"  id="searchForm" method="GET" action="godoc_search.html">
-                    <span class="material-icons"
-                          style="position:absolute; left: 4px; top: 6px; color: #7800DB; font-size: 20px">search</span>
+                    <span class="search-icon material-icons">search</span>
                     <input type="text" autocomplete="off" placeholder="Search" id="searchField" name="_query"/>
                     <div id="autocomplete"></div>
                 </form>
@@ -77,7 +81,7 @@ auto_stories
     </header>
 
     <main>
-        <article class="page-center">
+        <article class="main-container">
             <div>
                 <small>{{ .ModuleDoc.ImportPath }} > {{ .Title }}</small>
                 <h1>{{ .Title }}</h1><br/>
