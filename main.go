@@ -71,7 +71,6 @@ var ModulePath string
 func main() {
 	cliParse()
 	ParsePage(_modDoc)
-	//GenerateHTML(_modDoc)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {

@@ -67,10 +67,15 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 		}
 	}
 
-	/*
-		for i := 0; idx.Snippet(i) != nil; i++{
-			fmt.Debug(idx.Snippet(i))
-		}*/
+	for i := 0; ; i ++ {
+		snippet := idx.Snippet(i)
+		if snippet != nil {
+			preprocess := snippet.Text
+			_ = preprocess
+		} else {
+			break
+		}
+	}
 
 	pkgList := map[string]string{}
 	for pkgPath, symMap := range idx.Exports() {
@@ -116,7 +121,6 @@ func ModuleParse(modFilePath string) (parsedModuleDoc *ModuleDoc) {
 	for kind, symbols := range idx.Idents() {
 		if kind.Name() == "Packages" {
 			for _, sym := range symbols {
-				// pkgList[sym[0].Path] = sym[0].Name
 				_ = sym
 			}
 		} else {

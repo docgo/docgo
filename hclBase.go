@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/transform"
 	"github.com/zclconf/go-cty/cty"
@@ -109,7 +108,6 @@ func hclTemplateTransformer(ctx *hcl.EvalContext, body hcl.Body) hcl.Body {
 
 	//sch.Attributes = []hcl.AttributeSchema{{"markdown", true}}
 	b, remain, diags := body.PartialContent(&sch)
-	_ = spew.Dump
 
 	for _, item := range b.Blocks.OfType("template") {
 		attr, _ := item.Body.JustAttributes()
