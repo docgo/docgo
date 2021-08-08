@@ -287,7 +287,8 @@ pre[class*="language-go"] {
     background: #1F1F21;
     min-width: 250px;
     max-width: 100%;
-    overflow: auto !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
 }
 
 .header-split-sides {
