@@ -14,7 +14,7 @@ import (
 
 var Cli struct {
 	Out        string `default:"docgo-dist/" type:"path" short:"o" help:"Where to put HTML assets"`
-	ConfigFile string `default:"docgo-dist/config.hcl" name:"conf" type:"path" short:"c" help:"A config file for extending docs"`
+	ConfigFile string `default:"" name:"conf" type:"path" short:"c" help:"A config file for extending docs"`
 	ModulePath string `arg:"" type:"path" name:"path" help:"Path to module/package for documentation generation"`
 	ServerPort int    `default:"8080" name:"port" short:"p" help:"Port for launching a server, set 0 for no server"`
 }
@@ -36,9 +36,17 @@ func cliParse() {
 			os.Exit(1)
 		}
 	}
-	configAbsolute, _ := filepath.Abs(Cli.ConfigFile)
-	configBytes := ReadStaticFile("static/DOCGO.hcl")
-	os.WriteFile(configAbsolute, configBytes, fs.ModePerm)
+
+	if Cli.ConfigFile == "" {
+		distHcl := filepath.Join(Cli.Out, "config.hcl")
+		configBytes := ReadStaticFile("static/DOCGO.hcl")
+		err := os.WriteFile(distHcl, configBytes, fs.ModePerm)
+		if err != nil {
+			fmt.Red("Error while creating config.hcl: ", err)
+			os.Exit(1)
+		}
+		Cli.ConfigFile = distHcl
+	}
 
 	fmt.Yellow("Generating docs into:\n'" + Cli.Out + "' [as HTML assets]")
 
