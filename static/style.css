@@ -281,7 +281,10 @@ article small {
 }
 
 code[class*="language-"], pre[class*="language-"] {
+    font-weight: 400 !important;
     font-size: 1em !important;
+    line-height: 1.5 !important;
+    font-family: ui-monospace,"Cascadia Mono","Segoe UI Mono","Liberation Mono",Menlo,Monaco,Consolas,monospace !important;
 }
 
 pre[class*="language-go"] {
@@ -289,8 +292,8 @@ pre[class*="language-go"] {
     background: #1F1F21;
     min-width: 250px;
     max-width: 100%;
+    max-height: none !important;
     overflow-x: auto !important;
-    overflow-y: hidden !important;
 }
 
 .header-split-sides {
