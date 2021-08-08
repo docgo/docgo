@@ -32,10 +32,10 @@
     const params = Object.fromEntries(urlSearchParams.entries());
     if(params.hil) {
         console.log(params.hil)
-        var arr = JSON.parse(params.hil);
+        var arr = JSON.parse(params.hil).join(" ");
         var doc = [];
-        [...document.querySelectorAll("p")].map(x => doc.push({node: x, value: x.innerText.split(/\s+/g).join(" ")}))
-        var nnode = new Fuse(doc, {keys: ['value']}).search(arr.join(" "))[0].item.node;
+        [...document.querySelectorAll('main .main-container>div>*:not(ul)'), ...document.querySelectorAll('main .main-container>div>ul>*')].map(x => doc.push({node: x, value: x.innerText}))
+        var nnode = new Fuse(doc, {keys: ['value'], ignoreLocation: true, threshold: 0.2}).search(arr)[0].item.node;
         nnode.id = '_found';
         window.location.hash = '#_found';
     }

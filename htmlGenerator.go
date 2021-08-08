@@ -1,19 +1,20 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	oldFmt "fmt"
 	"github.com/docgo/docgo/markdownAnnotate"
-	"github.com/fatih/color"
-	templateHtml "html/template"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
+	"github.com/microcosm-cc/bluemonday"
+	"html"
 )
+
+func markdownToCleanText(markdown string) string {
+	markdown = markdownAnnotate.RenderPage(markdown)
+	strict := bluemonday.StrictPolicy().SkipElementsContent("code")
+	return html.UnescapeString(strict.Sanitize(markdown))
+}
 
 func transformGodocToMarkdown(godocString string) string {
 	const TABWIDTH = "    "
@@ -65,127 +66,3 @@ func CreateDist(file string) *os.File {
 	f, _ := os.Create(filepath.Join(Cli.Out, file))
 	return f
 }
-
-type PkgConfig string
-
-func (c PkgConfig) Group(x ...string) {
-	fmt.Debug(x)
-}
-
-func GenerateHTML(doc *ModuleDoc) {
-	os.RemoveAll(Cli.Out)
-
-	var headingTitles []string
-
-	markdownOutputBuffer := bytes.Buffer{}
-	githubRepo := ""
-	_ = githubRepo
-	siteInfo := make(map[string]string)
-	templateFunctions := template.FuncMap{
-		"GitHubRepo": func(repo string) string {
-			githubRepo = repo
-			return strings.Repeat(repo, 0)
-		},
-		"SetSiteInfo": func(keyValues ...string) string {
-			if len(keyValues) == 0 || (len(keyValues)%2) == 1 {
-				fmt.Red("Invalid SetSiteInfo arguments. Must be even 'arg1' 'key1' ...")
-				return ""
-			}
-			for i := 0; i < len(keyValues); i++ {
-				if i%2 == 1 {
-					continue
-				}
-				siteInfo[keyValues[i]] = keyValues[i+1]
-			}
-			return ""
-		},
-		"TransformDoc": func(source string) string {
-			return transformGodocToMarkdown(source)
-		},
-		"PackageConfig": func(pkgName string) PkgConfig {
-			return PkgConfig(pkgName)
-		},
-	}
-	//templates := ReadTemplates(templateFunctions)
-	templates := LoadMarkdownTemplates(templateFunctions)
-	htmlTemplates := LoadHTMLTemplates(templateHtml.FuncMap{
-		"GetPageTitle": func(idx int) string {
-			return headingTitles[idx]
-		},
-	})
-	baseHtmlTemplate := htmlTemplates.Lookup("base.html")
-
-	err := templates.Lookup("base.md").Execute(&markdownOutputBuffer, doc)
-	if err != nil {
-		fmt.Red("Error parsing markdown", err)
-		os.Exit(1)
-	}
-
-	markdownOutputBytes := append([]byte{}, markdownOutputBuffer.Bytes()...)
-	pages := []string{}
-	pages, headingTitles = markdownAnnotate.SplitPages(markdownOutputBytes)
-	var cleanPages = []string{}
-	for _, page := range pages {
-		cleanPages = append(cleanPages, markdownAnnotate.CleanPage(page))
-	}
-
-	type Page struct {
-		Title       string
-		Body        templateHtml.HTML
-		PageLinks   map[int]string
-		CurrentPage int
-		ModuleDoc   *ModuleDoc
-		SiteInfo    map[string]string
-	}
-
-	var pageLinks = map[int]string{}
-	var pageLinksInverted = map[string]int{}
-	var pageNameToSearchableContent = map[string]string{}
-
-	realIndex := 0
-	for counter, page := range pages {
-		s := markdownAnnotate.RenderPage(page)
-		pageName := ""
-		if realIndex == 0 {
-			pageName = "index"
-			pageLinks[0] = "index.html"
-			pageLinksInverted[pageName] = 0
-		} else {
-			dumbLink := strings.Join(strings.Fields(headingTitles[realIndex]), "-")
-			if _, exists := pageLinksInverted[dumbLink]; exists {
-				dumbLink += oldFmt.Sprintf("%d", rand.Uint32())
-			}
-			pageName = dumbLink
-			pageLinks[realIndex] = dumbLink + ".html"
-			pageLinksInverted[dumbLink] = realIndex
-		}
-		pageNameToSearchableContent[pageName] = cleanPages[counter]
-		defer func(realIndex int, s string, siteInfo map[string]string) {
-			distFile := CreateDist(pageLinks[realIndex])
-			jsonIndex, _ := json.Marshal(pageNameToSearchableContent)
-			thisPage := struct {
-				Title       string
-				Body        templateHtml.HTML
-				PageLinks   map[int]string
-				CurrentPage int
-				ModuleDoc   *ModuleDoc
-				SiteInfo    map[string]string
-				SearchIndex templateHtml.JS
-			}{
-				headingTitles[realIndex], templateHtml.HTML(s), pageLinks, realIndex, doc, siteInfo, templateHtml.JS(jsonIndex),
-			}
-			err := baseHtmlTemplate.Execute(distFile, thisPage)
-			if err != nil {
-				fmt.Red(err)
-				return
-			}
-		}(realIndex, s, siteInfo)
-		realIndex += 1
-	}
-	if FirstRun {
-		color.Green("Generated docs ✔")
-		FirstRun = false
-	}
-}
-
-var FirstRun = true

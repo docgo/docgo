@@ -8,7 +8,7 @@ site_settings {
 page {
   title = "Intro page"
   markdown = readfile("static/intro.md")
-  fulltext = "This is the intro page containing awesome markdown"
+  fulltext = cleanmarkdown(readfile("static/intro.md"))
   table_contents = ["docgo", "HCL syntax"]
 }
 
@@ -26,7 +26,7 @@ dynamic "page" {
       typeSection("Variables", it.value.CodeDef.Variables),
       typeSection("Interfaces", it.value.CodeDef.Interfaces),
     ])
-    fulltext = join(" ", [for item in getSections(it.value.CodeDef) : getSectionText(item)])
+    fulltext = join(" ", [ for section in getSections(it.value.CodeDef) : cleanmarkdown(typeSection("", section)) ] )
     table_contents = flatten([for section in getSections(it.value.CodeDef) : [for item in section : item.BaseDef.Name]])
   }
 }
@@ -34,11 +34,6 @@ dynamic "page" {
 function "getSections" {
   params = [cdef]
   result = [cdef.Constants, cdef.Functions, cdef.Structs, cdef.Variables, cdef.Interfaces]
-}
-
-function "getSectionText" {
-  params = [section]
-  result = join(" ", [for item in section : "${item.BaseDef.Name} ${item.BaseDef.Doc}"])
 }
 
 function "typeSection" {

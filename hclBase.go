@@ -80,6 +80,23 @@ func hclTemplateFn(e hcl.Expression, ctx *hcl.EvalContext) function.Function {
 	return function.New(&x)
 }
 
+func hclCleanMarkdownText() function.Function {
+	x := function.Spec{
+		Params: []function.Parameter{{
+			Name: "text",
+			Type: cty.String,
+		}},
+		VarParam: nil,
+		Type: func(args []cty.Value) (cty.Type, error) {
+			return cty.String, nil
+		},
+		Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+			out := markdownToCleanText(args[0].AsString())
+			return cty.StringVal(out), nil
+		},
+	}
+	return function.New(&x)
+}
 func hclTemplateTransformer(ctx *hcl.EvalContext, body hcl.Body) hcl.Body {
 	sch := hcl.BodySchema{
 		Blocks: []hcl.BlockHeaderSchema{

@@ -67,6 +67,7 @@ func ParsePage(doc *ModuleDoc) {
 	ctx := hcl.EvalContext{}
 
 	ctx.Functions = hclBaseFunctions()
+	ctx.Functions["cleanmarkdown"] = hclCleanMarkdownText()
 	ctx.Variables = map[string]cty.Value{"Packages": ctyValModuleDoc(doc)}
 	err := decodeHclIntoTarget(Cli.ConfigFile, &ctx, &document)
 	if err != nil {
@@ -88,12 +89,12 @@ func ParsePage(doc *ModuleDoc) {
 
 	sort.Sort(Sortable(document.Pages))
 	for i := 0; i < len(document.Pages); i++ {
+		slug := document.Pages[i].Slug()
 		if i == 0 {
-			links[0] = "index.html"
-		} else {
-			links[i] = oldFmt.Sprintf("%s.html", document.Pages[i].Slug())
+			slug = "index"
 		}
-		searchIndex[document.Pages[i].Slug()] = document.Pages[i].FullText
+		links[i] = oldFmt.Sprintf("%s.html", slug)
+		searchIndex[slug] = document.Pages[i].FullText
 	}
 	searchIndexBytes, _ := oldJson.Marshal(searchIndex)
 	for i, item := range document.Pages {
