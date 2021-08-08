@@ -12,8 +12,8 @@
     {{ GetCssString }}
 </head>
 <body>
-<script>var toggleDarkMode = () => localStorage['lm'] = document.body.classList.toggle('lightmode') || "";
-localStorage['darkmode'] ? toggleDarkMode() : 0; </script>
+<script>var toggleDarkMode = () => localStorage['isLight'] = document.body.classList.toggle('lightmode');
+localStorage['isLight'] === 'true' ? toggleDarkMode() : 0; </script>
 <div class="toc">
     <h2>Table of contents</h2>
     <ol>
@@ -64,7 +64,7 @@ auto_stories
                             class="material-icons">menu</span></label>
                 <form class="search-form" style="position: relative"  id="searchForm" method="GET" action="godoc_search.html">
                     <span class="search-icon material-icons">search</span>
-                    <input type="text" autocomplete="off" placeholder="Search" id="searchField" name="_query"/>
+                    <input type="text" autocomplete="off" placeholder="Search the documentation" id="searchField" name="_query"/>
                     <div id="autocomplete"></div>
                 </form>
                 </div>
@@ -94,27 +94,6 @@ auto_stories
     headerCheckbox.checked = false;
     [...document.querySelectorAll('a')].map(x => x.addEventListener('click', () => { headerCheckbox.checked = false; }))
 </script>
-<style>
-    ::-webkit-scrollbar {
-        width: 9px;
-        height: 9px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #7800DB;
-        border-radius: 15px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #8A3037;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #16181D;
-        border-radius: 0px;
-        box-shadow: inset 0px 0px 0px 0px #F0F0F0;
-    }
-</style>
     {{ template "search.html" .SearchIndex }}
 </body>
 </html>

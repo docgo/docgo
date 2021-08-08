@@ -2,36 +2,54 @@ body {
     font-size: 16px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Liberation Sans", sans-serif;
     margin: 0;
-    background: var(--background-main);
-    color: var(--foreground);
+    background: var(--body-background);
+    color: var(--body-foreground);
 }
 
 body {
-    --background-main: #202229;
-    --header-main: #333640;
-    --search-background: #202225;
-    --head-border: #333744;
-    --foreground: #DFE1E3;
-    --search-icon-color: var(--brand2);
+    --body-background: #202229;
+    --body-foreground: #DFE1E3;
 
-    --brand1: #03C4A1;
-    --brand2: #7800DB;
+    --header-bg: #333640;
+    --header-border: #333744;
+
+    --search-background: #202225;
+    --search-icon-color: var(--brand2);
+    --search-border: 1px solid var(--search-background);
+    --search-active-border: 2px solid var(--brand2);
+    --search-active-background: var(--search-background);
+    --search-foreground: #eee;
+
+    --brand2: #03C4A1;
+    --brand1: #F2575F;
+
+    --sidebar-border: 1px solid #555;
+
+    --menu-active-item-color: #fff;
+    --menu-active-item-bg: rgba(255, 255, 255, 0.1);
 }
 
 body.lightmode {
-    --background-main: #fff;
-    --search-background: #292F36;
-    --head-border: transparent;
-    --foreground: #1B1D23;
-    --search-icon-color: var(--brand1);
+    --body-background: #fff;
+    --body-foreground: #1B1D23;
 
-    --header-main: #fff;
-    --header-box-shadow: 0px 3px 5px rgb(0 0 0 / 0.1);
+    --header-bg: #fff;
+    --header-box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+    --header-border: transparent;
 
-    --sidebar-main: #F9FAFA;
+    --search-background: #eaeaea;
+    --search-icon-color: var(--brand2);
+    --search-border: none;
+    --search-active-border: 2px solid #000;
+    --search-active-background: #fff;
+    --search-foreground: #000;
+
+    --sidebar-bg: #F9FAFA;
     --sidebar-border: 1px solid #eaeaea;
     --sidebar-fg: #222;
-    --sidebar-fg-active: #333;
+
+    --menu-active-item-color: #333;
+    --menu-active-item-bg: rgba(255, 255, 255, 0.1);
 }
 
 a, a:visited {
@@ -62,8 +80,8 @@ h3 {
 
 header {
     width: 100%;
-    border-bottom: 1px solid var(--head-border);
-    background: var(--header-main, #333640);
+    border-bottom: 1px solid var(--header-border);
+    background: var(--header-bg, #333640);
     box-shadow: var(--header-box-shadow, 0 0 0);
 }
 
@@ -114,7 +132,7 @@ nav.sidebar {
     position: fixed;
     box-sizing: border-box;
     overflow-y: hidden;
-    background: var(--sidebar-main, #1B1D23);
+    background: var(--sidebar-bg, #1B1D23);
     border-right: var(--sidebar-border, none);
     color: var(--sidebar-fg);
     width: 300px;
@@ -159,13 +177,13 @@ nav.sidebar .menu-lvl-1 ul {
 }
 
 .menu-lvl-1 li.active a {
-    color: var(--sidebar-fg-active, #fff);
+    color: var(--menu-active-item-color, #fff);
 }
 
 .menu-lvl-1 li.active {
     border-left: 5px solid var(--brand2);
     font-weight: 500;
-    background: rgba(255 255 255 / 0.05);
+    background: var(--menu-active-item-bg);
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
@@ -242,6 +260,9 @@ section.header-right {
     height: 30px;
 }
 
+.lightmode .project-name img {
+    filter: invert(1) hue-rotate(180deg);
+}
 .lightmode .header-right img {
     filter: invert(0.7);
 }
@@ -300,23 +321,24 @@ pre[class*="language-go"] {
     padding-left: 25px;
     box-sizing: border-box;
     background: var(--search-background);
-    color: #eee;
-    border: var(--search-border, 1px solid var(--search-background));
+    color: var(--search-foreground);
+    border: var(--search-border);
     border-radius: 10px;
 }
 
 .search-form input:focus, .search-form input:active {
+    border: var(--search-active-border);
+    background: var(--search-active-background);
     outline: 0;
-    box-shadow: -2px -2px 4px var(--search-icon-color), 2px 2px 4px var(--search-icon-color);
 }
 
 .search-form input::placeholder {
-    color: #aaa;
+    color: var(--search-foreground);
 }
 
 hr {
     border-style: dashed;
-    border-color: #5e72b9;
+    border-color: var(--brand2);
 }
 
 article h3 {
@@ -327,7 +349,7 @@ article h3 {
     position: fixed;
     right: 25px;
     top: 80px;
-    color: var(--foreground);
+    color: var(--body-foreground);
     width: 150px;
     font-size: 0.9em;
     opacity: 0.8;

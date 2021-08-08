@@ -9,7 +9,7 @@ page {
   title = "Intro page"
   markdown = readfile("static/intro.md")
   fulltext = cleanmarkdown(readfile("static/intro.md"))
-  table_contents = ["docgo", "HCL syntax"]
+  table_contents = ["What's docgo"]
 }
 
 dynamic "page" {
@@ -29,6 +29,13 @@ dynamic "page" {
     fulltext = join(" ", [ for section in getSections(it.value.CodeDef) : cleanmarkdown(typeSection("", section)) ] )
     table_contents = flatten([for section in getSections(it.value.CodeDef) : [for item in section : item.BaseDef.Name]])
   }
+}
+
+page {
+  title = "HCL Syntax"
+  markdown = readfile("static/conf_syntax.md")
+  fulltext = cleanmarkdown(readfile("static/conf_syntax.md"))
+  table_contents = ["HCL syntax"]
 }
 
 function "getSections" {
